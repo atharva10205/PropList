@@ -4,7 +4,7 @@ import Link from "next/link";
 import { usePathname } from "next/navigation";
 import Navbar from "./Navbar";
 
-const Sidebar = () => {
+const Sidebar_manager = () => {
   const pathname = usePathname();
 
   const menuItems = [
@@ -57,4 +57,4 @@ const Sidebar = () => {
   );
 };
 
-export default Sidebar;
+export default Sidebar_manager;

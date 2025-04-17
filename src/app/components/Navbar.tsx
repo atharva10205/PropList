@@ -51,7 +51,7 @@ const Navbar = () => {
   };
 
   return (
-    <div className="flex">
+    <div className="flex stickey top-0">
       <div className="bg-black text-white h-[50px] w-full flex justify-between items-center">
         <div className="text-white ml-4">I am a navbar</div>
         <div className="ml-auto mr-4">
@@ -113,7 +113,7 @@ const Navbar = () => {
               {showDropdown && (
                 <div className="absolute top-12  right-0 bg-black text-white shadow-md rounded-xl p-3 z-50 w-48 flex flex-col space-y-2">
                   <button
-                    onClick={() => router.push("/dashboard")}
+                    onClick={() => router.push("/favorites")}
                     className="text-left hover:bg-white hover:text-black cursor-pointer px-4 py-2 rounded"
                   >
                     Dashboard

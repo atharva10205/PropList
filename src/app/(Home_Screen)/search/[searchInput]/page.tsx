@@ -3,21 +3,17 @@
 import Navbar from "@/app/components/Navbar";
 import React, { useState } from "react";
 import dynamic from "next/dynamic";
-import { MapContainer , TileLayer } from "react-leaflet";
-import { useEffect } from "react";
+import { useRouter } from "next/router";
+
 
 const MapView = dynamic(() => import("@/app/components/MapView"), {
   ssr: false,
 });
 
 
-
-
-
 const SidebarFilters = () => {
   return (
     <div className="w-64 p-4 space-y-6 border border-gray-300 rounded">
-      {/* ... all your existing filters unchanged ... */}
       <div>
         <h2 className="text-lg font-semibold mb-2">Property Type</h2>
         <div className="grid grid-cols-2 gap-2 text-center text-sm">
@@ -134,6 +130,7 @@ const NavbarFilters = () => {
 
 const Page = () => {
   const [selectedLocation, setSelectedLocation] = useState<any>(null);
+  
 
   return (
     <div>

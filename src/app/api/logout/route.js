@@ -11,5 +11,14 @@ export async function POST() {
     expires: new Date(0), 
   });
 
+  response.cookies.set({
+    name: 'email',
+    value: '',
+    httpOnly: false, 
+    secure: process.env.NODE_ENV === 'production',
+    path: '/',
+    expires: new Date(0), 
+  });
+
   return response;
 }

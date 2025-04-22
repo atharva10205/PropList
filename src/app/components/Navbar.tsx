@@ -7,6 +7,7 @@ const Navbar = () => {
   const [IsAuthenticated, setIsAuthenticated] = useState(false);
   const [showDropdown, setShowDropdown] = useState(false);
   const dropdownRef = useRef(null);
+  const [username, setusername] = useState("")
 
   useEffect(() => {
     const checkAuth = async () => {
@@ -22,6 +23,17 @@ const Navbar = () => {
 
     checkAuth();
   }, []);
+
+  useEffect(() => {
+  const getuserdata = async()=>{
+    try {
+      const response = await fetch
+    } catch (error) {
+      console.log("error while fetching getuserdata")
+    }
+  }
+  getuserdata();
+  }, [])
 
   useEffect(() => {
     const handleClickOutside = (event) => {
@@ -53,6 +65,7 @@ const Navbar = () => {
   return (
     <div className="flex stickey top-0">
       <div className="bg-black text-white h-[50px] w-full flex justify-between items-center">
+        <img onClick={()=>{router.push('/home')}} className="h-[35px] cursor-pointer w-[35px] ml-2 rounded-full" src="https://i.pinimg.com/736x/c2/7f/bd/c27fbd4ba881ed0492c15c6a7465cc70.jpg" alt="" />
         <div className="text-white ml-4">I am a navbar</div>
         <div className="ml-auto mr-4">
           {!IsAuthenticated ? (

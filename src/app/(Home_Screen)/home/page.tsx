@@ -2,6 +2,7 @@
 import React, { useState } from "react";
 import Navbar from "@/app/components/Navbar";
 import { useRouter } from "next/navigation";
+import axios from "axios";
 
 const Page = () => {
   const [searchInput, setSearchInput] = useState("");
@@ -22,6 +23,7 @@ const Page = () => {
       search_button();
     }
   };
+  
 
   return (
     <div>

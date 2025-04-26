@@ -8,6 +8,7 @@ const Navbar = () => {
   const [showDropdown, setShowDropdown] = useState(false);
   const dropdownRef = useRef(null);
   const [username, setusername] = useState("")
+  const [role, setrole] = useState("")
 
   useEffect(() => {
     const checkAuth = async () => {
@@ -15,25 +16,27 @@ const Navbar = () => {
         const res = await fetch("/api/me", { credentials: "include" });
         const data = await res.json();
         setIsAuthenticated(data.authenticated);
+        setrole(data.user.role)
       } catch (err) {
         console.error("Failed to check auth", err);
         setIsAuthenticated(false);
       }
     };
-
     checkAuth();
   }, []);
 
   useEffect(() => {
-  const getuserdata = async()=>{
-    try {
-      const response = await fetch
-    } catch (error) {
-      console.log("error while fetching getuserdata")
-    }
-  }
-  getuserdata();
-  }, [])
+    const getuserdata = async () => {
+      try {
+        const response = await fetch('/api/user_data');
+        const data = await response.json(); 
+        setusername(data.username)   
+         } catch (error) {
+        console.log("Error while fetching getuserdata:", error);
+      }
+    };
+    getuserdata();
+  }, []);
 
   useEffect(() => {
     const handleClickOutside = (event) => {
@@ -120,13 +123,13 @@ const Navbar = () => {
                   className="rounded-full mr-1 bg-white h-[35px] w-[35px]"
                   alt=""
                 />
-                <div className="font-bold">username123</div>
+                <div className="font-bold">{username}</div>
               </div>
 
               {showDropdown && (
                 <div className="absolute top-12  right-0 bg-black text-white shadow-md rounded-xl p-3 z-50 w-48 flex flex-col space-y-2">
                   <button
-                    onClick={() => router.push("/favorites")}
+                    onClick={() =>{ if(role === "tenant"){ router.push("/favorites")} else { router.push("/properties")}}}
                     className="text-left hover:bg-white hover:text-black cursor-pointer px-4 py-2 rounded"
                   >
                     Dashboard

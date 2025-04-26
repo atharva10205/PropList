@@ -28,6 +28,7 @@ L.Icon.Default.mergeOptions({
 
 const FlyToLocation = ({ location }: { location: any }) => {
   const map = useMap();
+  
 
   useEffect(() => {
     if (location) {
@@ -56,3 +57,5 @@ export default function MapView({ onLocationSelect }: { onLocationSelect: any })
     </MapContainer>
   );
 }
+
+

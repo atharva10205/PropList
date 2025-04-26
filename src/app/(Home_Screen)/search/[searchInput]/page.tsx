@@ -157,7 +157,6 @@ const Page = () => {
 
   useEffect(() => {
     handleSearch(searchInput);
-    console.log(searchInput);
   }, [searchInput]);
 
   const handleSearch = async (query: string) => {
@@ -169,8 +168,6 @@ const Page = () => {
       if (response.data && response.data.length > 0) {
         const { lat, lon } = response.data[0];
         setSelectedLocation([parseFloat(lat), parseFloat(lon)]);
-
-        //console.log(`Coordinates for ${query}: Latitude: ${lat}, Longitude: ${lon}`);
       } else {
         alert("Place not found");
       }

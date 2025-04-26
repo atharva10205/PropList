@@ -29,6 +29,7 @@ const Page = () => {
           .get(`/api/location?q=${encodeURIComponent(query)}`)
           .then((res) => {
             setSuggestions(res.data);
+            console.log(res.data)
           })
           .catch((err) => {
             console.error("API error:", err);

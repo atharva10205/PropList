@@ -12,16 +12,17 @@ const Page = () => {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    const res = await fetch("/api/signup", {
+
+    const response = await fetch("/api/signup", {
       method: "POST",
       body: JSON.stringify({ username, email, password, role }),
       credentials: "include",
       headers: { "Content-Type": "application/json" },
     });
 
-    const data = await res.json();
+    const data = await response.json();
 
-    if (!res.ok) {
+    if (!response.ok) {
       throw new Error(data.error || "Something went wrong");
     }
 

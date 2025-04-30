@@ -58,7 +58,5 @@ export async function POST(req) {
     maxAge: 60 * 60 * 24 * 7,
   });
 
-  
-
   return response;
 }

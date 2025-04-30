@@ -16,7 +16,9 @@ const Navbar = () => {
         const res = await fetch("/api/me", { credentials: "include" });
         const data = await res.json();
         setIsAuthenticated(data.authenticated);
-        setrole(data.user.role)
+        if (data.user) {
+          setrole(data.user.role);
+        }
       } catch (err) {
         console.error("Failed to check auth", err);
         setIsAuthenticated(false);
@@ -24,7 +26,7 @@ const Navbar = () => {
     };
     checkAuth();
   }, []);
-
+  
   useEffect(() => {
     const getuserdata = async () => {
       try {

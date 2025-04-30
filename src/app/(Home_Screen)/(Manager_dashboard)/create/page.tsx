@@ -2,23 +2,109 @@
 import React, { useState, useEffect } from "react";
 import Navbar from "@/app/components/Navbar";
 import dynamic from "next/dynamic";
-import { useRouter } from "next/navigation";
 import axios from "axios";
 import Sidebar_manager from "@/app/components/Sidebar_manager";
+import Cookies from "js-cookie";
+
+import {
+  MapContainer,
+  TileLayer,
+  Marker,
+  useMap,
+  useMapEvents,
+} from "react-leaflet";
+import L from "leaflet";
+import "leaflet/dist/leaflet.css";
+
 export default function AddPropertyForm() {
+  delete L.Icon.Default.prototype._getIconUrl;
+  L.Icon.Default.mergeOptions({
+    iconRetinaUrl:
+      "https://unpkg.com/leaflet@1.7.1/dist/images/marker-icon-2x.png",
+    iconUrl: "https://unpkg.com/leaflet@1.7.1/dist/images/marker-icon.png",
+    shadowUrl: "https://unpkg.com/leaflet@1.7.1/dist/images/marker-shadow.png",
+  });
+
+  const LocationMarker = ({
+    onSelect,
+  }: {
+    onSelect: (position: any) => void;
+  }) => {
+    const [position, setPosition] = useState<any>(null);
+
+    // Check if the position is stored in the cookie and load it on component mount
+    React.useEffect(() => {
+      const cookiePosition = Cookies.get("latlng");
+      if (cookiePosition) {
+        const parsedPosition = JSON.parse(cookiePosition); // Convert string to object
+        setPosition(parsedPosition);
+        setlatitude(parsedPosition.lat)
+        setlongitude(parsedPosition.lng)
+
+        console.log("Latitude changed:", latitude);
+        console.log("Longitude changed:", longitude);
+      }
+    }, []);
+
+    useMapEvents({
+      click: async (e) => {
+        const { latlng } = e;
+        setPosition(latlng);
+        loadPositionFromCookie();
+        Cookies.set("latlng", JSON.stringify(latlng), { expires: 7 }); // 7 days expiration
+      },
+    });
+
+    return position ? <Marker position={position} /> : null;
+  };
+
+  const [position, setPosition] = useState<any>(null);
+
+  const loadPositionFromCookie = () => {
+    const cookiePosition = Cookies.get("latlng");
+
+    if (cookiePosition) {
+      const decodedPosition = decodeURIComponent(cookiePosition);
+      const parsedPosition = JSON.parse(decodedPosition);
+      setPosition(parsedPosition);
+    }
+  };
+
+  const deletePositionCookie = () => {
+    Cookies.remove("latlng"); // Remove the cookie
+    setPosition(null); // Clear the position from state
+  };
+
+  useEffect(() => {
+    console.log("skibidi", position);
+  }, [position]);
+
+  function FlyToLocation1({
+    coords,
+  }: {
+    coords: { lat: number; lng: number };
+  }) {
+    const map = useMap();
+
+    useEffect(() => {
+      if (coords && coords.length === 2) {
+        map.flyTo(coords, 14, {
+          duration: 1.5,
+        });
+      }
+    }, [coords, map]);
+
+    return null;
+  }
+
   const [coords, setCoords] = useState(null);
   const [showMap, setShowMap] = useState(false);
   const [my_location, setmy_location] = useState(false); // Default false
   const [search_location, setsearch_location] = useState(false);
   const [query, setQuery] = useState("");
   const [suggestions, setSuggestions] = useState([]);
-  const [dog, setdog] = useState(true)
-  
+  const [dog, setdog] = useState(true);
   const [selectedLocation, setSelectedLocation] = useState<any>(null);
-  const [markerCoords, setMarkerCoords] = useState<{
-    lat: number;
-    lng: number;
-  } | null>(null);
 
   const get_coordinate = (query: string) => {
     handleSearch(query);
@@ -40,6 +126,8 @@ export default function AddPropertyForm() {
       alert("Error fetching location");
     }
   };
+
+
 
   useEffect(() => {
     const delayDebounce = setTimeout(() => {
@@ -69,23 +157,32 @@ export default function AddPropertyForm() {
   });
 
   const handleUseMyLocation = () => {
-    setdog(false)
+    setdog(false);
     setmy_location(true);
     setsearch_location(false);
     setShowMap(false);
-
+  
     if (!coords) {
       navigator.geolocation.getCurrentPosition(
         (pos) => {
-          setCoords({ lat: pos.coords.latitude, lng: pos.coords.longitude });
+          const { latitude, longitude } = pos.coords;
+          setCoords({ lat: latitude, lng: longitude });
+          setlatitude(latitude);
+          setlongitude(longitude);
           setShowMap(false);
+          console.log("Latitude changed:", latitude);
+          console.log("Longitude changed:", longitude);
+
         },
-        (err) => alert("Failed to get location.")
+        (err) => {
+          console.error("Error getting location:", err);
+          alert("Failed to get location. Please check your location settings.");
+        }
       );
     }
   };
 
-
+  const [email, setemail] = useState("")
   const [propertyName, setPropertyName] = useState("");
   const [description, setDescription] = useState("");
   const [pricePerMonth, setPricePerMonth] = useState("");
@@ -104,196 +201,405 @@ export default function AddPropertyForm() {
   const [state, setState] = useState("");
   const [postalCode, setPostalCode] = useState("");
   const [country, setCountry] = useState("");
+  const [latitude, setlatitude] = useState("");
+  const [longitude, setlongitude] = useState("")
+
+  const create_button = async(e) => {
+    deletePositionCookie();
+    e.preventDefault();
+
+    const response = await fetch("/api/create_listing" , { 
+      method : "POST",
+      headers: { "Content-Type": "application/json" },
+      credentials:"include",
+      body: JSON.stringify({
+        email,
+        propertyName,
+        description,
+        pricePerMonth,
+        securityDeposit,
+        applicationFee,
+        beds,
+        baths,
+        squareFeet,
+        petsAllowed,
+        parkingIncluded,
+        propertyType,
+        amenities,
+        highlights,
+        address,
+        city,
+        state,
+        postalCode,
+        country,
+        latitude,
+        longitude,
+      }),
+    })
+    const data = await response.json();
+    if (response.ok) {
+      console.log("Listing created:", data);
+    } else {
+      console.error("Error:", data.message);
+    }
+  };
+
+  useEffect(() => {
+  const get_email= async() =>{
+    try {
+      const response = await fetch("/api/user_email");
+      const data = await response.json();
+      setemail(data.email)
+
+    } catch (error) {    
+    }
+  }
+  get_email();
+  }, [])
+
 
 
   return (
-  <div className="h-screen flex flex-col overflow-hidden">
-  {/* Navbar */}
-  <Navbar />
+    <div className="h-screen flex flex-col overflow-hidden">
+      {/* Navbar */}
+      <Navbar />
 
-  {/* Main content */}
-  <div className="flex flex-1 overflow-hidden">
-    {/* Sidebar - stays fixed */}
-    <div className="w-64 h-full overflow-y-auto border-r">
-      <Sidebar_manager />
-    </div>
+      {/* Main content */}
+      <div className="flex flex-1 overflow-hidden">
+        {/* Sidebar - stays fixed */}
+        <div className="w-[190px] h-full overflow-y-auto border-r">
+          <Sidebar_manager />
+        </div>
 
-    {/* Form area - scrolls */}
-    <div className="flex-1 overflow-y-auto">
-      <div className="max-w-5xl mx-auto p-6">
-        <h1 className="text-2xl font-semibold mb-2">Add New Property</h1>
-        <p className="mb-6 text-gray-600">
-          Create a new property listing with detailed information
-        </p>
+        {/* Form area - scrolls */}
+        <div className="flex-1 overflow-y-auto">
+          <div className="max-w-5xl mx-auto p-6">
+            <h1 className="text-2xl font-semibold mb-2">Add New Property</h1>
+            <p className="mb-6 text-gray-600">
+              Create a new property listing with detailed information
+            </p>
 
-        <div className="space-y-8">
-          {/* Basic Information */}
-          <div>
-            <h2 className="text-xl font-medium mb-4">Basic Information</h2>
-            <input className="w-full p-2 mb-4 border rounded" placeholder="Property Name" />
-            <textarea className="w-full p-2 border rounded" rows={4} placeholder="Description" />
-          </div>
+            <div className="space-y-8">
+              {/* Basic Information */}
+              <div>
+                <h2 className="text-xl font-medium mb-4">Basic Information</h2>
+                <input
+                  className="w-full p-2 mb-4 border rounded"
+                  placeholder="Property Name"
+                  value={propertyName}
+                  onChange={(e) => setPropertyName(e.target.value)}
+                />
+                <textarea
+                  className="w-full p-2 border rounded"
+                  rows={4}
+                  placeholder="Description"
+                  value={description}
+                  onChange={(e) => setDescription(e.target.value)}
+                />
+              </div>
 
-          {/* Fees */}
-          <div>
-            <h2 className="text-xl font-medium mb-4">Fees</h2>
-            <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
-              <input className="p-2 border rounded" placeholder="Price per Month" />
-              <input className="p-2 border rounded" placeholder="Security Deposit" />
-              <input className="p-2 border rounded" placeholder="Application Fee" />
-            </div>
-          </div>
-
-          {/* Property Details */}
-          <div>
-            <h2 className="text-xl font-medium mb-4">Property Details</h2>
-            <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
-              <input className="p-2 border rounded" placeholder="Number of Beds" />
-              <input className="p-2 border rounded" placeholder="Number of Baths" />
-              <input className="p-2 border rounded" placeholder="Square Feet" />
-            </div>
-            <div className="flex items-center mt-4 space-x-6">
-              <label className="flex items-center space-x-2">
-                <input type="checkbox" className="form-checkbox" />
-                <span>Pets Allowed</span>
-              </label>
-              <label className="flex items-center space-x-2">
-                <input type="checkbox" className="form-checkbox" />
-                <span>Parking Included</span>
-              </label>
-            </div>
-            <input className="mt-4 w-full p-2 border rounded" placeholder="Property Type" />
-          </div>
-
-          {/* Amenities and Highlights */}
-          <div>
-            <h2 className="text-xl font-medium mb-4">Amenities and Highlights</h2>
-            <input className="w-full p-2 mb-4 border rounded" placeholder="Amenities" />
-            <input className="w-full p-2 border rounded" placeholder="Highlights" />
-          </div>
-
-          {/* Photos */}
-          <div>
-            <h2 className="text-xl font-medium mb-4">Photos</h2>
-            <label
-              htmlFor="photo-upload"
-              className="block w-full border-2 border-dashed border-gray-400 p-6 text-center rounded bg-gray-50 cursor-pointer hover:bg-gray-100 transition"
-            >
-              <p className="text-gray-700">
-                Drag & Drop your images or{" "}
-                <span className="text-black-600 font-bold underline">Browse</span>
-              </p>
-              <input id="photo-upload" type="file" accept="image/*" multiple className="hidden" />
-            </label>
-          </div>
-
-          {/* Additional Information */}
-          <div>
-            <h2 className="text-xl font-medium mb-4">Additional Information</h2>
-            <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-4">
-              <input className="p-2 border rounded" placeholder="Address" />
-              <input className="p-2 border rounded" placeholder="City" />
-              <input className="p-2 border rounded" placeholder="State" />
-              <input className="p-2 border rounded" placeholder="Postal Code" />
-            </div>
-            <input className="mt-4 w-full p-2 border rounded" placeholder="Country" />
-          </div>
-
-          {/* Location Options */}
-          <div className="my-6">
-            <h2 className="text-xl font-medium mb-2">Location</h2>
-            <div className="flex flex-col sm:flex-row gap-4">
-              <button
-                onClick={handleUseMyLocation}
-                className={`px-4 py-2 rounded border transition ${
-                  my_location
-                    ? "bg-black text-white"
-                    : "bg-white text-black border-gray-200 hover:bg-black hover:text-white"
-                }`}
-              >
-                Use My Current Location
-              </button>
-
-              <button
-                onClick={() => {
-                  setShowMap(!showMap);
-                  setsearch_location(true);
-                  setmy_location(false);
-                }}
-                className={`px-4 py-2 rounded border transition ${
-                  search_location
-                    ? "bg-black text-white"
-                    : "bg-white text-black border-gray-200 hover:bg-black hover:text-white"
-                }`}
-              >
-                Search On Map
-              </button>
-
-              {search_location && (
-                <div>
+              {/* Fees */}
+              <div>
+                <h2 className="text-xl font-medium mb-4">Fees</h2>
+                <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
                   <input
-                    value={query}
-                    onChange={(e) => setQuery(e.target.value)}
-                    type="text"
-                    placeholder="Enter Location"
-                    className="h-[40px] p-2 border border-gray-200 w-[300px] rounded"
+                    className="p-2 border rounded"
+                    placeholder="Price per Month"
+                    value={pricePerMonth}
+                    type="number"
+                    onChange={(e) => setPricePerMonth(e.target.value)}
                   />
-                  {suggestions.length > 0 && (
-                    <ul className="top-[65px] w-[600px] z-20 bg-white border opacity-80 border-gray-300 rounded-lg mt-1 max-h-60 overflow-y-auto">
-                      {suggestions.map((place, index) => (
-                        <li
-                          key={index}
-                          className="px-4 py-2 hover:bg-gray-100 cursor-pointer"
-                          onClick={() => {
-                            get_coordinate(place.display_name);
-                            setSuggestions([]);
-                            handleSearch(place.display_name);
-                          }}
-                        >
-                          {place.display_name}
-                        </li>
-                      ))}
-                    </ul>
+                  <input
+                    type="number"
+                    className="p-2 border rounded"
+                    placeholder="Security Deposit"
+                    value={securityDeposit}
+                    onChange={(e) => setSecurityDeposit(e.target.value)}
+                  />
+                  <input
+                    type="number"
+                    className="p-2 border rounded"
+                    placeholder="Application Fee"
+                    value={applicationFee}
+                    onChange={(e) => setApplicationFee(e.target.value)}
+                  />
+                </div>
+              </div>
+
+              {/* Property Details */}
+              <div>
+                <h2 className="text-xl font-medium mb-4">Property Details</h2>
+                <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+                  <input
+                    type="number"
+                    className="p-2 border rounded"
+                    placeholder="Number of Beds"
+                    value={beds}
+                    onChange={(e) => setBeds(e.target.value)}
+                  />
+                  <input
+                    type="number"
+                    className="p-2 border rounded"
+                    placeholder="Number of Baths"
+                    value={baths}
+                    onChange={(e) => setBaths(e.target.value)}
+                  />
+                  <input
+                    type="number"
+                    className="p-2 border rounded"
+                    placeholder="Square Feet"
+                    value={squareFeet}
+                    onChange={(e) => setSquareFeet(e.target.value)}
+                  />
+                </div>
+                <div className="flex items-center mt-4 space-x-6">
+                  <label className="flex items-center space-x-2">
+                    <input
+                      type="checkbox"
+                      className="form-checkbox"
+                      checked={petsAllowed}
+                      onChange={(e) => setPetsAllowed(e.target.checked)}
+                    />
+                    <span>Pets Allowed</span>
+                  </label>
+                  <label className="flex items-center space-x-2">
+                    <input
+                      type="checkbox"
+                      className="form-checkbox"
+                      checked={parkingIncluded}
+                      onChange={(e) => setParkingIncluded(e.target.checked)}
+                    />
+                    <span>Parking Included</span>
+                  </label>
+                </div>
+                <div>
+                  <div className="mt-4 p-2 w-full">
+                    <label
+                      htmlFor="property-type"
+                      className="block text-xl font-medium "
+                    >
+                      Property Type
+                    </label>
+                    <select
+                      id="property-type"
+                      className="mt-4 w-full p-2 border rounded"
+                      value={propertyType}
+                      onChange={(e) => setPropertyType(e.target.value)}
+                    >
+                      <option value="house">House</option>
+                      <option value="villa">Villa</option>
+                      <option value="apartment">Apartment</option>
+                      <option value="room">Room</option>
+                      <option value="studio">Studio Apartment</option>
+                      <option value="penthouse">Penthouse</option>
+                      <option value="duplex">Duplex</option>
+                      <option value="townhouse">Townhouse</option>
+                    </select>
+                  </div>
+                </div>
+              </div>
+
+              {/* Amenities and Highlights */}
+              <div>
+                <h2 className="text-xl font-medium mb-4">
+                  Amenities and Highlights
+                </h2>
+                <input
+                  className="w-full p-2 mb-4 border rounded"
+                  placeholder="Amenities"
+                  value={amenities}
+                  onChange={(e) => setAmenities(e.target.value)}
+                />
+                <input
+                  className="w-full p-2 border rounded"
+                  placeholder="Highlights"
+                  value={highlights}
+                  onChange={(e) => setHighlights(e.target.value)}
+                />
+              </div>
+
+              {/* Photos */}
+              <div>
+                <h2 className="text-xl font-medium mb-4">Photos</h2>
+                <label
+                  htmlFor="photo-upload"
+                  className="block w-full border-2 border-dashed border-gray-400 p-6 text-center rounded bg-gray-50 cursor-pointer hover:bg-gray-100 transition"
+                >
+                  <p className="text-gray-700">
+                    Drag & Drop your images or{" "}
+                    <span className="text-black-600 font-bold underline">
+                      Browse
+                    </span>
+                  </p>
+                  <input
+                    id="photo-upload"
+                    type="file"
+                    accept="image/*"
+                    multiple
+                    className="hidden"
+                  />
+                </label>
+              </div>
+
+              {/* Additional Information */}
+              <div>
+                <h2 className="text-xl font-medium mb-4">
+                  Additional Information
+                </h2>
+                <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-4">
+                  <input
+                    className="p-2 border rounded"
+                    placeholder="Address"
+                    value={address}
+                    onChange={(e) => setAddress(e.target.value)}
+                  />
+                  <input
+                    className="p-2 border rounded"
+                    placeholder="City"
+                    value={city}
+                    onChange={(e) => setCity(e.target.value)}
+                  />
+                  <input
+                    className="p-2 border rounded"
+                    placeholder="State"
+                    value={state}
+                    onChange={(e) => setState(e.target.value)}
+                  />
+                  <input
+                    className="p-2 border rounded"
+                    type="number"
+                    placeholder="Postal Code"
+                    value={postalCode}
+                    onChange={(e) => setPostalCode(e.target.value)}
+                  />
+                </div>
+                <div>
+                  <select
+                    id="country"
+                    className="mt-4 w-full p-2 border rounded"
+                    value={country}
+                    onChange={(e) => setCountry(e.target.value)}
+                  >
+                    <option value="">Select Country</option>
+                    <option value="USA">United States</option>
+                    <option value="Canada">Canada</option>
+                    <option value="UK">United Kingdom</option>
+                    <option value="India">India</option>
+                    <option value="Australia">Australia</option>
+                    <option value="Germany">Germany</option>
+                    <option value="France">France</option>
+                    <option value="Japan">Japan</option>
+                    <option value="Brazil">Brazil</option>
+                    <option value="SouthAfrica">South Africa</option>
+                    {/* Add more countries as needed */}
+                  </select>
+                </div>
+              </div>
+
+              {/* Location Options */}
+              <div className="my-6">
+                <h2 className="text-xl font-medium mb-2">Location</h2>
+                <div className="flex flex-col sm:flex-row gap-4">
+                  <button
+                    onClick={handleUseMyLocation}
+                    className={`px-4 py-2 rounded cursor-pointer border transition ${
+                      my_location
+                        ? "bg-black text-white"
+                        : "bg-white text-black border-gray-200 hover:bg-black hover:text-white"
+                    }`}
+                  >
+                    Use My Current Location
+                  </button>
+
+                  <button
+                    onClick={() => {
+                      setShowMap(!showMap);
+                      setsearch_location(true);
+                      setdog(false);
+                      setmy_location(false);
+                    }}
+                    className={`px-4 py-2 cursor-pointer rounded border transition ${
+                      search_location
+                        ? "bg-black text-white"
+                        : "bg-white text-black border-gray-200 hover:bg-black hover:text-white"
+                    }`}
+                  >
+                    Search On Map
+                  </button>
+
+                  {search_location && (
+                    <div>
+                      <input
+                        value={query}
+                        onChange={(e) => setQuery(e.target.value)}
+                        type="text"
+                        placeholder="Enter Location"
+                        className="h-[40px] p-2 border border-gray-200 w-[300px] rounded"
+                      />
+                      {suggestions.length > 0 && (
+                        <ul className="top-[65px] w-[600px] z-20 bg-white border opacity-80 border-gray-300 rounded-lg mt-1 max-h-60 overflow-y-auto">
+                          {suggestions.map((place, index) => (
+                            <li
+                              key={index}
+                              className="px-4 py-2 hover:bg-gray-100 cursor-pointer"
+                              onClick={() => {
+                                get_coordinate(place.display_name);
+                                setSuggestions([]);
+                                handleSearch(place.display_name);
+                              }}
+                            >
+                              {place.display_name}
+                            </li>
+                          ))}
+                        </ul>
+                      )}
+                    </div>
                   )}
                 </div>
+              </div>
+
+              {/* Map */}
+              {my_location && coords && (
+                <div className="h-[403px] w-[973px] bg-gray-300 flex items-center justify-center">
+                  <MapView1 markerCoords={coords} />
+                </div>
               )}
-            </div>
-          </div>
+              {search_location && (
+                <div className="h-[403px] w-[973px] bg-gray-300 flex items-center justify-center">
+                  <MapContainer
+                    center={selectedLocation || [20.5937, 78.9629]}
+                    zoom={1}
+                    style={{ height: "400px", width: "970px" }}
+                  >
+                    <TileLayer
+                      url="https://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}{r}.png"
+                      attribution='&copy; <a href="https://carto.com/">CARTO</a>'
+                    />
+                    {<FlyToLocation1 coords={selectedLocation} />}
+                    {<LocationMarker onSelect={selectedLocation} />}
+                  </MapContainer>
+                </div>
+              )}
 
-          {/* Map */}
-          {my_location && coords && (
-            <div className="h-[403px] w-[973px] bg-gray-300 flex items-center justify-center">
-              <MapView1 markerCoords={coords} />
-            </div>
-          )}
-          {search_location && (
-            <div className="h-[403px] w-[973px] bg-gray-300 flex items-center justify-center">
-              <MapView2
-                markerCoords={selectedLocation}
-                onLocationSelect={(coords) => setMarkerCoords(coords)}
-              />
-            </div>
-          )}
-          {dog && (
-            <div className="h-[403px] w-[973px] bg-gray-300 flex items-center justify-center">
-              <MapView2
-                markerCoords={selectedLocation}
-                onLocationSelect={(coords) => setMarkerCoords(coords)}
-              />
-            </div>
-          )}
+              {dog && (
+                <div className="h-[403px] w-[973px] bg-gray-300 flex items-center justify-center">
+                  <MapView2 />
+                </div>
+              )}
 
-          {/* Submit */}
-          <div>
-            <button className="w-full bg-black text-white cursor-pointer py-3 rounded transition">
-              Create Property
-            </button>
+              {/* Submit */}
+              <div>
+                <button
+                  onClick={create_button}
+                  className="w-full bg-black text-white cursor-pointer py-3 rounded transition"
+                >
+                  Create Property
+                </button>
+              </div>
+            </div>
           </div>
         </div>
       </div>
     </div>
-  </div>
-</div>
-
   );
 }

@@ -26,9 +26,6 @@ function FlyToLocation1({ coords }: { coords: { lat: number; lng: number } }) {
       map.flyTo([coords.lat, coords.lng], 14, {
         duration: 1.5,
       });
-
-     
-
     }
   }, [coords, map]);
 

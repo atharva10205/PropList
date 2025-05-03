@@ -3,6 +3,8 @@ import prisma from "../../../../lib/prisma";
 import { cookies } from "next/headers";
 
 async function getUsernameByEmail(emailFromCookie) {
+  if (!emailFromCookie) return null;
+
   const user = await prisma.user.findUnique({
     where: { email: emailFromCookie },
     select: { username: true },
@@ -12,9 +14,10 @@ async function getUsernameByEmail(emailFromCookie) {
 }
 
 export async function GET() {
-  const cookieStore = await cookies();
-  const email =   cookieStore.get("email")?.value;
+  const cookieStore = await cookies(); // ✅ await here
+  const email = cookieStore.get("email")?.value;
 
   const username = await getUsernameByEmail(email);
+
   return NextResponse.json({ username });
 }

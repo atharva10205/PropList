@@ -1,64 +1,56 @@
 import { PrismaClient } from "@prisma/client";
-const prisma = new PrismaClient();
+import { parse } from "cookie";
 import jwt from "jsonwebtoken";
-import { cookies } from "next/headers";
+
+const prisma = new PrismaClient();
 
 export async function POST(req) {
-    const cookieStore = await cookies();
-    const response = cookieStore.get("token").value;
-    const decode = jwt.decode(response);
-    const userId = decode.id;
-    try {
-    const {
-      email,
-      propertyName,
-      description,
-      pricePerMonth,
-      securityDeposit,
-      applicationFee,
-      beds,
-      baths,
-      squareFeet,
-      petsAllowed,
-      parkingIncluded,
-      propertyType,
-      amenities,
-      highlights,
-      address,
-      city,
-      state,
-      postalCode,
-      country,
-      latitude,
-      longitude,
-    } = await req.json();
+  const cookies = parse(req.headers.get("cookie") || "");
+  const token = cookies.token;
+
+  if (!token) {
+    return new Response(JSON.stringify({ error: "Unauthorized. Token missing." }), {
+      status: 401,
+    });
+  }
+
+  const decode = jwt.decode(token); // Use jwt.verify() in production
+  if (!decode?.id) {
+    return new Response(JSON.stringify({ error: "Unauthorized. Invalid token." }), {
+      status: 401,
+    });
+  }
+
+  const userId = decode.id;
+
+  try {
+    const form = await req.formData();
 
     const property = await prisma.property.create({
       data: {
-        email,
-        propertyName,
-        description,
-        pricePerMonth,
-        securityDeposit,
-        applicationFee,
-        beds,
-        baths,
-        squareFeet,
-        petsAllowed,
-        parkingIncluded,
-        propertyType,
-        amenities,
-        highlights,
-        address,
-        city,
-        state,
-        postalCode,
-        country,
-        latitude,
-        longitude,
+        propertyName: form.get("propertyName"),
+        description: form.get("description"),
+        pricePerMonth: form.get("pricePerMonth"),
+        securityDeposit: form.get("securityDeposit"),
+        applicationFee: form.get("applicationFee"),
+        beds: form.get("beds"),
+        baths: form.get("baths"),
+        squareFeet: form.get("squareFeet"),
+        petsAllowed: form.get("petsAllowed") === "true",
+        parkingIncluded: form.get("parkingIncluded") === "true",
+        propertyType: form.get("propertyType"),
+        amenities: form.get("amenities"),
+        highlights: form.get("highlights"),
+        address: form.get("address"),
+        city: form.get("city"),
+        state: form.get("state"),
+        postalCode: form.get("postalCode"),
+        country: form.get("country"),
+        latitude: parseFloat(form.get("latitude")),
+        longitude: parseFloat(form.get("longitude")),
         user: {
-            connect: { id: userId } // Pass an existing User's ID here
-          }
+          connect: { id: userId },
+        },
       },
     });
 

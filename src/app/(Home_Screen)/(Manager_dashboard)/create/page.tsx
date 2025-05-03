@@ -1,101 +1,12 @@
 "use client";
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect , useMemo } from "react";
 import Navbar from "@/app/components/Navbar";
 import dynamic from "next/dynamic";
 import axios from "axios";
 import Sidebar_manager from "@/app/components/Sidebar_manager";
-import Cookies from "js-cookie";
 
-import {
-  MapContainer,
-  TileLayer,
-  Marker,
-  useMap,
-  useMapEvents,
-} from "react-leaflet";
-import L from "leaflet";
-import "leaflet/dist/leaflet.css";
 
 export default function AddPropertyForm() {
-  delete L.Icon.Default.prototype._getIconUrl;
-  L.Icon.Default.mergeOptions({
-    iconRetinaUrl:
-      "https://unpkg.com/leaflet@1.7.1/dist/images/marker-icon-2x.png",
-    iconUrl: "https://unpkg.com/leaflet@1.7.1/dist/images/marker-icon.png",
-    shadowUrl: "https://unpkg.com/leaflet@1.7.1/dist/images/marker-shadow.png",
-  });
-
-  const LocationMarker = ({
-    onSelect,
-  }: {
-    onSelect: (position: any) => void;
-  }) => {
-    const [position, setPosition] = useState<any>(null);
-
-    // Check if the position is stored in the cookie and load it on component mount
-    React.useEffect(() => {
-      const cookiePosition = Cookies.get("latlng");
-      if (cookiePosition) {
-        const parsedPosition = JSON.parse(cookiePosition); // Convert string to object
-        setPosition(parsedPosition);
-        setlatitude(parsedPosition.lat)
-        setlongitude(parsedPosition.lng)
-
-        console.log("Latitude changed:", latitude);
-        console.log("Longitude changed:", longitude);
-      }
-    }, []);
-
-    useMapEvents({
-      click: async (e) => {
-        const { latlng } = e;
-        setPosition(latlng);
-        loadPositionFromCookie();
-        Cookies.set("latlng", JSON.stringify(latlng), { expires: 7 }); // 7 days expiration
-      },
-    });
-
-    return position ? <Marker position={position} /> : null;
-  };
-
-  const [position, setPosition] = useState<any>(null);
-
-  const loadPositionFromCookie = () => {
-    const cookiePosition = Cookies.get("latlng");
-
-    if (cookiePosition) {
-      const decodedPosition = decodeURIComponent(cookiePosition);
-      const parsedPosition = JSON.parse(decodedPosition);
-      setPosition(parsedPosition);
-    }
-  };
-
-  const deletePositionCookie = () => {
-    Cookies.remove("latlng"); // Remove the cookie
-    setPosition(null); // Clear the position from state
-  };
-
-  useEffect(() => {
-    console.log("skibidi", position);
-  }, [position]);
-
-  function FlyToLocation1({
-    coords,
-  }: {
-    coords: { lat: number; lng: number };
-  }) {
-    const map = useMap();
-
-    useEffect(() => {
-      if (coords && coords.length === 2) {
-        map.flyTo(coords, 14, {
-          duration: 1.5,
-        });
-      }
-    }, [coords, map]);
-
-    return null;
-  }
 
   const [coords, setCoords] = useState(null);
   const [showMap, setShowMap] = useState(false);
@@ -105,10 +16,14 @@ export default function AddPropertyForm() {
   const [suggestions, setSuggestions] = useState([]);
   const [dog, setdog] = useState(true);
   const [selectedLocation, setSelectedLocation] = useState<any>(null);
+  const [previewUrls, setPreviewUrls] = useState([]);
 
+
+  
   const get_coordinate = (query: string) => {
     handleSearch(query);
   };
+
 
   const handleSearch = async (query: string) => {
     try {
@@ -118,7 +33,7 @@ export default function AddPropertyForm() {
 
       if (response.data && response.data.length > 0) {
         const { lat, lon } = response.data[0];
-        setSelectedLocation([parseFloat(lat), parseFloat(lon)]);
+        setSelectedLocation({ lat: parseFloat(lat), lng: parseFloat(lon) });
       } else {
         alert("Place not found");
       }
@@ -129,6 +44,7 @@ export default function AddPropertyForm() {
 
 
 
+  //thing that pulls suggestions
   useEffect(() => {
     const delayDebounce = setTimeout(() => {
       if (query.length > 2) {
@@ -156,31 +72,12 @@ export default function AddPropertyForm() {
     ssr: false,
   });
 
-  const handleUseMyLocation = () => {
-    setdog(false);
-    setmy_location(true);
-    setsearch_location(false);
-    setShowMap(false);
-  
-    if (!coords) {
-      navigator.geolocation.getCurrentPosition(
-        (pos) => {
-          const { latitude, longitude } = pos.coords;
-          setCoords({ lat: latitude, lng: longitude });
-          setlatitude(latitude);
-          setlongitude(longitude);
-          setShowMap(false);
-          console.log("Latitude changed:", latitude);
-          console.log("Longitude changed:", longitude);
+  const MapView3 = dynamic(() => import("@/app/components/MapView3"), {
+    ssr: false,
+  });
 
-        },
-        (err) => {
-          console.error("Error getting location:", err);
-          alert("Failed to get location. Please check your location settings.");
-        }
-      );
-    }
-  };
+
+  
 
   const [email, setemail] = useState("")
   const [propertyName, setPropertyName] = useState("");
@@ -203,46 +100,120 @@ export default function AddPropertyForm() {
   const [country, setCountry] = useState("");
   const [latitude, setlatitude] = useState("");
   const [longitude, setlongitude] = useState("")
+  const [image, setImage] = useState(null);
 
-  const create_button = async(e) => {
-    deletePositionCookie();
-    e.preventDefault();
+  const [files, setFiles] = useState([]);
 
-    const response = await fetch("/api/create_listing" , { 
-      method : "POST",
-      headers: { "Content-Type": "application/json" },
-      credentials:"include",
-      body: JSON.stringify({
-        email,
-        propertyName,
-        description,
-        pricePerMonth,
-        securityDeposit,
-        applicationFee,
-        beds,
-        baths,
-        squareFeet,
-        petsAllowed,
-        parkingIncluded,
-        propertyType,
-        amenities,
-        highlights,
-        address,
-        city,
-        state,
-        postalCode,
-        country,
-        latitude,
-        longitude,
-      }),
-    })
-    const data = await response.json();
-    if (response.ok) {
-      console.log("Listing created:", data);
-    } else {
-      console.error("Error:", data.message);
+
+  const handleImageChange = (e :  React.ChangeEvent<HTMLInputElement>) => {
+
+    if (e.target.files) {
+      setFiles(Array.from(e.target.files));
+    }
+    const files = Array.from(e.target.files);
+    setImage(files);
+
+    const previews = files.map((file) => URL.createObjectURL(file));
+    setPreviewUrls(previews);
+  };
+
+
+  const handleUseMyLocation = () => {
+    setdog(false);
+    setmy_location(true);
+    setsearch_location(false);
+    setShowMap(false);
+  
+      navigator.geolocation.getCurrentPosition(
+        (pos) => {
+          const { latitude, longitude } = pos.coords;
+          setCoords({ lat: latitude, lng: longitude });
+          setShowMap(false);
+        },
+        (err) => {
+          console.error("Error getting location:", err);
+          alert("API down");
+        }
+      );
+    
+  };
+
+  useEffect(() => {
+    if(coords){
+    setlatitude(coords.lat);
+    setlongitude(coords.lng);
+    }
+  }, [coords])
+
+  const upload_image = async () => {
+    if (files.length === 0) return;
+    
+    const formData = new FormData();
+    files.forEach((file) => {
+      formData.append('files', file);
+    });
+
+    try {
+      const res = await fetch('/api/upload1', {
+        method: 'POST',
+        body: formData,
+      });
+
+      if (!res.ok) {
+        throw new Error('Image upload failed');
+      }
+
+      const data = await res.json();
+      setImageURL(data.urls); // Setting all uploaded image URLs
+    } catch (error) {
+      console.error('Upload error:', error);
     }
   };
+  const [ImageURL, setImageURL] = useState([])
+  
+  useEffect(() => {
+  console.log("ImageURL",ImageURL)
+  }, [ImageURL])
+  
+
+  const create_button = async (e) => {
+    e.preventDefault();
+    
+    const formData = new FormData();
+    formData.append('propertyName', propertyName);
+    formData.append('description', description);
+    formData.append('pricePerMonth', pricePerMonth);
+    formData.append('securityDeposit', securityDeposit);
+    formData.append('applicationFee', applicationFee);
+    formData.append('beds', beds);
+    formData.append('baths', baths);
+    formData.append('squareFeet', squareFeet);
+    formData.append('petsAllowed', petsAllowed);
+    formData.append('parkingIncluded', parkingIncluded);
+    formData.append('propertyType', propertyType);
+    formData.append('amenities', amenities);
+    formData.append('highlights', highlights);
+    formData.append('address', address);
+    formData.append('city', city);
+    formData.append('state', state);
+    formData.append('postalCode', postalCode);
+    formData.append('country', country);
+    formData.append('latitude', latitude);
+    formData.append('longitude', longitude);
+    
+    const response = await fetch('/api/create_listing', {
+      method: 'POST',
+      body: formData,
+    });
+  
+    const data = await response.json();
+    if (response.ok) {
+      console.log('Listing created:', data);
+    } else {
+      console.error('Error:', data.message);
+    }
+  };
+  
 
   useEffect(() => {
   const get_email= async() =>{
@@ -257,9 +228,36 @@ export default function AddPropertyForm() {
   get_email();
   }, [])
 
+  const [selectedLocation1, setSelectedLocation1] = useState<{ lat: number; lng: number } | null>(null);
+
+
+
+  const memoizedMap = useMemo(() => {
+    return (
+      <div className="h-[403px] w-[973px] bg-gray-300 flex items-center justify-center">
+        <MapView3 
+          markerCoords={selectedLocation} 
+          onLocationSelect={setSelectedLocation1} 
+        />
+      </div>
+    );
+  }, [selectedLocation]);
+
+  useEffect(() => {    
+    if (selectedLocation1) {
+      setlatitude(selectedLocation1.lat);
+      setlongitude(selectedLocation1.lng);
+    }
+  }, [selectedLocation1]);
+
+
+  
+
+
 
 
   return (
+    
     <div className="h-screen flex flex-col overflow-hidden">
       {/* Navbar */}
       <Navbar />
@@ -420,27 +418,41 @@ export default function AddPropertyForm() {
 
               {/* Photos */}
               <div>
-                <h2 className="text-xl font-medium mb-4">Photos</h2>
-                <label
-                  htmlFor="photo-upload"
-                  className="block w-full border-2 border-dashed border-gray-400 p-6 text-center rounded bg-gray-50 cursor-pointer hover:bg-gray-100 transition"
-                >
-                  <p className="text-gray-700">
-                    Drag & Drop your images or{" "}
-                    <span className="text-black-600 font-bold underline">
-                      Browse
-                    </span>
-                  </p>
-                  <input
-                    id="photo-upload"
-                    type="file"
-                    accept="image/*"
-                    multiple
-                    className="hidden"
-                  />
-                </label>
-              </div>
+      <h2 className="text-xl font-medium mb-4">Photos</h2>
+      <label
+        htmlFor="photo-upload"
+        className="block w-full border-2 border-dashed border-gray-400 p-6 text-center rounded bg-gray-50 cursor-pointer hover:bg-gray-100 transition"
+      >
+        <p className="text-gray-700">
+          Drag & Drop your images or{" "}
+          <span className="text-black font-bold underline">Browse</span>
+        </p>
+        <input
+          name="image"
+          id="photo-upload"
+          type="file"
+          accept="image/*"
+          multiple
+          className="hidden"
+          // onChange={(e) => setFiles(Array.from(e.target.files))}
+          onChange={handleImageChange}
+          />
+      </label>
 
+      {/* Image Previews */}
+      {previewUrls.length > 0 && (
+        <div className="grid grid-cols-3 gap-4 mt-6">
+          {previewUrls.map((url, index) => (
+            <img
+              key={index}
+              src={url}
+              alt={`Preview ${index}`}
+              className="w-full h-32 object-cover rounded"
+            />
+          ))}
+        </div>
+      )}
+    </div>
               {/* Additional Information */}
               <div>
                 <h2 className="text-xl font-medium mb-4">
@@ -564,22 +576,8 @@ export default function AddPropertyForm() {
                   <MapView1 markerCoords={coords} />
                 </div>
               )}
-              {search_location && (
-                <div className="h-[403px] w-[973px] bg-gray-300 flex items-center justify-center">
-                  <MapContainer
-                    center={selectedLocation || [20.5937, 78.9629]}
-                    zoom={1}
-                    style={{ height: "400px", width: "970px" }}
-                  >
-                    <TileLayer
-                      url="https://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}{r}.png"
-                      attribution='&copy; <a href="https://carto.com/">CARTO</a>'
-                    />
-                    {<FlyToLocation1 coords={selectedLocation} />}
-                    {<LocationMarker onSelect={selectedLocation} />}
-                  </MapContainer>
-                </div>
-              )}
+             {search_location && memoizedMap}
+
 
               {dog && (
                 <div className="h-[403px] w-[973px] bg-gray-300 flex items-center justify-center">
@@ -590,7 +588,7 @@ export default function AddPropertyForm() {
               {/* Submit */}
               <div>
                 <button
-                  onClick={create_button}
+                  onClick={(e) => { create_button(e); upload_image(); }}
                   className="w-full bg-black text-white cursor-pointer py-3 rounded transition"
                 >
                   Create Property

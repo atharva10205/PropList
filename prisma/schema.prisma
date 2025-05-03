@@ -20,7 +20,6 @@ model User {
 
 model Property {
   id               Int      @id @default(autoincrement())
-  email            String
   propertyName     String
   description      String
   pricePerMonth    String
@@ -39,7 +38,6 @@ model Property {
   state            String
   postalCode       String
   country          String
-  //imageUrl         String?
   latitude         Float
   longitude        Float
 

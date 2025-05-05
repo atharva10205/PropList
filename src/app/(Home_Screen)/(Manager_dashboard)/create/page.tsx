@@ -145,74 +145,84 @@ export default function AddPropertyForm() {
     }
   }, [coords])
 
-  const upload_image = async () => {
-    if (files.length === 0) return;
-    
-    const formData = new FormData();
-    files.forEach((file) => {
-      formData.append('files', file);
+  const [ImageURL, setImageURL] = useState([])
+
+ const create_button = async (e) => {
+  e.preventDefault();
+
+  // Step 1: Upload Images
+  if (files.length === 0) {
+    console.error("No files selected for upload");
+    return;
+  }
+
+  const uploadFormData = new FormData();
+  files.forEach((file) => {
+    uploadFormData.append('files', file);
+  });
+
+  let imageURLs = [];
+
+  try {
+    const uploadRes = await fetch('/api/upload1', {
+      method: 'POST',
+      body: uploadFormData,
     });
 
-    try {
-      const res = await fetch('/api/upload1', {
-        method: 'POST',
-        body: formData,
-      });
-
-      if (!res.ok) {
-        throw new Error('Image upload failed');
-      }
-
-      const data = await res.json();
-      setImageURL(data.urls); // Setting all uploaded image URLs
-    } catch (error) {
-      console.error('Upload error:', error);
+    if (!uploadRes.ok) {
+      throw new Error('Image upload failed');
     }
-  };
-  const [ImageURL, setImageURL] = useState([])
-  
-  useEffect(() => {
-  console.log("ImageURL",ImageURL)
-  }, [ImageURL])
-  
 
-  const create_button = async (e) => {
-    e.preventDefault();
-    
-    const formData = new FormData();
-    formData.append('propertyName', propertyName);
-    formData.append('description', description);
-    formData.append('pricePerMonth', pricePerMonth);
-    formData.append('securityDeposit', securityDeposit);
-    formData.append('applicationFee', applicationFee);
-    formData.append('beds', beds);
-    formData.append('baths', baths);
-    formData.append('squareFeet', squareFeet);
-    formData.append('petsAllowed', petsAllowed);
-    formData.append('parkingIncluded', parkingIncluded);
-    formData.append('propertyType', propertyType);
-    formData.append('amenities', amenities);
-    formData.append('highlights', highlights);
-    formData.append('address', address);
-    formData.append('city', city);
-    formData.append('state', state);
-    formData.append('postalCode', postalCode);
-    formData.append('country', country);
-    formData.append('latitude', latitude);
-    formData.append('longitude', longitude);
-    
+    const uploadData = await uploadRes.json();
+    imageURLs = uploadData.urls; // Get uploaded image URLs
+  } catch (error) {
+    console.error('Upload error:', error);
+    return;
+  }
+
+  // Step 2: Create Listing
+  const formData = new FormData();
+  formData.append('propertyName', propertyName);
+  formData.append('description', description);
+  formData.append('pricePerMonth', pricePerMonth);
+  formData.append('securityDeposit', securityDeposit);
+  formData.append('applicationFee', applicationFee);
+  formData.append('beds', beds);
+  formData.append('baths', baths);
+  formData.append('squareFeet', squareFeet);
+  formData.append('petsAllowed', petsAllowed);
+  formData.append('parkingIncluded', parkingIncluded);
+  formData.append('propertyType', propertyType);
+  formData.append('amenities', amenities);
+  formData.append('highlights', highlights);
+  formData.append('address', address);
+  formData.append('city', city);
+  formData.append('state', state);
+  formData.append('postalCode', postalCode);
+  formData.append('country', country);
+  formData.append('latitude', latitude);
+  formData.append('longitude', longitude);
+
+  // Append image URLs to the formData (stringify if it's an array)
+  formData.append('imageURLs', JSON.stringify(imageURLs));
+
+  try {
     const response = await fetch('/api/create_listing', {
       method: 'POST',
       body: formData,
     });
-  
+
     const data = await response.json();
     if (response.ok) {
       console.log('Listing created:', data);
     } else {
       console.error('Error:', data.message);
     }
-  };
+  } catch (error) {
+    console.error('Create listing error:', error);
+  }
+};
+
   
 
   useEffect(() => {
@@ -282,6 +292,7 @@ export default function AddPropertyForm() {
               <div>
                 <h2 className="text-xl font-medium mb-4">Basic Information</h2>
                 <input
+                required
                   className="w-full p-2 mb-4 border rounded"
                   placeholder="Property Name"
                   value={propertyName}
@@ -301,6 +312,7 @@ export default function AddPropertyForm() {
                 <h2 className="text-xl font-medium mb-4">Fees</h2>
                 <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
                   <input
+                  required
                     className="p-2 border rounded"
                     placeholder="Price per Month"
                     value={pricePerMonth}
@@ -308,6 +320,7 @@ export default function AddPropertyForm() {
                     onChange={(e) => setPricePerMonth(e.target.value)}
                   />
                   <input
+                  required
                     type="number"
                     className="p-2 border rounded"
                     placeholder="Security Deposit"
@@ -315,6 +328,7 @@ export default function AddPropertyForm() {
                     onChange={(e) => setSecurityDeposit(e.target.value)}
                   />
                   <input
+                  required
                     type="number"
                     className="p-2 border rounded"
                     placeholder="Application Fee"
@@ -329,6 +343,7 @@ export default function AddPropertyForm() {
                 <h2 className="text-xl font-medium mb-4">Property Details</h2>
                 <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
                   <input
+                  required
                     type="number"
                     className="p-2 border rounded"
                     placeholder="Number of Beds"
@@ -336,6 +351,7 @@ export default function AddPropertyForm() {
                     onChange={(e) => setBeds(e.target.value)}
                   />
                   <input
+                  required
                     type="number"
                     className="p-2 border rounded"
                     placeholder="Number of Baths"
@@ -343,6 +359,7 @@ export default function AddPropertyForm() {
                     onChange={(e) => setBaths(e.target.value)}
                   />
                   <input
+                  required
                     type="number"
                     className="p-2 border rounded"
                     placeholder="Square Feet"
@@ -353,6 +370,7 @@ export default function AddPropertyForm() {
                 <div className="flex items-center mt-4 space-x-6">
                   <label className="flex items-center space-x-2">
                     <input
+                    
                       type="checkbox"
                       className="form-checkbox"
                       checked={petsAllowed}
@@ -428,6 +446,7 @@ export default function AddPropertyForm() {
           <span className="text-black font-bold underline">Browse</span>
         </p>
         <input
+        required
           name="image"
           id="photo-upload"
           type="file"
@@ -460,24 +479,28 @@ export default function AddPropertyForm() {
                 </h2>
                 <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-4">
                   <input
+                  required
                     className="p-2 border rounded"
                     placeholder="Address"
                     value={address}
                     onChange={(e) => setAddress(e.target.value)}
                   />
                   <input
+                  required
                     className="p-2 border rounded"
                     placeholder="City"
                     value={city}
                     onChange={(e) => setCity(e.target.value)}
                   />
                   <input
+                  required
                     className="p-2 border rounded"
                     placeholder="State"
                     value={state}
                     onChange={(e) => setState(e.target.value)}
                   />
                   <input
+                  required
                     className="p-2 border rounded"
                     type="number"
                     placeholder="Postal Code"
@@ -588,7 +611,7 @@ export default function AddPropertyForm() {
               {/* Submit */}
               <div>
                 <button
-                  onClick={(e) => { create_button(e); upload_image(); }}
+                  onClick={(e) => { create_button(e) }}
                   className="w-full bg-black text-white cursor-pointer py-3 rounded transition"
                 >
                   Create Property

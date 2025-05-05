@@ -40,6 +40,7 @@ model Property {
   country          String
   latitude         Float
   longitude        Float
+  imageURLs      String[]
 
   userId           Int        // Foreign key
   user             User       @relation(fields: [userId], references: [id])

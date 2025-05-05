@@ -26,6 +26,9 @@ export async function POST(req) {
   try {
     const form = await req.formData();
 
+    // 👇 Parse imageURLs from the form (stringified JSON array)
+    const imageURLs = JSON.parse(form.get("imageURLs") || "[]");
+
     const property = await prisma.property.create({
       data: {
         propertyName: form.get("propertyName"),
@@ -48,6 +51,7 @@ export async function POST(req) {
         country: form.get("country"),
         latitude: parseFloat(form.get("latitude")),
         longitude: parseFloat(form.get("longitude")),
+        imageURLs, // 👈 Include parsed image URLs (must exist in schema)
         user: {
           connect: { id: userId },
         },

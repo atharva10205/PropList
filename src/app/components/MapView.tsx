@@ -1,30 +1,21 @@
 'use client';
 
-import { MapContainer, TileLayer, Marker, useMap, useMapEvents } from 'react-leaflet';
-import { useEffect, useState } from 'react';
+import { MapContainer, TileLayer, Marker, Popup, useMap } from 'react-leaflet';
+import { useEffect } from 'react';
 import L from 'leaflet';
 import 'leaflet/dist/leaflet.css';
 
 // Fix Leaflet's missing marker icon issue
 delete L.Icon.Default.prototype._getIconUrl;
+
 L.Icon.Default.mergeOptions({
-  iconRetinaUrl: 'https://unpkg.com/leaflet@1.7.1/dist/images/marker-icon-2x.png',
-  iconUrl: 'https://unpkg.com/leaflet@1.7.1/dist/images/marker-icon.png',
-  shadowUrl: 'https://unpkg.com/leaflet@1.7.1/dist/images/marker-shadow.png',
+  iconRetinaUrl: 'https://img.icons8.com/?size=100&id=7880&format=png&color=000000',
+  iconUrl: 'https://img.icons8.com/?size=100&id=7880&format=png&color=000000',
+  shadowUrl: '',
+  iconSize: [32, 32],
+  iconAnchor: [16, 32],
+  popupAnchor: [0, -32]
 });
-
-// const LocationMarker = ({ onSelect }: { onSelect: (position: any) => void }) => {
-//   const [position, setPosition] = useState<any>(null);
-
-//   useMapEvents({
-//     click(e) {
-//       setPosition(e.latlng);
-//       onSelect(e.latlng);
-//     },
-//   });
-
-//   return position === null ? null : <Marker position={position} />;
-// };
 
 const FlyToLocation = ({ location }: { location: any }) => {
   const map = useMap();
@@ -41,7 +32,13 @@ const FlyToLocation = ({ location }: { location: any }) => {
   return null;
 };
 
-export default function MapView({ onLocationSelect }: { onLocationSelect: any }) {
+export default function MapView({
+  markers,
+  onLocationSelect,
+}: {
+  markers: any[],
+  onLocationSelect: any
+}) {
   return (
     <MapContainer
       center={[20.5937, 78.9629]}
@@ -52,7 +49,21 @@ export default function MapView({ onLocationSelect }: { onLocationSelect: any })
         url="https://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}{r}.png"
         attribution='&copy; <a href="https://carto.com/">CARTO</a>'
       />
-      {/* <LocationMarker onSelect={onLocationSelect} /> */}
+      
+      {markers && markers.map((marker, index) => (
+        <Marker
+          key={index}
+          position={marker}
+          eventHandlers={{
+            click: () => {
+              console.log('Clicked marker index:', index);
+            }
+          }}
+        >
+        
+        </Marker>
+      ))}
+
       <FlyToLocation location={onLocationSelect} />
     </MapContainer>
   );

@@ -10,6 +10,10 @@ const Page = () => {
   const [query, setQuery] = useState("");
   const [suggestions, setSuggestions] = useState([]);
 
+  const my_location_click = ()=>{
+
+  }
+
   const search_button = () => {
     if (query.trim()) {
       router.push(`search/${query}`);
@@ -29,7 +33,7 @@ const Page = () => {
           .get(`/api/location?q=${encodeURIComponent(query)}`)
           .then((res) => {
             setSuggestions(res.data);
-            console.log(res.data)
+            console.log(res.data);
           })
           .catch((err) => {
             console.error("API error:", err);
@@ -65,33 +69,51 @@ const Page = () => {
               Perfect place to call home
             </div>
             <div className="text-white text-center">
-              explore our wide range of rental properties tailored to your lifestyle!
+              explore our wide range of rental properties tailored to your
+              lifestyle!
             </div>
           </div>
 
           <div className="flex flex-row ml-6 relative">
-            <input
-              className="w-[600px] rounded-[26px] h-[60px] px-4 bg-white opacity-55 shadow-lg"
-              type="text"
-              value={query}
-              onChange={(e) => setQuery(e.target.value)}
-              onKeyDown={handleKeyDown}
-              placeholder="Search by city, neighbourhood, or address"
-            />
+            <div className="flex flex-row items-center justify-center gap-4 ">
+              <input
+                className="w-[600px] rounded-[26px] h-[60px] px-4 bg-white opacity-55 shadow-lg"
+                type="text"
+                value={query}
+                onChange={(e) => setQuery(e.target.value)}
+                onKeyDown={handleKeyDown}
+                placeholder="Search by city, neighbourhood, or address"
+              />
+              {/* <div className="relative ">
+                <input
+                  type="text"
+                  placeholder=""
+                  className="h-[60px] w-[60px]  rounded-full opacity-55 cursor-pointer bg-white border border-gray-300 focus:outline-none"
+                  onClick={my_location_click}
+                />
+                <img
+                  src="https://img.icons8.com/?size=100&id=113259&format=png&color=000000"
+                  alt="icon"
+                  className="absolute top-1/2 left-[18px] transform -translate-y-1/2 w-6 h-6 pointer-events-none"
+                />
+              </div> */}
+            </div>
+
             {suggestions.length > 0 && (
               <ul className="absolute top-[65px] w-[600px] z-20 bg-white border opacity-80 border-gray-300 rounded-lg mt-1 max-h-60 overflow-y-auto">
                 {suggestions.map((place, index) => (
-               <li
-               key={index}
-               className="px-4 py-2 hover:bg-gray-100 cursor-pointer"
-               onClick={() => {
-                 router.push(`/search/${encodeURIComponent(place.display_name)}`);
-                 setSuggestions([]);
-               }}
-             >
-               {place.display_name}
-             </li>
-             
+                  <li
+                    key={index}
+                    className="px-4 py-2 hover:bg-gray-100 cursor-pointer"
+                    onClick={() => {
+                      router.push(
+                        `/search/${encodeURIComponent(place.display_name)}`
+                      );
+                      setSuggestions([]);
+                    }}
+                  >
+                    {place.display_name}
+                  </li>
                 ))}
               </ul>
             )}

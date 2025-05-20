@@ -134,6 +134,7 @@ const Page = () => {
         });
         const data = await response.json();
         setadd_data(data);
+        
         if (Array.isArray(data.markers)) {
           const latLngArray = data.markers.map((marker) => [
             marker.latitude,

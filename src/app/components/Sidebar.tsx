@@ -2,7 +2,6 @@
 import React from "react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import Navbar from "./Navbar";
 
 const Sidebar = () => {
   const pathname = usePathname();
@@ -10,8 +9,11 @@ const Sidebar = () => {
   const menuItems = [
     {
       name: "Favorites",
-      path: "/favorites", // Fixed typo here
-      icon: "https://img.icons8.com/?size=100&id=85038&format=png&color=000000",
+      path: "/favorites",
+      icon:
+        pathname === "/favorites"
+          ? "https://img.icons8.com/?size=100&id=85138&format=png&color=000000" // active icon
+          : "https://img.icons8.com/?size=100&id=85038&format=png&color=000000", // default icon
     },
     {
       name: "Applications",
@@ -31,8 +33,7 @@ const Sidebar = () => {
   ];
 
   return (
-    <div>
-    <div className="w-[180px] h-[calc(100vh-50px)] bg-gray-100    p-4 border-r border-gray-300">
+    <div className="w-[180px] h-[calc(100vh-50px)] bg-gray-100 p-4 border-r border-gray-300">
       <h2 className="text-lg font-semibold mb-6">Renter View</h2>
       <ul className="space-y-4">
         {menuItems.map(({ name, path, icon }) => (
@@ -40,19 +41,16 @@ const Sidebar = () => {
             <Link href={path} className="block">
               <div
                 className={`flex items-center gap-3 p-1 rounded cursor-pointer hover:text-black ${
-                  pathname === path
-                    ? "text-black-600 font-bold"
-                    : "text-gray-800"
+                  pathname === path ? "text-black font-bold" : "text-gray-800"
                 }`}
               >
-                <img className="h-[15px] w-[15px]" src={icon} alt="" />
+                <img className="h-[15px] w-[15px]" src={icon} alt={`${name} icon`} />
                 <span>{name}</span>
               </div>
             </Link>
           </li>
         ))}
       </ul>
-    </div>
     </div>
   );
 };

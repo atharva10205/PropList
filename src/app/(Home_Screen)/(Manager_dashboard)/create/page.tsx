@@ -1,5 +1,5 @@
 "use client";
-import React, { useState, useEffect , useMemo } from "react";
+import React, { useState, useEffect, useMemo } from "react";
 import Navbar from "@/app/components/Navbar";
 import dynamic from "next/dynamic";
 import axios from "axios";
@@ -7,7 +7,6 @@ import Sidebar_manager from "@/app/components/Sidebar_manager";
 
 
 export default function AddPropertyForm() {
-
   const [coords, setCoords] = useState(null);
   const [showMap, setShowMap] = useState(false);
   const [my_location, setmy_location] = useState(false); // Default false
@@ -17,13 +16,12 @@ export default function AddPropertyForm() {
   const [dog, setdog] = useState(true);
   const [selectedLocation, setSelectedLocation] = useState<any>(null);
   const [previewUrls, setPreviewUrls] = useState([]);
+  const [created_listing, setcreated_listing] = useState(false)
+  const [creating_screen, setcreating_screen] = useState(false)
 
-
-  
   const get_coordinate = (query: string) => {
     handleSearch(query);
   };
-
 
   const handleSearch = async (query: string) => {
     try {
@@ -41,8 +39,6 @@ export default function AddPropertyForm() {
       alert("Error fetching location");
     }
   };
-
-
 
   //thing that pulls suggestions
   useEffect(() => {
@@ -76,10 +72,7 @@ export default function AddPropertyForm() {
     ssr: false,
   });
 
-
-  
-
-  const [email, setemail] = useState("")
+  const [email, setemail] = useState("");
   const [propertyName, setPropertyName] = useState("");
   const [description, setDescription] = useState("");
   const [pricePerMonth, setPricePerMonth] = useState("");
@@ -99,14 +92,12 @@ export default function AddPropertyForm() {
   const [postalCode, setPostalCode] = useState("");
   const [country, setCountry] = useState("");
   const [latitude, setlatitude] = useState("");
-  const [longitude, setlongitude] = useState("")
+  const [longitude, setlongitude] = useState("");
   const [image, setImage] = useState(null);
 
   const [files, setFiles] = useState([]);
 
-
-  const handleImageChange = (e :  React.ChangeEvent<HTMLInputElement>) => {
-
+  const handleImageChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     if (e.target.files) {
       setFiles(Array.from(e.target.files));
     }
@@ -117,157 +108,165 @@ export default function AddPropertyForm() {
     setPreviewUrls(previews);
   };
 
-
   const handleUseMyLocation = () => {
     setdog(false);
     setmy_location(true);
     setsearch_location(false);
     setShowMap(false);
-  
-      navigator.geolocation.getCurrentPosition(
-        (pos) => {
-          const { latitude, longitude } = pos.coords;
-          setCoords({ lat: latitude, lng: longitude });
-          setShowMap(false);
-        },
-        (err) => {
-          console.error("Error getting location:", err);
-          alert("API down");
-        }
-      );
-    
+
+    navigator.geolocation.getCurrentPosition(
+      (pos) => {
+        const { latitude, longitude } = pos.coords;
+        setCoords({ lat: latitude, lng: longitude });
+        setShowMap(false);
+      },
+      (err) => {
+        console.error("Error getting location:", err);
+        alert("API down");
+      }
+    );
   };
 
   useEffect(() => {
-    if(coords){
-    setlatitude(coords.lat);
-    setlongitude(coords.lng);
+    if (coords) {
+      setlatitude(coords.lat);
+      setlongitude(coords.lng);
     }
-  }, [coords])
+  }, [coords]);
 
-  const [ImageURL, setImageURL] = useState([])
+  const [ImageURL, setImageURL] = useState([]);
 
- const create_button = async (e) => {
-  e.preventDefault();
+  const create_button = async (e) => {
+    e.preventDefault();
 
-  // Step 1: Upload Images
-  if (files.length === 0) {
-    console.error("No files selected for upload");
-    return;
-  }
+    if (files.length === 0) {
+      console.error("No files selected for upload");
+      return;
+    }
 
-  const uploadFormData = new FormData();
-  files.forEach((file) => {
-    uploadFormData.append('files', file);
-  });
+    setcreating_screen(true)
 
-  let imageURLs = [];
+    const uploadFormData = new FormData();
 
-  try {
-    const uploadRes = await fetch('/api/upload1', {
-      method: 'POST',
-      body: uploadFormData,
+    files.forEach((file) => {
+      uploadFormData.append("files", file);
     });
 
-    if (!uploadRes.ok) {
-      throw new Error('Image upload failed');
+    let imageURLs = [];
+
+    try {
+      const uploadRes = await fetch("/api/upload1", {
+        method: "POST",
+        body: uploadFormData,
+      });
+
+      if (!uploadRes.ok) {
+        throw new Error("Image upload failed");
+      }
+
+      const uploadData = await uploadRes.json();
+      imageURLs = uploadData.urls; 
+    } catch (error) {
+      console.error("Upload error:", error);
+      return;
     }
 
-    const uploadData = await uploadRes.json();
-    imageURLs = uploadData.urls; // Get uploaded image URLs
-  } catch (error) {
-    console.error('Upload error:', error);
-    return;
-  }
+    // Step 2: Create Listing
+    const formData = new FormData();
+    formData.append("propertyName", propertyName);
+    formData.append("description", description);
+    formData.append("pricePerMonth", pricePerMonth);
+    formData.append("securityDeposit", securityDeposit);
+    formData.append("applicationFee", applicationFee);
+    formData.append("beds", beds);
+    formData.append("baths", baths);
+    formData.append("squareFeet", squareFeet);
+    formData.append("petsAllowed", petsAllowed);
+    formData.append("parkingIncluded", parkingIncluded);
+    formData.append("propertyType", propertyType);
+    formData.append("amenities", amenities);
+    formData.append("highlights", highlights);
+    formData.append("address", address);
+    formData.append("city", city);
+    formData.append("state", state);
+    formData.append("postalCode", postalCode);
+    formData.append("country", country);
+    formData.append("latitude", latitude);
+    formData.append("longitude", longitude);
 
-  // Step 2: Create Listing
-  const formData = new FormData();
-  formData.append('propertyName', propertyName);
-  formData.append('description', description);
-  formData.append('pricePerMonth', pricePerMonth);
-  formData.append('securityDeposit', securityDeposit);
-  formData.append('applicationFee', applicationFee);
-  formData.append('beds', beds);
-  formData.append('baths', baths);
-  formData.append('squareFeet', squareFeet);
-  formData.append('petsAllowed', petsAllowed);
-  formData.append('parkingIncluded', parkingIncluded);
-  formData.append('propertyType', propertyType);
-  formData.append('amenities', amenities);
-  formData.append('highlights', highlights);
-  formData.append('address', address);
-  formData.append('city', city);
-  formData.append('state', state);
-  formData.append('postalCode', postalCode);
-  formData.append('country', country);
-  formData.append('latitude', latitude);
-  formData.append('longitude', longitude);
+    formData.append("imageURLs", JSON.stringify(imageURLs));
 
-  // Append image URLs to the formData (stringify if it's an array)
-  formData.append('imageURLs', JSON.stringify(imageURLs));
+    try {
+      const response = await fetch("/api/create_listing", {
+        method: "POST",
+        body: formData,
+      });
 
-  try {
-    const response = await fetch('/api/create_listing', {
-      method: 'POST',
-      body: formData,
-    });
-
-    const data = await response.json();
-    if (response.ok) {
-      console.log('Listing created:', data);
-    } else {
-      console.error('Error:', data.message);
+      const data = await response.json();
+      if (response.ok) {
+        setcreated_listing(true);
+        setcreating_screen(false)
+      } else {
+        console.error("Error:", data.message);
+      }
+    } catch (error) {
+      console.error("Create listing error:", error);
     }
-  } catch (error) {
-    console.error('Create listing error:', error);
-  }
-};
-
-  
+   
+  };
 
   useEffect(() => {
-  const get_email= async() =>{
-    try {
-      const response = await fetch("/api/user_email");
-      const data = await response.json();
-      setemail(data.email)
+    const get_email = async () => {
+      try {
+        const response = await fetch("/api/user_email");
+        const data = await response.json();
+        setemail(data.email);
+      } catch (error) {}
+    };
+    get_email();
+  }, []);
 
-    } catch (error) {    
-    }
-  }
-  get_email();
-  }, [])
-
-  const [selectedLocation1, setSelectedLocation1] = useState<{ lat: number; lng: number } | null>(null);
-
-
+  const [selectedLocation1, setSelectedLocation1] = useState<{
+    lat: number;
+    lng: number;
+  } | null>(null);
 
   const memoizedMap = useMemo(() => {
     return (
       <div className="h-[403px] w-[973px] bg-gray-300 flex items-center justify-center">
-        <MapView3 
-          markerCoords={selectedLocation} 
-          onLocationSelect={setSelectedLocation1} 
+        <MapView3
+          markerCoords={selectedLocation}
+          onLocationSelect={setSelectedLocation1}
         />
       </div>
     );
   }, [selectedLocation]);
 
-  useEffect(() => {    
+  useEffect(() => {
     if (selectedLocation1) {
       setlatitude(selectedLocation1.lat);
       setlongitude(selectedLocation1.lng);
     }
   }, [selectedLocation1]);
 
+  if(creating_screen === true){
+    return(
+      <div className="bg-black min-h-screen text-white flex justify-center items-center">
+        creating ....
+      </div>
+    )
+  }
 
-  
-
-
+  if(created_listing === true){
+    return(
+      <div className="bg-black min-h-screen text-white flex justify-center items-center">
+        created yay
+      </div>
+    )
+  }
 
 
   return (
-    
     <div className="h-screen flex flex-col overflow-hidden">
       {/* Navbar */}
       <Navbar />
@@ -292,7 +291,7 @@ export default function AddPropertyForm() {
               <div>
                 <h2 className="text-xl font-medium mb-4">Basic Information</h2>
                 <input
-                required
+                  required
                   className="w-full p-2 mb-4 border rounded"
                   placeholder="Property Name"
                   value={propertyName}
@@ -312,7 +311,7 @@ export default function AddPropertyForm() {
                 <h2 className="text-xl font-medium mb-4">Fees</h2>
                 <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
                   <input
-                  required
+                    required
                     className="p-2 border rounded"
                     placeholder="Price per Month"
                     value={pricePerMonth}
@@ -320,7 +319,7 @@ export default function AddPropertyForm() {
                     onChange={(e) => setPricePerMonth(e.target.value)}
                   />
                   <input
-                  required
+                    required
                     type="number"
                     className="p-2 border rounded"
                     placeholder="Security Deposit"
@@ -328,7 +327,7 @@ export default function AddPropertyForm() {
                     onChange={(e) => setSecurityDeposit(e.target.value)}
                   />
                   <input
-                  required
+                    required
                     type="number"
                     className="p-2 border rounded"
                     placeholder="Application Fee"
@@ -343,7 +342,7 @@ export default function AddPropertyForm() {
                 <h2 className="text-xl font-medium mb-4">Property Details</h2>
                 <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
                   <input
-                  required
+                    required
                     type="number"
                     className="p-2 border rounded"
                     placeholder="Number of Beds"
@@ -351,7 +350,7 @@ export default function AddPropertyForm() {
                     onChange={(e) => setBeds(e.target.value)}
                   />
                   <input
-                  required
+                    required
                     type="number"
                     className="p-2 border rounded"
                     placeholder="Number of Baths"
@@ -359,7 +358,7 @@ export default function AddPropertyForm() {
                     onChange={(e) => setBaths(e.target.value)}
                   />
                   <input
-                  required
+                    required
                     type="number"
                     className="p-2 border rounded"
                     placeholder="Square Feet"
@@ -370,7 +369,6 @@ export default function AddPropertyForm() {
                 <div className="flex items-center mt-4 space-x-6">
                   <label className="flex items-center space-x-2">
                     <input
-                    
                       type="checkbox"
                       className="form-checkbox"
                       checked={petsAllowed}
@@ -436,42 +434,44 @@ export default function AddPropertyForm() {
 
               {/* Photos */}
               <div>
-      <h2 className="text-xl font-medium mb-4">Photos</h2>
-      <label
-        htmlFor="photo-upload"
-        className="block w-full border-2 border-dashed border-gray-400 p-6 text-center rounded bg-gray-50 cursor-pointer hover:bg-gray-100 transition"
-      >
-        <p className="text-gray-700">
-          Drag & Drop your images or{" "}
-          <span className="text-black font-bold underline">Browse</span>
-        </p>
-        <input
-        required
-          name="image"
-          id="photo-upload"
-          type="file"
-          accept="image/*"
-          multiple
-          className="hidden"
-          // onChange={(e) => setFiles(Array.from(e.target.files))}
-          onChange={handleImageChange}
-          />
-      </label>
+                <h2 className="text-xl font-medium mb-4">Photos</h2>
+                <label
+                  htmlFor="photo-upload"
+                  className="block w-full border-2 border-dashed border-gray-400 p-6 text-center rounded bg-gray-50 cursor-pointer hover:bg-gray-100 transition"
+                >
+                  <p className="text-gray-700">
+                    Drag & Drop your images or{" "}
+                    <span className="text-black font-bold underline">
+                      Browse
+                    </span>
+                  </p>
+                  <input
+                    required
+                    name="image"
+                    id="photo-upload"
+                    type="file"
+                    accept="image/*"
+                    multiple
+                    className="hidden"
+                    // onChange={(e) => setFiles(Array.from(e.target.files))}
+                    onChange={handleImageChange}
+                  />
+                </label>
 
-      {/* Image Previews */}
-      {previewUrls.length > 0 && (
-        <div className="grid grid-cols-3 gap-4 mt-6">
-          {previewUrls.map((url, index) => (
-            <img
-              key={index}
-              src={url}
-              alt={`Preview ${index}`}
-              className="w-full h-32 object-cover rounded"
-            />
-          ))}
-        </div>
-      )}
-    </div>
+                {/* Image Previews */}
+                {previewUrls.length > 0 && (
+                  <div className="grid grid-cols-3 gap-4 mt-6">
+                    {previewUrls.map((url, index) => (
+                      <img
+                        key={index}
+                        src={url}
+                        alt={`Preview ${index}`}
+                        className="w-full h-32 object-cover rounded"
+                      />
+                    ))}
+                  </div>
+                )}
+              </div>
               {/* Additional Information */}
               <div>
                 <h2 className="text-xl font-medium mb-4">
@@ -479,28 +479,28 @@ export default function AddPropertyForm() {
                 </h2>
                 <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-4">
                   <input
-                  required
+                    required
                     className="p-2 border rounded"
                     placeholder="Address"
                     value={address}
                     onChange={(e) => setAddress(e.target.value)}
                   />
                   <input
-                  required
+                    required
                     className="p-2 border rounded"
                     placeholder="City"
                     value={city}
                     onChange={(e) => setCity(e.target.value)}
                   />
                   <input
-                  required
+                    required
                     className="p-2 border rounded"
                     placeholder="State"
                     value={state}
                     onChange={(e) => setState(e.target.value)}
                   />
                   <input
-                  required
+                    required
                     className="p-2 border rounded"
                     type="number"
                     placeholder="Postal Code"
@@ -535,6 +535,8 @@ export default function AddPropertyForm() {
               <div className="my-6">
                 <h2 className="text-xl font-medium mb-2">Location</h2>
                 <div className="flex flex-col sm:flex-row gap-4">
+
+                  <div>
                   <button
                     onClick={handleUseMyLocation}
                     className={`px-4 py-2 rounded cursor-pointer border transition ${
@@ -545,7 +547,9 @@ export default function AddPropertyForm() {
                   >
                     Use My Current Location
                   </button>
+                  </div>
 
+                  <div>
                   <button
                     onClick={() => {
                       setShowMap(!showMap);
@@ -561,7 +565,9 @@ export default function AddPropertyForm() {
                   >
                     Search On Map
                   </button>
+                  </div>
 
+                  <div>
                   {search_location && (
                     <div>
                       <input
@@ -590,6 +596,8 @@ export default function AddPropertyForm() {
                       )}
                     </div>
                   )}
+                  </div>
+
                 </div>
               </div>
 
@@ -599,8 +607,7 @@ export default function AddPropertyForm() {
                   <MapView1 markerCoords={coords} />
                 </div>
               )}
-             {search_location && memoizedMap}
-
+              {search_location && memoizedMap}
 
               {dog && (
                 <div className="h-[403px] w-[973px] bg-gray-300 flex items-center justify-center">
@@ -611,12 +618,16 @@ export default function AddPropertyForm() {
               {/* Submit */}
               <div>
                 <button
-                  onClick={(e) => { create_button(e) }}
+                  onClick={(e) => {
+                    create_button(e);
+                  }}
                   className="w-full bg-black text-white cursor-pointer py-3 rounded transition"
                 >
                   Create Property
                 </button>
               </div>
+
+
             </div>
           </div>
         </div>

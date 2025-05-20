@@ -4,7 +4,7 @@ import jwt from "jsonwebtoken";
 
 const prisma = new PrismaClient();
 
-export async function POST(req) {
+export async function POST(req) { 
   const cookies = parse(req.headers.get("cookie") || "");
   const token = cookies.token;
 
@@ -14,7 +14,7 @@ export async function POST(req) {
     });
   }
 
-  const decode = jwt.decode(token); // Use jwt.verify() in production
+  const decode = jwt.decode(token); 
   if (!decode?.id) {
     return new Response(JSON.stringify({ error: "Unauthorized. Invalid token." }), {
       status: 401,
@@ -26,7 +26,6 @@ export async function POST(req) {
   try {
     const form = await req.formData();
 
-    // 👇 Parse imageURLs from the form (stringified JSON array)
     const imageURLs = JSON.parse(form.get("imageURLs") || "[]");
 
     const property = await prisma.property.create({

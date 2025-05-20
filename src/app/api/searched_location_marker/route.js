@@ -5,8 +5,6 @@ export async function POST(req) {
     const { location } = await req.json();
     const [lat, lng] = location;
 
-    console.log("Latitude:", lat);
-    console.log("Longitude:", lng);
 
     const markers = await prisma.property.findMany({
       where: {
@@ -21,7 +19,6 @@ export async function POST(req) {
       },
     });
 
-    console.log("Marked location", markers);
 
     return Response.json({ markers }); 
   } catch (error) {

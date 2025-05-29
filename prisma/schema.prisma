@@ -19,7 +19,7 @@ model User {
 }
 
 model Property {
-  id              Int      @id @default(autoincrement())
+  id              Int     @id @default(autoincrement())
   propertyName    String
   description     String
   pricePerMonth   String
@@ -30,17 +30,19 @@ model Property {
   squareFeet      String
   petsAllowed     Boolean
   parkingIncluded Boolean
-  propertyType    String
-  amenities       String
-  highlights      String
-  address         String
-  city            String
-  state           String
-  postalCode      String
-  country         String
-  latitude        Float
-  longitude       Float
-  imageURLs       String[]
+  Bathtub         Boolean @default(false)
+  Wifi            Boolean @default(false)
+  propertyType String
+  amenities    String
+  highlights   String
+  address      String
+  city         String
+  state        String
+  postalCode   String
+  country      String
+  latitude     Float
+  longitude    Float
+  imageURLs    String[]
 
   userId Int // Foreign key
   user   User @relation(fields: [userId], references: [id])
@@ -62,4 +64,15 @@ model Like {
   createdAt DateTime @default(now())
 
   @@unique([userId, propertyId])
+}
+
+model Application {
+  id Int @id @default(autoincrement())
+
+  senderId  Int
+  reciverId Int
+  addId     Int
+  contact   String
+  message   String
+  status    String @default("under_process")
 }

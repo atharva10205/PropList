@@ -40,6 +40,8 @@ export async function POST(req) {
         squareFeet: form.get("squareFeet"),
         petsAllowed: form.get("petsAllowed") === "true",
         parkingIncluded: form.get("parkingIncluded") === "true",
+        Bathtub: form.get("Bathtub") === "true",
+        Wifi: form.get("Wifi") === "true",
         propertyType: form.get("propertyType"),
         amenities: form.get("amenities"),
         highlights: form.get("highlights"),

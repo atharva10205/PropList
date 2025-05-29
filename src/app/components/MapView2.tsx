@@ -64,7 +64,7 @@ export default function MapView2({
     <MapContainer
       center={markerCoords || [20.5937, 78.9629]}
       zoom={1}
-      style={{ height: "400px", width: "970px" }}
+      style={{ height: "400px", width: "970px", zIndex :0,position:'relative' }}
     >
       <TileLayer
         url="https://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}{r}.png"

@@ -35,7 +35,7 @@ export async function POST(req) {
       role: user.role,
     },
     process.env.JWT_SECRET,
-    { expiresIn: '7d' }
+    { expiresIn: '30d' }
   );
 
   const response = NextResponse.json({ success: true, user });

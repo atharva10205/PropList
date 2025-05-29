@@ -16,8 +16,6 @@ async function getUsernameByEmail(emailFromCookie) {
 export async function GET() {
   const cookieStore = await cookies(); // ✅ await here
   const email = cookieStore.get("email")?.value;
-
   const username = await getUsernameByEmail(email);
-
   return NextResponse.json({ username });
 }

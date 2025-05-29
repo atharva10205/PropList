@@ -1,0 +1,3 @@
+-- AlterTable
+ALTER TABLE "Property" ADD COLUMN     "Bathtub" BOOLEAN NOT NULL DEFAULT false,
+ADD COLUMN     "Wifi" BOOLEAN NOT NULL DEFAULT false;

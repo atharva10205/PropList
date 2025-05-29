@@ -59,9 +59,13 @@ const Page = () => {
           />
           <button
             type="submit"
-            className="w-full py-2 cursor-pointer bg-black text-white rounded-md hover:bg-gray-900 transition"
+            className="relative w-full py-2 cursor-pointer text-black overflow-hidden group border border-black rounded-md"
           >
-            Login
+            <span className="absolute bottom-0 left-0 w-full h-0 bg-black origin-bottom transition-all duration-300 ease-out group-hover:h-full"></span>
+
+            <span className="relative z-10 transition-colors duration-300 group-hover:text-white">
+              Login
+            </span>
           </button>
         </form>
 

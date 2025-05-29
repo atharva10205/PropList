@@ -5,7 +5,6 @@ import dynamic from "next/dynamic";
 import axios from "axios";
 import Sidebar_manager from "@/app/components/Sidebar_manager";
 
-
 export default function AddPropertyForm() {
   const [coords, setCoords] = useState(null);
   const [showMap, setShowMap] = useState(false);
@@ -16,8 +15,32 @@ export default function AddPropertyForm() {
   const [dog, setdog] = useState(true);
   const [selectedLocation, setSelectedLocation] = useState<any>(null);
   const [previewUrls, setPreviewUrls] = useState([]);
-  const [created_listing, setcreated_listing] = useState(false)
-  const [creating_screen, setcreating_screen] = useState(false)
+  const [created_listing, setcreated_listing] = useState(false);
+  const [creating_screen, setcreating_screen] = useState(false);
+  const [errors, setErrors] = useState({});
+
+  const validateFields = () => {
+    const newErrors = {};
+
+    if (!propertyName.trim()) newErrors.propertyName = true;
+    if (!pricePerMonth) newErrors.pricePerMonth = true;
+    if (!securityDeposit) newErrors.securityDeposit = true;
+    if (!applicationFee) newErrors.applicationFee = true;
+    if (!beds) newErrors.beds = true;
+    if (!baths) newErrors.baths = true;
+    if (!squareFeet) newErrors.squareFeet = true;
+    if (!address.trim()) newErrors.address = true;
+    if (!city.trim()) newErrors.city = true;
+    if (!state.trim()) newErrors.state = true;
+    if (!postalCode) newErrors.postalCode = true;
+    if (!country) newErrors.country = true;
+    if (!propertyType) newErrors.propertyType = true;
+    if (files.length === 0) newErrors.files = true;
+
+    setErrors(newErrors);
+
+    return Object.keys(newErrors).length === 0;
+  };
 
   const get_coordinate = (query: string) => {
     handleSearch(query);
@@ -94,7 +117,8 @@ export default function AddPropertyForm() {
   const [latitude, setlatitude] = useState("");
   const [longitude, setlongitude] = useState("");
   const [image, setImage] = useState(null);
-
+  const [Bathtub, setBathtub] = useState(false)
+  const [Wifi, setWifi] = useState(false)
   const [files, setFiles] = useState([]);
 
   const handleImageChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -134,20 +158,66 @@ export default function AddPropertyForm() {
     }
   }, [coords]);
 
-  const [ImageURL, setImageURL] = useState([]);
+  const getInputClass = (fieldName) => {
+    return `p-2 border rounded ${
+      errors[fieldName] ? "border-red-500" : "border-gray-300"
+    }`;
+  };
 
   const create_button = async (e) => {
+    if (!validateFields()) {
+      alert("Please fill in all required fields!");
+      return;
+    }
     e.preventDefault();
 
-    if (files.length === 0) {
-      console.error("No files selected for upload");
+    // List of required fields and their current values
+    const requiredFields = {
+      propertyName,
+      description,
+      pricePerMonth,
+      securityDeposit,
+      applicationFee,
+      beds,
+      baths,
+      squareFeet,
+      propertyType,
+      address,
+      city,
+      state,
+      postalCode,
+      country,
+      latitude,
+      longitude,
+    };
+
+    // Collect any empty field names
+    const emptyFields = Object.entries(requiredFields).filter(
+      ([key, value]) => !value || value.toString().trim() === ""
+    );
+
+    if (files.length === 0 || emptyFields.length > 0) {
+      if (files.length === 0) {
+        alert("Please select at least one image.");
+      }
+
+      if (emptyFields.length > 0) {
+        alert("Please fill in all required fields.");
+        // Optionally highlight inputs (set errors for styling)
+        setFieldErrors(
+          emptyFields.reduce((acc, [key]) => {
+            acc[key] = true;
+            return acc;
+          }, {})
+        );
+      }
+
       return;
     }
 
-    setcreating_screen(true)
+    setcreating_screen(true);
 
     const uploadFormData = new FormData();
-
     files.forEach((file) => {
       uploadFormData.append("files", file);
     });
@@ -165,7 +235,7 @@ export default function AddPropertyForm() {
       }
 
       const uploadData = await uploadRes.json();
-      imageURLs = uploadData.urls; 
+      imageURLs = uploadData.urls;
     } catch (error) {
       console.error("Upload error:", error);
       return;
@@ -183,6 +253,8 @@ export default function AddPropertyForm() {
     formData.append("squareFeet", squareFeet);
     formData.append("petsAllowed", petsAllowed);
     formData.append("parkingIncluded", parkingIncluded);
+    formData.append("Bathtub", Bathtub);
+    formData.append("Wifi", Wifi);
     formData.append("propertyType", propertyType);
     formData.append("amenities", amenities);
     formData.append("highlights", highlights);
@@ -193,7 +265,6 @@ export default function AddPropertyForm() {
     formData.append("country", country);
     formData.append("latitude", latitude);
     formData.append("longitude", longitude);
-
     formData.append("imageURLs", JSON.stringify(imageURLs));
 
     try {
@@ -205,14 +276,13 @@ export default function AddPropertyForm() {
       const data = await response.json();
       if (response.ok) {
         setcreated_listing(true);
-        setcreating_screen(false)
+        setcreating_screen(false);
       } else {
         console.error("Error:", data.message);
       }
     } catch (error) {
       console.error("Create listing error:", error);
     }
-   
   };
 
   useEffect(() => {
@@ -249,22 +319,21 @@ export default function AddPropertyForm() {
     }
   }, [selectedLocation1]);
 
-  if(creating_screen === true){
-    return(
+  if (creating_screen === true) {
+    return (
       <div className="bg-black min-h-screen text-white flex justify-center items-center">
         creating ....
       </div>
-    )
+    );
   }
 
-  if(created_listing === true){
-    return(
+  if (created_listing === true) {
+    return (
       <div className="bg-black min-h-screen text-white flex justify-center items-center">
         created yay
       </div>
-    )
+    );
   }
-
 
   return (
     <div className="h-screen flex flex-col overflow-hidden">
@@ -292,10 +361,16 @@ export default function AddPropertyForm() {
                 <h2 className="text-xl font-medium mb-4">Basic Information</h2>
                 <input
                   required
-                  className="w-full p-2 mb-4 border rounded"
+                  className={`w-full p-2 mb-4 border rounded ${
+                    errors.propertyName ? "border-red-500" : "border-gray-300"
+                  }`}
                   placeholder="Property Name"
                   value={propertyName}
-                  onChange={(e) => setPropertyName(e.target.value)}
+                  onChange={(e) => {
+                    setPropertyName(e.target.value);
+                    if (errors.propertyName)
+                      setErrors((prev) => ({ ...prev, propertyName: false }));
+                  }}
                 />
                 <textarea
                   className="w-full p-2 border rounded"
@@ -312,27 +387,60 @@ export default function AddPropertyForm() {
                 <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
                   <input
                     required
-                    className="p-2 border rounded"
+                    className={`p-2 border rounded ${
+                      errors.pricePerMonth
+                        ? "border-red-500"
+                        : "border-gray-300"
+                    }`}
                     placeholder="Price per Month"
                     value={pricePerMonth}
                     type="number"
-                    onChange={(e) => setPricePerMonth(e.target.value)}
+                    onChange={(e) => {
+                      setPricePerMonth(e.target.value);
+                      if (errors.pricePerMonth)
+                        setErrors((prev) => ({
+                          ...prev,
+                          pricePerMonth: false,
+                        }));
+                    }}
                   />
                   <input
                     required
                     type="number"
-                    className="p-2 border rounded"
+                    className={`p-2 border rounded ${
+                      errors.securityDeposit
+                        ? "border-red-500"
+                        : "border-gray-300"
+                    }`}
                     placeholder="Security Deposit"
                     value={securityDeposit}
-                    onChange={(e) => setSecurityDeposit(e.target.value)}
+                    onChange={(e) => {
+                      setSecurityDeposit(e.target.value);
+                      if (errors.securityDeposit)
+                        setErrors((prev) => ({
+                          ...prev,
+                          securityDeposit: false,
+                        }));
+                    }}
                   />
                   <input
                     required
                     type="number"
-                    className="p-2 border rounded"
+                    className={`p-2 border rounded ${
+                      errors.applicationFee
+                        ? "border-red-500"
+                        : "border-gray-300"
+                    }`}
                     placeholder="Application Fee"
                     value={applicationFee}
-                    onChange={(e) => setApplicationFee(e.target.value)}
+                    onChange={(e) => {
+                      setApplicationFee(e.target.value);
+                      if (errors.applicationFee)
+                        setErrors((prev) => ({
+                          ...prev,
+                          applicationFee: false,
+                        }));
+                    }}
                   />
                 </div>
               </div>
@@ -344,33 +452,51 @@ export default function AddPropertyForm() {
                   <input
                     required
                     type="number"
-                    className="p-2 border rounded"
+                    className={`p-2 border rounded ${
+                      errors.beds ? "border-red-500" : "border-gray-300"
+                    }`}
                     placeholder="Number of Beds"
                     value={beds}
-                    onChange={(e) => setBeds(e.target.value)}
+                    onChange={(e) => {
+                      setBeds(e.target.value);
+                      if (errors.beds)
+                        setErrors((prev) => ({ ...prev, beds: false }));
+                    }}
                   />
                   <input
                     required
                     type="number"
-                    className="p-2 border rounded"
+                    className={`p-2 border rounded ${
+                      errors.baths ? "border-red-500" : "border-gray-300"
+                    }`}
                     placeholder="Number of Baths"
                     value={baths}
-                    onChange={(e) => setBaths(e.target.value)}
+                    onChange={(e) => {
+                      setBaths(e.target.value);
+                      if (errors.baths)
+                        setErrors((prev) => ({ ...prev, baths: false }));
+                    }}
                   />
                   <input
                     required
                     type="number"
-                    className="p-2 border rounded"
+                    className={`p-2 border rounded ${
+                      errors.squareFeet ? "border-red-500" : "border-gray-300"
+                    }`}
                     placeholder="Square Feet"
                     value={squareFeet}
-                    onChange={(e) => setSquareFeet(e.target.value)}
+                    onChange={(e) => {
+                      setSquareFeet(e.target.value);
+                      if (errors.squareFeet)
+                        setErrors((prev) => ({ ...prev, squareFeet: false }));
+                    }}
                   />
                 </div>
-                <div className="flex items-center mt-4 space-x-6">
+                <div className="flex items-center mt-8 space-x-6">
                   <label className="flex items-center space-x-2">
                     <input
                       type="checkbox"
-                      className="form-checkbox"
+                      className="form-checkbox accent-black"
                       checked={petsAllowed}
                       onChange={(e) => setPetsAllowed(e.target.checked)}
                     />
@@ -379,11 +505,29 @@ export default function AddPropertyForm() {
                   <label className="flex items-center space-x-2">
                     <input
                       type="checkbox"
-                      className="form-checkbox"
+                      className="form-checkbox accent-black"
                       checked={parkingIncluded}
                       onChange={(e) => setParkingIncluded(e.target.checked)}
                     />
                     <span>Parking Included</span>
+                  </label>
+                  <label className="flex items-center space-x-2">
+                    <input
+                      type="checkbox"
+                      className="form-checkbox accent-black"
+                      checked={Bathtub}
+                      onChange={(e) => setBathtub(e.target.checked)}
+                    />
+                    <span>Bath Tub</span>
+                  </label>
+                  <label className="flex items-center space-x-2">
+                    <input
+                      type="checkbox"
+                      className="form-checkbox accent-black"
+                      checked={Wifi}
+                      onChange={(e) => setWifi(e.target.checked)}
+                    />
+                    <span>Wifi</span>
                   </label>
                 </div>
                 <div>
@@ -396,10 +540,22 @@ export default function AddPropertyForm() {
                     </label>
                     <select
                       id="property-type"
-                      className="mt-4 w-full p-2 border rounded"
+                      className={`mt-4 w-full p-2 border rounded ${
+                        errors.propertyType
+                          ? "border-red-500"
+                          : "border-gray-300"
+                      }`}
                       value={propertyType}
-                      onChange={(e) => setPropertyType(e.target.value)}
+                      onChange={(e) => {
+                        setPropertyType(e.target.value);
+                        if (errors.propertyType)
+                          setErrors((prev) => ({
+                            ...prev,
+                            propertyType: false,
+                          }));
+                      }}
                     >
+                      <option value="">Select Property Type</option>
                       <option value="house">House</option>
                       <option value="villa">Villa</option>
                       <option value="apartment">Apartment</option>
@@ -437,7 +593,9 @@ export default function AddPropertyForm() {
                 <h2 className="text-xl font-medium mb-4">Photos</h2>
                 <label
                   htmlFor="photo-upload"
-                  className="block w-full border-2 border-dashed border-gray-400 p-6 text-center rounded bg-gray-50 cursor-pointer hover:bg-gray-100 transition"
+                  className={`block w-full border-2 border-dashed p-6 text-center rounded bg-gray-50 cursor-pointer hover:bg-gray-100 transition ${
+                    errors.files ? "border-red-500" : "border-gray-400"
+                  }`}
                 >
                   <p className="text-gray-700">
                     Drag & Drop your images or{" "}
@@ -453,8 +611,11 @@ export default function AddPropertyForm() {
                     accept="image/*"
                     multiple
                     className="hidden"
-                    // onChange={(e) => setFiles(Array.from(e.target.files))}
-                    onChange={handleImageChange}
+                    onChange={(e) => {
+                      handleImageChange(e);
+                      if (errors.files)
+                        setErrors((prev) => ({ ...prev, files: false }));
+                    }}
                   />
                 </label>
 
@@ -480,40 +641,70 @@ export default function AddPropertyForm() {
                 <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-4">
                   <input
                     required
-                    className="p-2 border rounded"
+                    className={`p-2 border rounded ${
+                      errors.address ? "border-red-500" : "border-gray-300"
+                    }`}
                     placeholder="Address"
                     value={address}
-                    onChange={(e) => setAddress(e.target.value)}
+                    onChange={(e) => {
+                      setAddress(e.target.value);
+                      if (errors.address)
+                        setErrors((prev) => ({ ...prev, address: false }));
+                    }}
                   />
                   <input
                     required
-                    className="p-2 border rounded"
+                    className={`p-2 border rounded ${
+                      errors.city ? "border-red-500" : "border-gray-300"
+                    }`}
                     placeholder="City"
                     value={city}
-                    onChange={(e) => setCity(e.target.value)}
+                    onChange={(e) => {
+                      setCity(e.target.value);
+                      if (errors.city)
+                        setErrors((prev) => ({ ...prev, city: false }));
+                    }}
                   />
                   <input
                     required
-                    className="p-2 border rounded"
+                    className={`p-2 border rounded ${
+                      errors.state ? "border-red-500" : "border-gray-300"
+                    }`}
                     placeholder="State"
                     value={state}
-                    onChange={(e) => setState(e.target.value)}
+                    onChange={(e) => {
+                      setState(e.target.value);
+                      if (errors.state)
+                        setErrors((prev) => ({ ...prev, state: false }));
+                    }}
                   />
                   <input
                     required
-                    className="p-2 border rounded"
+                    className={`p-2 border rounded ${
+                      errors.postalCode ? "border-red-500" : "border-gray-300"
+                    }`}
                     type="number"
                     placeholder="Postal Code"
                     value={postalCode}
-                    onChange={(e) => setPostalCode(e.target.value)}
+                    onChange={(e) => {
+                      setPostalCode(e.target.value);
+                      if (errors.postalCode)
+                        setErrors((prev) => ({ ...prev, postalCode: false }));
+                    }}
                   />
                 </div>
                 <div>
                   <select
                     id="country"
-                    className="mt-4 w-full p-2 border rounded"
+                    className={`mt-4 w-full p-2 border rounded ${
+                      errors.country ? "border-red-500" : "border-gray-300"
+                    }`}
                     value={country}
-                    onChange={(e) => setCountry(e.target.value)}
+                    onChange={(e) => {
+                      setCountry(e.target.value);
+                      if (errors.country)
+                        setErrors((prev) => ({ ...prev, country: false }));
+                    }}
                   >
                     <option value="">Select Country</option>
                     <option value="USA">United States</option>
@@ -526,7 +717,6 @@ export default function AddPropertyForm() {
                     <option value="Japan">Japan</option>
                     <option value="Brazil">Brazil</option>
                     <option value="SouthAfrica">South Africa</option>
-                    {/* Add more countries as needed */}
                   </select>
                 </div>
               </div>
@@ -535,69 +725,92 @@ export default function AddPropertyForm() {
               <div className="my-6">
                 <h2 className="text-xl font-medium mb-2">Location</h2>
                 <div className="flex flex-col sm:flex-row gap-4">
-
                   <div>
-                  <button
-                    onClick={handleUseMyLocation}
-                    className={`px-4 py-2 rounded cursor-pointer border transition ${
-                      my_location
-                        ? "bg-black text-white"
-                        : "bg-white text-black border-gray-200 hover:bg-black hover:text-white"
-                    }`}
-                  >
-                    Use My Current Location
-                  </button>
-                  </div>
-
-                  <div>
-                  <button
-                    onClick={() => {
-                      setShowMap(!showMap);
-                      setsearch_location(true);
-                      setdog(false);
-                      setmy_location(false);
-                    }}
-                    className={`px-4 py-2 cursor-pointer rounded border transition ${
-                      search_location
-                        ? "bg-black text-white"
-                        : "bg-white text-black border-gray-200 hover:bg-black hover:text-white"
-                    }`}
-                  >
-                    Search On Map
-                  </button>
-                  </div>
-
-                  <div>
-                  {search_location && (
-                    <div>
-                      <input
-                        value={query}
-                        onChange={(e) => setQuery(e.target.value)}
-                        type="text"
-                        placeholder="Enter Location"
-                        className="h-[40px] p-2 border border-gray-200 w-[300px] rounded"
-                      />
-                      {suggestions.length > 0 && (
-                        <ul className="top-[65px] w-[600px] z-20 bg-white border opacity-80 border-gray-300 rounded-lg mt-1 max-h-60 overflow-y-auto">
-                          {suggestions.map((place, index) => (
-                            <li
-                              key={index}
-                              className="px-4 py-2 hover:bg-gray-100 cursor-pointer"
-                              onClick={() => {
-                                get_coordinate(place.display_name);
-                                setSuggestions([]);
-                                handleSearch(place.display_name);
-                              }}
-                            >
-                              {place.display_name}
-                            </li>
-                          ))}
-                        </ul>
+                    <button
+                      onClick={handleUseMyLocation}
+                      className={`relative px-4 py-2 rounded cursor-pointer overflow-hidden group border transition-all duration-300 ${
+                        my_location
+                          ? "bg-black text-white border-black"
+                          : "bg-white text-black border-gray-200"
+                      }`}
+                    >
+                      {/* Animated fill from bottom to top */}
+                      {!my_location && (
+                        <span className="absolute bottom-0 left-0 w-full h-0 bg-black origin-bottom transition-all duration-300 ease-out group-hover:h-full" />
                       )}
-                    </div>
-                  )}
+
+                      {/* Text stays above and turns white on hover */}
+                      <span
+                        className={`relative z-10 transition-colors duration-300 ${
+                          my_location ? "" : "group-hover:text-white"
+                        }`}
+                      >
+                        Use My Current Location
+                      </span>
+                    </button>
                   </div>
 
+                  <div>
+                    <button
+                      onClick={() => {
+                        setShowMap(!showMap);
+                        setsearch_location(true);
+                        setdog(false);
+                        setmy_location(false);
+                      }}
+                      className={`relative px-4 py-2 rounded cursor-pointer overflow-hidden group border transition-all duration-300 ${
+                        search_location
+                          ? "bg-black text-white border-black"
+                          : "bg-white text-black border-gray-200"
+                      }`}
+                    >
+                      {/* Animated fill from bottom to top (only when not active) */}
+                      {!search_location && (
+                        <span className="absolute bottom-0 left-0 w-full h-0 bg-black origin-bottom transition-all duration-300 ease-out group-hover:h-full" />
+                      )}
+
+                      {/* Text on top with color change */}
+                      <span
+                        className={`relative z-10 transition-colors duration-300 ${
+                          search_location ? "" : "group-hover:text-white"
+                        }`}
+                      >
+                        Search On Map
+                      </span>
+                    </button>
+                  </div>
+
+                  <div>
+                    {search_location && (
+                      <div className="relative">
+                        <input
+                          value={query}
+                          onChange={(e) => setQuery(e.target.value)}
+                          type="text"
+                          placeholder="Enter Location"
+                          className="h-[40px] p-2 border border-gray-200 w-[300px] rounded"
+                        />
+
+                        {suggestions.length > 0 && (
+                          <ul className="absolute top-[45px] w-[600px] z-20 bg-white border opacity-90 border-gray-300 rounded-lg max-h-60 overflow-y-auto shadow-md">
+                            {suggestions.map((place, index) => (
+                              <li
+                                key={index}
+                                className="px-4 py-2 hover:bg-gray-100 cursor-pointer"
+                                onClick={() => {
+                                  get_coordinate(place.display_name);
+                                  setSuggestions([]);
+                                  handleSearch(place.display_name);
+                                }}
+                              >
+                                {place.display_name}
+                              </li>
+                            ))}
+                          </ul>
+                        )}
+                      </div>
+                    )}
+                  </div>
                 </div>
               </div>
 
@@ -621,13 +834,15 @@ export default function AddPropertyForm() {
                   onClick={(e) => {
                     create_button(e);
                   }}
-                  className="w-full bg-black text-white cursor-pointer py-3 rounded transition"
+                  className="relative w-full py-3 rounded cursor-pointer text-black overflow-hidden group border border-black"
                 >
-                  Create Property
+                  <span className="absolute bottom-0 left-0 w-full h-0 bg-black origin-bottom transition-all duration-300 ease-out group-hover:h-full"></span>
+
+                  <span className="relative z-10 transition-colors duration-300 group-hover:text-white">
+                    Create Property
+                  </span>
                 </button>
               </div>
-
-
             </div>
           </div>
         </div>

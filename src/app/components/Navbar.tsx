@@ -7,8 +7,8 @@ const Navbar = () => {
   const [IsAuthenticated, setIsAuthenticated] = useState(false);
   const [showDropdown, setShowDropdown] = useState(false);
   const dropdownRef = useRef(null);
-  const [username, setusername] = useState("")
-  const [role, setrole] = useState("")
+  const [username, setusername] = useState("");
+  const [role, setrole] = useState("");
 
   useEffect(() => {
     const checkAuth = async () => {
@@ -26,14 +26,14 @@ const Navbar = () => {
     };
     checkAuth();
   }, []);
-  
+
   useEffect(() => {
     const getuserdata = async () => {
       try {
-        const response = await fetch('/api/user_data');
-        const data = await response.json(); 
-        setusername(data.username)   
-         } catch (error) {
+        const response = await fetch("/api/user_data");
+        const data = await response.json();
+        setusername(data.username);
+      } catch (error) {
         console.log("Error while fetching getuserdata:", error);
       }
     };
@@ -70,7 +70,14 @@ const Navbar = () => {
   return (
     <div className="flex stickey top-0">
       <div className="bg-black text-white h-[50px] w-full flex justify-between items-center">
-        <img onClick={()=>{router.push('/home')}} className="h-[35px] cursor-pointer w-[35px] ml-2 rounded-full" src="https://i.pinimg.com/736x/c2/7f/bd/c27fbd4ba881ed0492c15c6a7465cc70.jpg" alt="" />
+        <img
+          onClick={() => {
+            router.push("/home");
+          }}
+          className="h-[35px] cursor-pointer w-[35px] ml-2 rounded-full"
+          src="https://i.pinimg.com/736x/c2/7f/bd/c27fbd4ba881ed0492c15c6a7465cc70.jpg"
+          alt=""
+        />
         <div className="text-white ml-4">I am a navbar</div>
         <div className="ml-auto mr-4">
           {!IsAuthenticated ? (
@@ -89,13 +96,15 @@ const Navbar = () => {
               </button>
             </>
           ) : (
-            <div className="flex flex-row gap-3 items-center relative" ref={dropdownRef}>
+            <div
+              className="flex flex-row gap-3 items-center relative"
+              ref={dropdownRef}
+            >
+              {/* <div className="border border-white rounded-lg p-1 cursor-pointer group:">
+                connect wallet
+              </div> */}
+
               <div className="relative h-[30px] w-[30px] cursor-pointer group">
-                <img
-                  src="https://img.icons8.com/?size=100&id=85701&format=png&color=FFFFFF"
-                  className="absolute top-0 left-0 h-full w-full group-hover:hidden"
-                  alt="default icon"
-                />
                 <img
                   src="https://img.icons8.com/?size=100&id=85491&format=png&color=FFFFFF"
                   className="absolute top-0 left-0 h-full w-full hidden group-hover:block"
@@ -129,24 +138,41 @@ const Navbar = () => {
               </div>
 
               {showDropdown && (
-                <div className="absolute top-12  right-0 bg-black text-white shadow-md rounded-xl p-3 z-50 w-48 flex flex-col space-y-2">
+                <div className="absolute top-12 right-0 bg-black text-white shadow-md rounded-xl p-3 z-50 w-48 flex flex-col space-y-2">
                   <button
-                    onClick={() =>{ if(role === "tenant"){ router.push("/favorites")} else { router.push("/properties")}}}
-                    className="text-left hover:bg-white hover:text-black cursor-pointer px-4 py-2 rounded"
+                    onClick={() => {
+                      if (role === "tenant") {
+                        router.push("/favorites");
+                      } else {
+                        router.push("/properties");
+                      }
+                    }}
+                    className="relative overflow-hidden group text-left px-4 py-2 rounded cursor-pointer "
                   >
-                    Dashboard
+                    <span className="absolute bottom-0 left-0 w-full h-0 bg-white origin-bottom transition-all duration-300 ease-out group-hover:h-full"></span>
+                    <span className="relative z-10 transition-colors duration-300 group-hover:text-black">
+                      Dashboard
+                    </span>
                   </button>
+
                   <button
                     onClick={() => router.push("/settings")}
-                    className="text-left hover:bg-white hover:text-black cursor-pointer px-4 py-2 rounded"
+                    className="relative overflow-hidden group text-left px-4 py-2 rounded cursor-pointer "
                   >
-                    Settings
+                    <span className="absolute bottom-0 left-0 w-full h-0 bg-white origin-bottom transition-all duration-300 ease-out group-hover:h-full"></span>
+                    <span className="relative z-10 transition-colors duration-300 group-hover:text-black">
+                      Settings
+                    </span>
                   </button>
+
                   <button
                     onClick={handleLogout}
-                    className="text-left hover:bg-white hover:text-black cursor-pointer px-4 py-2 rounded"
+                    className="relative overflow-hidden group text-left px-4 py-2 rounded cursor-pointer "
                   >
-                    Logout
+                    <span className="absolute bottom-0 left-0 w-full h-0 bg-white origin-bottom transition-all duration-300 ease-out group-hover:h-full"></span>
+                    <span className="relative z-10 transition-colors duration-300 group-hover:text-black">
+                      Logout
+                    </span>
                   </button>
                 </div>
               )}

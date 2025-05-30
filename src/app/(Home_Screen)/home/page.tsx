@@ -54,11 +54,20 @@ const Page = () => {
         className="relative bg-black"
         style={{ height: "calc(100vh - 50px)", width: "100vw" }}
       >
-        <img
+        {/* <img
           className="h-full w-full object-cover absolute top-0 left-0 opacity-50 z-0"
           src="https://images.unsplash.com/photo-1582407947304-fd86f028f716?q=80&w=3096&auto=format&fit=crop&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D"
           alt=""
-        />
+        /> */}
+
+        <video
+          autoPlay
+          muted
+          loop
+          playsInline
+          className="h-full w-full object-cover absolute top-0 left-0 opacity-50 z-0"
+          src="/Untitled design.mp4"
+        ></video>
 
         <div className="absolute flex-col inset-0 flex items-center justify-center z-10">
           <div className="flex flex-col p-2 mb-4 mr-7">

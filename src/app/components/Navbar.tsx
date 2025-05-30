@@ -9,6 +9,7 @@ const Navbar = () => {
   const dropdownRef = useRef(null);
   const [username, setusername] = useState("");
   const [role, setrole] = useState("");
+  const [notification_popup, setnotification_popup] = useState(false);
 
   useEffect(() => {
     const checkAuth = async () => {
@@ -112,7 +113,13 @@ const Navbar = () => {
                 />
               </div> */}
 
-              <div className="relative h-[30px] w-[30px] cursor-pointer group">
+              <div
+                onClick={() => {
+                  setnotification_popup((prev) => !prev),
+                    setShowDropdown(false);
+                }}
+                className="relative  h-[30px] w-[30px] cursor-pointer group"
+              >
                 <img
                   src="https://img.icons8.com/?size=100&id=82754&format=png&color=FFFFFF"
                   className="absolute top-0 left-0 h-full w-full group-hover:hidden"
@@ -126,7 +133,10 @@ const Navbar = () => {
               </div>
 
               <div
-                onClick={() => setShowDropdown((prev) => !prev)}
+                onClick={() => {
+                  setShowDropdown((prev) => !prev),
+                    setnotification_popup(false);
+                }}
                 className="flex flex-row items-center justify-center cursor-pointer"
               >
                 <img
@@ -174,6 +184,26 @@ const Navbar = () => {
                       Logout
                     </span>
                   </button>
+                </div>
+              )}
+
+              {notification_popup && (
+                <div className="absolute top-12 right-0 bg-white text-white shadow-md rounded-xl p-3 z-50 h-[400px] w-[400px] flex flex-col space-y-2">
+                  <div className="h-[60px] flex items-start space-x-3 ml-5 rounded-lg w-full border border-gray-300 p-2 overflow-hidden">
+                    <img
+                      className="bg-red-500 rounded-full h-[50px] w-[50px]"
+                      src=""
+                      alt=""
+                    />
+
+                    <div className="flex-1 overflow-y-auto text-black text-sm max-h-[50px] pr-2">
+                      Lorem ipsum dolor sit, amet consectetur adipisicing elit.
+                      Consequuntur molestias cumque neque ullam nihil sapiente
+                      perferendis odit dolore ratione voluptatibus! Lorem ipsum
+                      dolor sit amet, consectetur adipisicing elit. Saepe,
+                      voluptate!
+                    </div>
+                  </div>
                 </div>
               )}
             </div>

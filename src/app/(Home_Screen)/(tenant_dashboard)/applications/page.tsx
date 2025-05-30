@@ -9,6 +9,7 @@ const Page = () => {
   const router = useRouter();
   const [userId, setUserId] = useState(null);
   const [data, setData] = useState(null);
+  const [fadingOutIds, setFadingOutIds] = useState([]);
 
   useEffect(() => {
     const getUserId = async () => {
@@ -48,6 +49,10 @@ const Page = () => {
         body: JSON.stringify({ userId }),
       });
       const data = await response.json();
+      
+      if (data?.applications?.length) {
+        data.applications.reverse();
+      }
       setData(data);
     };
 
@@ -55,12 +60,22 @@ const Page = () => {
   }, [userId]);
 
   const handleDeleteClick = async (id) => {
+    setFadingOutIds((prev) => [...prev, id]);
+    
     await fetch("/api/application_delete", {
       method: "POST",
       credentials: "include",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ e: id }),
     });
+    
+    setTimeout(() => {
+      setData((prev) => ({
+        ...prev,
+        applications: prev.applications.filter((app) => app.id !== id)
+      }));
+      setFadingOutIds((prev) => prev.filter((fid) => fid !== id));
+    }, 300);
   };
 
   return (
@@ -74,17 +89,24 @@ const Page = () => {
         <div className="flex-1 overflow-y-auto p-4">
           <h1 className="text-2xl font-bold mb-4">Application</h1>
 
-
           {!data ? (
             <div className="flex items-center justify-center h-full">
               <div className="w-12 h-12 border-4 border-gray-300 border-t-black rounded-full animate-spin"></div>
-              </div>
+            </div>
           ) : (
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-1 gap-7 mt-4">
               {data?.applications?.map((property, index) => (
                 <div
                   key={index}
-                  className="rounded-2xl flex flex-row shadow-lg border border-gray-300 w-[1200px]"
+                  className={`rounded-2xl flex flex-row shadow-lg border border-gray-300 w-[1200px] transition-all duration-300 ease-out ${
+                    fadingOutIds.includes(property.id)
+                      ? "opacity-0 -translate-y-4 scale-95"
+                      : "opacity-100 translate-y-0 scale-100"
+                  }`}
+                  style={{
+                    transitionProperty: 'opacity, transform',
+                    willChange: 'opacity, transform'
+                  }}
                 >
                   <div>
                     <div className="w-80 rounded-2xl h-[330px] overflow-hidden shadow-lg border cursor-pointer border-gray-200">
@@ -191,9 +213,7 @@ const Page = () => {
 
                           <div>
                             <img
-                              onClick={() =>
-                                handleDeleteClick(property.id)
-                              }
+                              onClick={() => handleDeleteClick(property.id)}
                               className="h-[25px] mt-3 w-[25px] cursor-pointer"
                               src="https://img.icons8.com/?size=100&id=67884&format=png&color=000000"
                               alt="delete"

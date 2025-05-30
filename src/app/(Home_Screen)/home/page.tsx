@@ -10,21 +10,21 @@ const Page = () => {
   const [query, setQuery] = useState("");
   const [suggestions, setSuggestions] = useState([]);
 
-  const my_location_click = ()=>{
+  // const my_location_click = ()=>{
 
-  }
+  // }
 
-  const search_button = () => {
-    if (query.trim()) {
-      router.push(`search/${query}`);
-    }
-  };
+  // const search_button = () => {
+  //   if (query.trim()) {
+  //     router.push(`search/${query}`);
+  //   }
+  // };
 
-  const handleKeyDown = (e) => {
-    if (e.key === "Enter") {
-      search_button();
-    }
-  };
+  // const handleKeyDown = (e) => {
+  //   if (e.key === "Enter") {
+  //     search_button();
+  //   }
+  // };
 
   useEffect(() => {
     const delayDebounce = setTimeout(() => {
@@ -81,7 +81,6 @@ const Page = () => {
                 type="text"
                 value={query}
                 onChange={(e) => setQuery(e.target.value)}
-                onKeyDown={handleKeyDown}
                 placeholder="Search by city, neighbourhood, or address"
               />
               {/* <div className="relative ">

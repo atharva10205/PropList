@@ -104,13 +104,13 @@ const Navbar = () => {
                 connect wallet
               </div> */}
 
-              <div className="relative h-[30px] w-[30px] cursor-pointer group">
+              {/* <div className="relative h-[30px] w-[30px] cursor-pointer group">
                 <img
                   src="https://img.icons8.com/?size=100&id=85491&format=png&color=FFFFFF"
                   className="absolute top-0 left-0 h-full w-full hidden group-hover:block"
                   alt="hover icon"
                 />
-              </div>
+              </div> */}
 
               <div className="relative h-[30px] w-[30px] cursor-pointer group">
                 <img

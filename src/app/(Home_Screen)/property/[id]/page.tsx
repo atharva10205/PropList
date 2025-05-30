@@ -4,8 +4,11 @@ import React, { useEffect, useState } from "react";
 import Navbar from "@/app/components/Navbar";
 import { useParams } from "next/navigation";
 import dynamic from "next/dynamic";
+import { motion, AnimatePresence } from "framer-motion";
+import { useRouter } from "next/navigation";
 
 const PropertyDetails = () => {
+  const router = useRouter();
   const params = useParams();
   const id = decodeURIComponent(params.id as string); //addID
   const [data, setData] = useState<any>(null);
@@ -21,9 +24,30 @@ const PropertyDetails = () => {
   const [reciver_id, setreciver_id] = useState(null); //reciverID
   const [Message, setMessage] = useState(null); //message
   const [loading, setLoading] = useState(true);
+  const [role, setrole] = useState("");
+  const [IsAuthenticated, setIsAuthenticated] = useState(false);
+
+  useEffect(() => {
+    const checkAuth = async () => {
+      try {
+        const res = await fetch("/api/me", { credentials: "include" });
+        const data = await res.json();
+        setIsAuthenticated(data.authenticated);
+        if (data.user) {
+          setrole(data.user.role);
+        }
+      } catch (err) {
+        console.error("Failed to check auth", err);
+        setIsAuthenticated(false);
+      }
+    };
+    checkAuth();
+  }, []);
 
   const submit = async () => {
+    setLoading(true)
     try {
+      
       const response = await fetch("/api/application_submit", {
         method: "POST",
         credentials: "include",
@@ -34,16 +58,22 @@ const PropertyDetails = () => {
       const data = await response.json();
 
       if (response.ok) {
-        alert(data.message); // "Application created successfully"
+        router.push("/applications");
       } else if (response.status === 409) {
         alert("Add already exists");
+        setLoading(false)
+
       } else {
         console.error("Error from server:", data.message);
         alert(`Error: ${data.message}`);
+        setLoading(false)
+
       }
     } catch (error) {
       console.error("Fetch error:", error);
       alert("Something went wrong. Please try again.");
+      setLoading(false)
+
     }
   };
 
@@ -189,30 +219,42 @@ const PropertyDetails = () => {
         </div>
       ) : (
         <>
-          {selectedImage && (
-            <div
-              className="fixed inset-0 bg-black/80 flex items-center justify-center z-50"
-              onClick={() => setSelectedImage(null)}
-            >
-              <img
-                src={selectedImage}
-                alt="Enlarged"
-                className="max-w-3xl max-h-[90vh] object-contain rounded shadow-lg"
-                onClick={(e) => e.stopPropagation()}
-              />
-            </div>
-          )}
+          <AnimatePresence>
+            {selectedImage && (
+              <motion.div
+                className="fixed inset-0 bg-black/80 flex items-center justify-center z-50"
+                onClick={() => setSelectedImage(null)}
+                initial={{ opacity: 0 }}
+                animate={{ opacity: 1 }}
+                exit={{ opacity: 0 }}
+                transition={{ duration: 0.2 }}
+              >
+                <motion.img
+                  src={selectedImage}
+                  alt="Enlarged"
+                  className="max-w-3xl max-h-[90vh] object-contain rounded shadow-lg"
+                  onClick={(e) => e.stopPropagation()}
+                  initial={{ scale: 0.9, opacity: 0 }}
+                  animate={{ scale: 1, opacity: 1 }}
+                  exit={{ scale: 0.9, opacity: 0 }}
+                  transition={{ duration: 0.2 }}
+                />
+              </motion.div>
+            )}
+          </AnimatePresence>
 
           <div className="max-w-6xl mt-[60px] mx-auto p-4 space-y-6">
             {info?.imageURLs && (
               <div className="grid grid-cols-3 cursor-pointer gap-2">
                 {info.imageURLs.map((url: string, index: number) => (
-                  <img
+                  <motion.img
                     key={index}
                     src={url}
                     alt={`Property image ${index + 1}`}
                     className="h-48 w-full object-cover rounded"
                     onClick={() => setSelectedImage(url)}
+                    whileHover={{ scale: 1.02 }}
+                    transition={{ duration: 0.2 }}
                   />
                 ))}
               </div>
@@ -221,7 +263,11 @@ const PropertyDetails = () => {
             <div className="space-y-2">
               <div className="flex flex-row justify-between">
                 <h1 className="text-2xl font-bold">{info?.propertyName}</h1>
-                <button onClick={handleLikeToggle} className="cursor-pointer">
+                <motion.button
+                  onClick={handleLikeToggle}
+                  className="cursor-pointer"
+                  whileTap={{ scale: 0.9 }}
+                >
                   <img
                     src={
                       liked
@@ -231,7 +277,7 @@ const PropertyDetails = () => {
                     className="h-[20px] w-[20px] object-contain"
                     alt="heart icon"
                   />
-                </button>
+                </motion.button>
               </div>
               <p className="text-gray-600">
                 {info?.address}, {info?.city}, {info?.state}, {info?.country},{" "}
@@ -265,24 +311,38 @@ const PropertyDetails = () => {
             <div>
               <h2 className="text-lg font-semibold mb-2">Villa Features</h2>
               <div className="grid grid-cols-3 gap-4 text-center text-sm">
-                <div className="border p-2 rounded">
-                  Parking Included: {info?.parkingIncluded ? "Yes" : "No"}
-                </div>
-                <div className="border p-2 rounded">
-                  Pets Allowed: {info?.petsAllowed ? "Yes" : "No"}
-                </div>
-                <div className="border p-2 rounded">
-                  Application Fee: ${info?.applicationFee}
-                </div>
-                <div className="border p-2 rounded">
-                  Security Deposit: ${info?.securityDeposit}
-                </div>
-                <div className="border p-2 rounded">
-                  Latitude: {info?.latitude}
-                </div>
-                <div className="border p-2 rounded">
-                  Longitude: {info?.longitude}
-                </div>
+                {[
+                  {
+                    label: "Parking Included",
+                    value: info?.parkingIncluded ? "Yes" : "No",
+                  },
+                  {
+                    label: "Pets Allowed",
+                    value: info?.petsAllowed ? "Yes" : "No",
+                  },
+                  {
+                    label: "Application Fee",
+                    value: `$${info?.applicationFee}`,
+                  },
+                  {
+                    label: "Security Deposit",
+                    value: `$${info?.securityDeposit}`,
+                  },
+                  { label: "Latitude", value: info?.latitude },
+                  { label: "Longitude", value: info?.longitude },
+                ].map((item, index) => (
+                  <motion.div
+                    key={index}
+                    className="border p-2 rounded"
+                    whileHover={{
+                      y: -2,
+                      boxShadow: "0 4px 6px -1px rgba(0, 0, 0, 0.1)",
+                    }}
+                    transition={{ duration: 0.2 }}
+                  >
+                    {item.label}: <strong>{item.value}</strong>
+                  </motion.div>
+                ))}
               </div>
             </div>
 
@@ -291,82 +351,101 @@ const PropertyDetails = () => {
               <p className="text-sm text-gray-700">{info?.highlights}</p>
             </div>
 
-            <div>
-              <div
-                onClick={() => {
-                  setsubmit_popup(true);
-                }}
-                className="relative w-full h-[40px] overflow-hidden group border border-gray-200 cursor-pointer flex items-center justify-center rounded text-center"
-              >
-                <span className="absolute bottom-0 left-0 w-full h-0 bg-black origin-bottom transition-all duration-300 ease-out group-hover:h-full"></span>
+            {role === "tenant" && (
+               <motion.div
+               onClick={() => setsubmit_popup(true)}
+               className="relative w-full h-[40px] overflow-hidden group border border-gray-200 cursor-pointer flex items-center justify-center rounded text-center"
+               whileHover={{ scale: 1.01 }}
+               whileTap={{ scale: 0.99 }}
+             >
+               <span className="absolute bottom-0 left-0 w-full h-0 bg-black origin-bottom transition-all duration-300 ease-out group-hover:h-full"></span>
+               <span className="relative z-10 transition-colors duration-300 group-hover:text-white">
+                 Submit Application
+               </span>
+             </motion.div>
+            ) }
+           
 
-                <span className="relative z-10 transition-colors duration-300 group-hover:text-white">
-                  Submit Application
-                </span>
-              </div>
-            </div>
-
-            {submit_popup && (
-              <div
-                className="fixed h-full inset-0 bg-black/70 flex items-center justify-center z-50"
-                onClick={() => setsubmit_popup(false)}
-              >
-                <div
-                  className="bg-white border-2  border-black  h-[550px] w-[700px] p-4 rounded-lg"
-                  onClick={(e) => e.stopPropagation()}
+            <AnimatePresence>
+              {submit_popup && (
+                <motion.div
+                  className="fixed h-full inset-0 bg-black/70 flex items-center justify-center z-50"
+                  onClick={() => setsubmit_popup(false)}
+                  initial={{ opacity: 0 }}
+                  animate={{ opacity: 1 }}
+                  exit={{ opacity: 0 }}
+                  transition={{ duration: 0.2 }}
                 >
-                  <div>
-                    <div className="flex flex-row mt-5 items-center">
-                      <img
-                        className="h-[60px] w-[60px] mr-4 rounded-full"
-                        src="https://imgs.search.brave.com/5UXUrwnw8J0ENnlCfKBvy2iT3ZiU9L2WC2CXtxFJfO0/rs:fit:860:0:0:0/g:ce/aHR0cHM6Ly93YWxs/cGFwZXJzLmNvbS9p/bWFnZXMvaGQvcGZw/LXBpY3R1cmVzLWsz/ZHF4bjNuMG5heGVm/bjIuanBn"
-                        alt=""
-                      />
-                      <h1 className="break-all">
-                        {user_data?.username || "xyz"}
-                      </h1>
-                    </div>
-
-                    <div className="flex mt-5 flex-row items-center">
-                      <h1 className="font-bold mr-2">Email:</h1>
-                      <h1 className="break-all">{user_data?.email || "xyz"}</h1>
-                    </div>
-
-                    <div className="flex flex-row items-center mt-1">
-                      <h1 className="font-bold mr-2">Contact:</h1>
-                      <input
-                        className="border border-gray-300 shadow-lg rounded-[5px]"
-                        type="number"
-                        onChange={(e) => {
-                          setContact(e.target.value);
-                        }}
-                      />
-                    </div>
-
-                    <div
-                      className="h-[300px] mt-4 w-[670px] rounded-lg border border-gray-300 shadow-lg p-4 outline-none"
-                      contentEditable
-                      placeholder="Message"
-                      onInput={(e) => setMessage(e.currentTarget.textContent)}
-                      suppressContentEditableWarning={true}
-                    ></div>
-
+                  <motion.div
+                    className="bg-white border-2 border-black h-[550px] w-[700px] p-4 rounded-lg"
+                    onClick={(e) => e.stopPropagation()}
+                    initial={{ scale: 0.9, opacity: 0 }}
+                    animate={{ scale: 1, opacity: 1 }}
+                    exit={{ scale: 0.9, opacity: 0 }}
+                    transition={{ type: "spring", stiffness: 300, damping: 25 }}
+                  >
                     <div>
-                      <button
+                      <div className="flex flex-row mt-5 items-center">
+                        <motion.img
+                          className="h-[60px] w-[60px] mr-4 rounded-full"
+                          src="https://imgs.search.brave.com/5UXUrwnw8J0ENnlCfKBvy2iT3ZiU9L2WC2CXtxFJfO0/rs:fit:860:0:0:0/g:ce/aHR0cHM6Ly93YWxs/cGFwZXJzLmNvbS9p/bWFnZXMvaGQvcGZw/LXBpY3R1cmVzLWsz/ZHF4bjNuMG5heGVm/bjIuanBn"
+                          alt=""
+                          initial={{ scale: 0.8 }}
+                          animate={{ scale: 1 }}
+                          transition={{ delay: 0.1 }}
+                        />
+                        <h1 className="break-all">
+                          {user_data?.username || "xyz"}
+                        </h1>
+                      </div>
+
+                      <div className="flex mt-5 flex-row items-center">
+                        <h1 className="font-bold mr-2">Email:</h1>
+                        <h1 className="break-all">
+                          {user_data?.email || "xyz"}
+                        </h1>
+                      </div>
+
+                      <div className="flex flex-row items-center mt-1">
+                        <h1 className="font-bold mr-2">Contact:</h1>
+                        <motion.input
+                          className="border border-gray-300 shadow-lg rounded-[5px]"
+                          type="number"
+                          onChange={(e) => setContact(e.target.value)}
+                          whileFocus={{
+                            scale: 1.02,
+                            boxShadow: "0 0 0 2px rgba(0, 0, 255, 0.2)",
+                          }}
+                        />
+                      </div>
+
+                      <motion.div
+                        className="h-[300px] mt-4 w-[670px] rounded-lg border border-gray-300 shadow-lg p-4 outline-none"
+                        contentEditable
+                        placeholder="Message"
+                        onInput={(e) => setMessage(e.currentTarget.textContent)}
+                        suppressContentEditableWarning={true}
+                        whileFocus={{
+                          boxShadow: "0 0 0 2px rgba(0, 0, 255, 0.2)",
+                        }}
+                      ></motion.div>
+
+                      <motion.button
                         onClick={submit}
-                        className=" relative group  overflow-hidden w-[670px] cursor-pointer mt-2 rounded-lg   h-[40px] border border-gray-300 shadow-lg "
+                        className="relative group overflow-hidden w-[670px] cursor-pointer mt-2 rounded-lg h-[40px] border border-gray-300 shadow-lg"
+                        whileHover={{ scale: 1.01 }}
+                        whileTap={{ scale: 0.98 }}
                       >
                         <span className="absolute h-0 bottom-0 left-0 w-full bg-black origin-bottom transition-all duration-300 ease-out group-hover:h-full"></span>
-
                         <span className="z-10 relative transition-colors duration-300 group-hover:text-white">
                           Submit
                         </span>
-                      </button>
+                      </motion.button>
                     </div>
-                  </div>
-                </div>
-              </div>
-            )}
+                  </motion.div>
+                </motion.div>
+              )}
+            </AnimatePresence>
 
             <div>
               <h2 className="text-lg font-semibold mb-2">Map</h2>

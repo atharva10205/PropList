@@ -52,6 +52,7 @@ const Page = () => {
 
         const fetchedData = await response.json();
         setApplications(fetchedData);
+        console.log(fetchedData)
       } catch (err) {
         console.error("Failed to fetch applications:", err);
       } finally {
@@ -65,21 +66,22 @@ const Page = () => {
   const handleRemoveWithAnimation = (id) => {
     setFadingOutIds((prev) => [...prev, id]);
     setTimeout(() => {
-      setApplications((prev) =>
-        prev.filter((app) => app.applicationId !== id)
-      );
+      setApplications((prev) => prev.filter((app) => app.applicationId !== id));
       setFadingOutIds((prev) => prev.filter((fid) => fid !== id));
     }, 300);
   };
 
-  const accept_button = async (id) => {
-    await fetch("/api/accept_button", {
+  const accept_button = async (id , add_id) => {
+    const response = await fetch("/api/accept_button", {
       method: "POST",
       credentials: "include",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ applicationId: id }),
+      body: JSON.stringify({ applicationId: id  , userId , add_id : add_id}),
     });
     handleRemoveWithAnimation(id);
+    if(response){
+      router.push("/residence")
+    }
   };
 
   const decline_button = async (id) => {
@@ -104,12 +106,12 @@ const Page = () => {
         </div>
 
         <div className="flex-1 overflow-y-auto p-4">
-        <h1 className="text-2xl font-bold mb-4">Applications</h1>
+          <h1 className="text-2xl font-bold mb-4">Applications</h1>
 
           {loading ? (
             <div className="flex justify-center items-center h-full">
               <div className="w-12 h-12 border-4 border-gray-300 border-t-black rounded-full animate-spin"></div>
-              </div>
+            </div>
           ) : (
             <div className="grid grid-cols-1 gap-7 mt-4">
               {filteredApplications.length > 0 ? (
@@ -122,7 +124,6 @@ const Page = () => {
                         : "opacity-100"
                     }`}
                   >
-                    {/* Property Card */}
                     <div className="w-full lg:w-80 rounded-2xl h-auto lg:h-[360px] overflow-hidden shadow-lg border cursor-pointer border-gray-200 m-4 lg:m-0">
                       <div className="relative">
                         <img
@@ -173,7 +174,6 @@ const Page = () => {
                       </div>
                     </div>
 
-                    {/* Sender Info and Buttons */}
                     <div className="flex flex-col md:flex-row gap-4 mr-4 ml-4 flex-grow">
                       <div className="flex-shrink-0 p-4 border border-gray-300 mt-2 mb-2 rounded-lg shadow-lg w-full md:w-auto">
                         <h1 className="font-bold">From,</h1>
@@ -197,27 +197,33 @@ const Page = () => {
                           <h1 className="font-bold mr-2">Contact:</h1>
                           <h1>{application.contact}</h1>
                         </div>
-                        <div className="flex flex-col mt-10">
+                        <div className="flex flex-col mt-10 space-y-5">
                           <button
                             onClick={() =>
-                              accept_button(application.applicationId)
+                              accept_button(application.applicationId ,application.property.id )
                             }
-                            className="h-[30px] hover:bg-black hover:text-white rounded-[5px] border cursor-pointer border-gray-300 shadow-lg"
+                            className="relative group h-[30px] border cursor-pointer border-gray-300 shadow-lg rounded-[5px] overflow-hidden"
                           >
-                            Accept
+                            <span className="absolute bottom-0 left-0 w-full h-0 bg-black origin-bottom transition-all duration-300 ease-out group-hover:h-full"></span>
+                            <span className="relative z-10 text-black transition-colors duration-300 group-hover:text-white">
+                              Accept
+                            </span>
                           </button>
+
                           <button
                             onClick={() =>
                               decline_button(application.applicationId)
                             }
-                            className="h-[30px] mt-5 hover:bg-black hover:text-white rounded-[5px] border cursor-pointer border-gray-300 shadow-lg"
+                            className="relative group h-[30px] border cursor-pointer border-gray-300 shadow-lg rounded-[5px] overflow-hidden"
                           >
-                            Decline
+                            <span className="absolute bottom-0 left-0 w-full h-0 bg-black origin-bottom transition-all duration-300 ease-out group-hover:h-full"></span>
+                            <span className="relative z-10 text-black transition-colors duration-300 group-hover:text-white">
+                              Decline
+                            </span>
                           </button>
                         </div>
                       </div>
 
-                      {/* Message Box */}
                       <div className="flex-grow p-4 border border-gray-300 mt-2 mb-2 rounded-lg shadow-lg min-w-[300px] max-w-full">
                         <h1 className="font-bold mb-2">Message,</h1>
                         <h2 className="break-words">{application.message}</h2>

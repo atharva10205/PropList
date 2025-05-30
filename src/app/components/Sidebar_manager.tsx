@@ -24,6 +24,11 @@ const Sidebar_manager = () => {
       icon: "https://img.icons8.com/?size=100&id=2bMQJZQif7nl&format=png&color=000000",
     },
     {
+      name: "Residences",
+      path: "/residence",
+      icon: "https://img.icons8.com/?size=100&id=W4QfMayFv3KE&format=png&color=000000",
+    },
+    {
       name: "Settings",
       path: "/settings",
       icon: "https://img.icons8.com/?size=100&id=14099&format=png&color=000000",

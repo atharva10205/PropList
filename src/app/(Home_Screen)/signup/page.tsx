@@ -85,7 +85,7 @@ const Page = () => {
           />
           <button
             type="submit"
-            className="relative w-full py-2 text-black overflow-hidden group border border-black rounded-md"
+            className="relative w-full py-2 text-black overflow-hidden group border cursor-pointer border-black rounded-md"
           >
             <span className="absolute bottom-0 left-0 w-full h-0 bg-black origin-bottom transition-all duration-300 ease-out group-hover:h-full"></span>
 

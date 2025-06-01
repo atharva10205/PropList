@@ -11,6 +11,50 @@ const Page = () => {
   const [applications, setApplications] = useState(null);
   const [fadingOutIds, setFadingOutIds] = useState([]);
   const [loading, setLoading] = useState(true); // New loading state
+  const [Wallet_connected, setWallet_connected] = useState(false);
+  const [Public_Id, setPublic_Id] = useState("");
+
+  const Connectwallet = async () => {
+    if (!window.ethereum) {
+      alert("Please install MetaMask");
+      return;
+    }
+
+    let metamaskProvider = null;
+
+    if (Array.isArray(window.ethereum.providers)) {
+      metamaskProvider = window.ethereum.providers.find((p) => p.isMetaMask);
+    } else if (window.ethereum.isMetaMask) {
+      metamaskProvider = window.ethereum;
+    }
+
+    if (!metamaskProvider) {
+      alert("MetaMask wallet not found! Please install MetaMask.");
+      return;
+    }
+
+    try {
+      const accounts = await metamaskProvider.request({
+        method: "eth_requestAccounts",
+      });
+      console.log("Connected MetaMask account:", accounts[0]);
+      setPublic_Id(accounts[0]);
+    } catch (error) {
+      console.error("Connection rejected or failed:", error);
+    }
+  };
+
+    useEffect(() => {
+      Connectwallet();
+    }, [Connectwallet]);
+
+  useEffect(() => {
+    if (Public_Id !== null && Public_Id !== "") {
+      setWallet_connected(true);
+    }
+  }, [Public_Id]);
+
+  
 
   useEffect(() => {
     const getUserId = async () => {
@@ -173,186 +217,85 @@ const Page = () => {
                     </div>
 
                     {/* Sender Info and Buttons */}
-                    <div className="flex flex-col md:flex-row gap-4 mr-4 ml-4 flex-grow">
-                      <div className="flex-shrink-0 p-4 border border-gray-300 mt-2 mb-2 rounded-lg shadow-lg w-full md:w-auto">
-                        <h1 className="font-bold">From,</h1>
-                        <div className="flex flex-row mt-5 items-center">
-                          <img
-                            className="h-[60px] w-[60px] mr-4 rounded-full"
-                            src="https://imgs.search.brave.com/5UXUrwnw8J0ENnlCfKBvy2iT3ZiU9L2WC2CXtxFJfO0/rs:fit:860:0:0:0/g:ce/aHR0cHM6Ly93YWxs/cGFwZXJzLmNvbS9p/bWFnZXMvaGQvcGZw/LXBpY3R1cmVzLWsz/ZHF4bjNuMG5heGVm/bjIuanBn"
-                            alt="profile"
-                          />
-                          <h1 className="break-all">
-                            {application.sender.username}
-                          </h1>
-                        </div>
-                        <div className="flex mt-5 flex-row items-center">
-                          <h1 className="font-bold mr-2">Email:</h1>
-                          <h1 className="break-all">
-                            {application.sender.email}
-                          </h1>
-                        </div>
-                        <div className="flex flex-row items-center mt-1">
-                          <h1 className="font-bold mr-2">Contact:</h1>
-                          <h1>{application.contact}</h1>
-                        </div>
+                    <div className="flex flex-col md:flex-row gap-4 mr-4 ml-4 w flex-grow">
+                      <div className="flex-shrink-0 p-4 border border-gray-300 items-center justify-center flex flex-col  mt-2 mb-2 rounded-lg shadow-lg min-w-[200px] md:w-auto">
+                        <h1 className="font-bold mb-2">Payment </h1>
+                        {!Wallet_connected && (
+                          <button
+                            onClick={Connectwallet}
+                            className="relative cursor-pointer group overflow-hidden px-4 py-2 border border-black rounded text-black"
+                          >
+                            <span className="absolute bottom-0 left-0 w-full h-0 bg-black transition-all duration-300 ease-out group-hover:h-full origin-bottom"></span>
+                            <span className="relative z-10 transition-colors duration-300 group-hover:text-white">
+                              Connect wallet
+                            </span>
+                          </button>
+                        )}
+                        {Wallet_connected && (
+                          <div className="space-y-4 p-4 bg-white rounded-lg shadow-md border border-gray-200">
+                            <div className="flex flex-col space-y-2">
+                              <div className="flex items-center">
+                                <span className="font-din font-bold text-gray-700 min-w-[80px]">
+                                  Your ID:
+                                </span>
+                                <span className="text-gray-900 font-medium break-all">
+                                  {Public_Id}
+                                </span>
+                              </div>
+
+                              <div className="flex items-center">
+                                <span className="font-din font-bold text-gray-700 min-w-[80px]">
+                                  Bill:
+                                </span>
+                                <span className="text-black font-semibold">
+                                  ${application.property.pricePerMonth}
+                                </span>
+                              </div>
+
+                              <div className="flex items-center">
+                                <span className="font-din font-bold text-gray-700 min-w-[80px]">
+                                  Due Date:
+                                </span>
+                                <span className="text-gray-900">10/02/25</span>
+                              </div>
+                            </div>
+
+                            <div className="pt-2">
+                              <button className=" cursor-pointer w-[500px] relative group overflow-hidden px-4 py-2 border border-black rounded text-black">
+                                <span className="absolute bottom-0 left-0 w-full h-0 bg-black transition-all duration-300 ease-out group-hover:h-full origin-bottom"></span>
+
+                                <span className="relative z-10 transition-colors duration-300 group-hover:text-white">
+                                 Change wallet
+                                </span>
+                              </button>
+                            </div>
+                          </div>
+                        )}
                       </div>
 
-                      <div className="flex-grow p-4 border border-gray-300 mt-2 mb-2 rounded-lg shadow-lg min-w-[300px] max-w-full">
+                      <div className="flex-grow p-4 border border-gray-300 mt-2 mb-2 rounded-lg shadow-lg  max-w-[300px] overflow-hidden">
                         <h1 className="font-bold mb-2">Billing History</h1>
 
                         <div className="overflow-y-auto max-h-64">
-                          {" "}
-                          {/* This will make the content scrollable after 256px height */}
-                          <table className="min-w-full divide-y divide-gray-200">
+                          <table className="w-full table-fixed divide-y divide-gray-200">
                             <thead className="bg-gray-50">
                               <tr>
-                                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                                  User
-                                </th>
-                                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                                <th className="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                                   Date
                                 </th>
-                                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                                <th className="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                                   Amount
-                                </th>
-                                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                                  Status
                                 </th>
                               </tr>
                             </thead>
-                            <tbody className="bg-white divide-y divide-gray-200">
-                              {/* Dummy transaction data */}
-                              {[
-                                {
-                                  id: 1,
-                                  name: "John Doe",
-                                  date: "2023-05-15",
-                                  amount: "$125.00",
-                                  status: "Completed",
-                                },
-                                {
-                                  id: 2,
-                                  name: "Jane Smith",
-                                  date: "2023-05-14",
-                                  amount: "$89.50",
-                                  status: "Pending",
-                                },
-                                {
-                                  id: 3,
-                                  name: "Robert Johnson",
-                                  date: "2023-05-14",
-                                  amount: "$230.75",
-                                  status: "Completed",
-                                },
-                                {
-                                  id: 4,
-                                  name: "Emily Davis",
-                                  date: "2023-05-13",
-                                  amount: "$65.20",
-                                  status: "Failed",
-                                },
-                                {
-                                  id: 5,
-                                  name: "Michael Brown",
-                                  date: "2023-05-12",
-                                  amount: "$154.99",
-                                  status: "Completed",
-                                },
-                                {
-                                  id: 6,
-                                  name: "Sarah Wilson",
-                                  date: "2023-05-12",
-                                  amount: "$42.50",
-                                  status: "Completed",
-                                },
-                                {
-                                  id: 7,
-                                  name: "David Taylor",
-                                  date: "2023-05-11",
-                                  amount: "$199.99",
-                                  status: "Pending",
-                                },
-                                {
-                                  id: 8,
-                                  name: "Jessica Anderson",
-                                  date: "2023-05-10",
-                                  amount: "$87.30",
-                                  status: "Completed",
-                                },
-                                {
-                                  id: 9,
-                                  name: "Thomas Martinez",
-                                  date: "2023-05-09",
-                                  amount: "$210.00",
-                                  status: "Completed",
-                                },
-                                {
-                                  id: 10,
-                                  name: "Lisa Robinson",
-                                  date: "2023-05-08",
-                                  amount: "$55.75",
-                                  status: "Failed",
-                                },
-                                {
-                                  id: 11,
-                                  name: "William Clark",
-                                  date: "2023-05-07",
-                                  amount: "$175.25",
-                                  status: "Completed",
-                                },
-                                {
-                                  id: 12,
-                                  name: "Karen Rodriguez",
-                                  date: "2023-05-06",
-                                  amount: "$92.40",
-                                  status: "Pending",
-                                },
-                                {
-                                  id: 13,
-                                  name: "James Lewis",
-                                  date: "2023-05-05",
-                                  amount: "$135.60",
-                                  status: "Completed",
-                                },
-                                {
-                                  id: 14,
-                                  name: "Nancy Lee",
-                                  date: "2023-05-04",
-                                  amount: "$68.90",
-                                  status: "Completed",
-                                },
-                                {
-                                  id: 15,
-                                  name: "Daniel Walker",
-                                  date: "2023-05-03",
-                                  amount: "$220.50",
-                                  status: "Failed",
-                                },
-                              ].map((transaction) => (
-                                <tr key={transaction.id}>
-                                  <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">
-                                    {transaction.name}
+                             <tbody className="bg-white divide-y divide-gray-200">
+                              {application.property.date?.map((date, index) => (
+                                <tr key={index}>
+                                  <td className="px-4 py-2 text-sm text-gray-700">
+                                    {date}
                                   </td>
-                                  <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                                    {transaction.date}
-                                  </td>
-                                  <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                                    {transaction.amount}
-                                  </td>
-                                  <td className="px-6 py-4 whitespace-nowrap">
-                                    <span
-                                      className={`px-2 inline-flex text-xs leading-5 font-semibold rounded-full 
-                ${
-                  transaction.status === "Completed"
-                    ? "bg-green-100 text-green-800"
-                    : transaction.status === "Pending"
-                    ? "bg-yellow-100 text-yellow-800"
-                    : "bg-red-100 text-red-800"
-                }`}
-                                    >
-                                      {transaction.status}
-                                    </span>
+                                  <td className="px-4 py-2 text-sm text-gray-700">
+                                    ${application.property.amount[index]}
                                   </td>
                                 </tr>
                               ))}

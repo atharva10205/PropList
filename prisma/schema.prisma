@@ -19,7 +19,7 @@ model User {
 }
 
 model Property {
-  id              Int     @id @default(autoincrement())
+  id              Int      @id @default(autoincrement())
   propertyName    String
   description     String
   pricePerMonth   String
@@ -30,21 +30,24 @@ model Property {
   squareFeet      String
   petsAllowed     Boolean
   parkingIncluded Boolean
-  Bathtub         Boolean @default(false)
-  Wifi            Boolean @default(false)
-  propertyType String
-  amenities    String
-  highlights   String
-  address      String
-  city         String
-  state        String
-  postalCode   String
-  country      String
-  latitude     Float
-  longitude    Float
-  imageURLs    String[]
+  Bathtub         Boolean  @default(false)
+  Wifi            Boolean  @default(false)
+  propertyType    String
+  amenities       String
+  highlights      String
+  address         String
+  city            String
+  state           String
+  postalCode      String
+  country         String
+  latitude        Float
+  longitude       Float
+  Public_Id       String
+  imageURLs       String[]
+  amount          Float[]    @default([])
+  date            String[]    @default([])
 
-  userId Int // Foreign key
+  userId Int
   user   User @relation(fields: [userId], references: [id])
 
   createdAt DateTime @default(now())
@@ -75,4 +78,12 @@ model Application {
   contact   String
   message   String
   status    String @default("under_process")
+}
+
+model Billing {
+  id Int @id @default(autoincrement())
+
+  addId     Int
+  senderId  Int
+  reciverId Int
 }

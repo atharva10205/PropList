@@ -4,7 +4,6 @@ import prisma from "../../../../lib/prisma";
 export async function POST(req) {
   try {
     const { userId } = await req.json();
-    console.log("Received userId:", userId);
 
     const applications = await prisma.Application.findMany({
       where: {
@@ -31,7 +30,6 @@ export async function POST(req) {
       },
     });
 
-
     const finalData = applications.map((app) => {
       const manager = managers.find((m) => m.id === app.reciverId);
       const property = properties.find((p) => p.id === app.addId);
@@ -41,7 +39,7 @@ export async function POST(req) {
         addId: app.addId,
         contact: app.contact,
         message: app.message,
-        status: app.status, 
+        status: app.status,
         managerUsername: manager ? manager.username : null,
         propertyimage: property ? property.imageURLs[0] : null,
         propertyName: property ? property.propertyName : null,
@@ -49,9 +47,11 @@ export async function POST(req) {
         pricePerMonth: property ? property.pricePerMonth : null,
         beds: property ? property.beds : null,
         baths: property ? property.baths : null,
+        Public_Id: property ? property.Public_Id : null,
+        date: property ? property.date : null,
+        amount: property ? property.amount : null,
       };
     });
-
 
     return NextResponse.json({ applications: finalData }, { status: 200 });
   } catch (error) {

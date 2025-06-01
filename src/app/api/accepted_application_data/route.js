@@ -41,6 +41,9 @@ export async function POST(req) {
       imageURLs: true,
       beds: true,
       baths: true,
+      Public_Id: true,
+      amount:true,
+      date:true,
     },
   });
 
@@ -67,6 +70,9 @@ export async function POST(req) {
             imageURL: property.imageURLs?.[0] || null,
             beds: property.beds,
             baths: property.baths,
+            Public_Id: property.Public_Id,
+            date: property.date,
+            amount: property.amount,
           }
         : null,
     };

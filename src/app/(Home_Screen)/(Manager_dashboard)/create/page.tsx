@@ -5,6 +5,7 @@ import dynamic from "next/dynamic";
 import axios from "axios";
 import Sidebar_manager from "@/app/components/Sidebar_manager";
 import { useRouter } from "next/navigation";
+import toast, { Toaster } from "react-hot-toast";
 
 export default function AddPropertyForm() {
   const router = useRouter();
@@ -22,6 +23,86 @@ export default function AddPropertyForm() {
   const [creating_screen, setcreating_screen] = useState(false);
   const [errors, setErrors] = useState({});
   const [role, setrole] = useState("");
+  const [Wallet_connected, setWallet_connected] = useState(false);
+  const [Public_Id, setPublic_Id] = useState("");
+
+  const Connectwallet = async () => {
+    if (!window.ethereum) {
+      
+      return;
+    }
+
+    let metamaskProvider = null;
+
+    if (Array.isArray(window.ethereum.providers)) {
+      metamaskProvider = window.ethereum.providers.find((p) => p.isMetaMask);
+    } else if (window.ethereum.isMetaMask) {
+      metamaskProvider = window.ethereum;
+    }
+
+    if (!metamaskProvider) {
+       toast.custom((t) => (
+        <div
+          className={`${
+            t.visible ? "animate-enter" : "animate-leave"
+          } fixed top-2 right-2 bg-black border mt-[40px] border-black text-white flex items-center justify-center rounded-lg shadow-md font-bold h-[60px] w-[250px] text-sm`}
+        >
+          No metamask detected{" "}
+        </div>
+      ));
+      return;
+    }
+
+    try {
+      const accounts = await metamaskProvider.request({
+        method: "eth_requestAccounts",
+      });
+      console.log("Connected MetaMask account:", accounts[0]);
+      setPublic_Id(accounts[0]);
+    } catch (error) {
+      console.error("Connection rejected or failed:", error);
+    }
+  };
+
+  const Connectwallet1 = async () => {
+    if (!window.ethereum) {
+      
+      return;
+    }
+
+    let metamaskProvider = null;
+
+    if (Array.isArray(window.ethereum.providers)) {
+      metamaskProvider = window.ethereum.providers.find((p) => p.isMetaMask);
+    } else if (window.ethereum.isMetaMask) {
+      metamaskProvider = window.ethereum;
+    }
+
+    if (!metamaskProvider) {
+    
+      return;
+    }
+
+    try {
+      const accounts = await metamaskProvider.request({
+        method: "eth_requestAccounts",
+      });
+      console.log("Connected MetaMask account:", accounts[0]);
+      setPublic_Id(accounts[0]);
+    } catch (error) {
+      console.error("Connection rejected or failed:", error);
+    }
+  };
+
+  useEffect(() => {
+    Connectwallet1();
+  }, [Connectwallet1]);
+
+  useEffect(() => {
+    if (Public_Id !== null && Public_Id !== "") {
+      setWallet_connected(true);
+    }
+  }, [Public_Id]);
 
   useEffect(() => {
     const checkAuth = async () => {
@@ -52,6 +133,7 @@ export default function AddPropertyForm() {
     if (!beds) newErrors.beds = true;
     if (!baths) newErrors.baths = true;
     if (!squareFeet) newErrors.squareFeet = true;
+    if (!Public_Id) newErrors.Public_Id = true;
     if (!address.trim()) newErrors.address = true;
     if (!city.trim()) newErrors.city = true;
     if (!state.trim()) newErrors.state = true;
@@ -79,10 +161,27 @@ export default function AddPropertyForm() {
         const { lat, lon } = response.data[0];
         setSelectedLocation({ lat: parseFloat(lat), lng: parseFloat(lon) });
       } else {
-        alert("Place not found");
+        
+         toast.custom((t) => (
+        <div
+          className={`${
+            t.visible ? "animate-enter" : "animate-leave"
+          } fixed top-2 right-2 bg-black border mt-[40px] border-black text-white flex items-center justify-center rounded-lg shadow-md font-bold h-[60px] w-[250px] text-sm`}
+        >
+          Place not found{" "}
+        </div>
+      ));
       }
     } catch (error) {
-      alert("Error fetching location");
+      toast.custom((t) => (
+        <div
+          className={`${
+            t.visible ? "animate-enter" : "animate-leave"
+          } fixed top-2 right-2 bg-black border mt-[40px] border-black text-white flex items-center justify-center rounded-lg shadow-md font-bold h-[60px] w-[250px] text-sm`}
+        >
+          Error fetching location{" "}
+        </div>
+      ));
     }
   };
 
@@ -169,7 +268,15 @@ export default function AddPropertyForm() {
       },
       (err) => {
         console.error("Error getting location:", err);
-        alert("API down");
+         toast.custom((t) => (
+        <div
+          className={`${
+            t.visible ? "animate-enter" : "animate-leave"
+          } fixed top-2 right-2 bg-black border mt-[40px] border-black text-white flex items-center justify-center rounded-lg shadow-md font-bold h-[60px] w-[250px] text-sm`}
+        >
+          API down{" "}
+        </div>
+      ));
       }
     );
   };
@@ -188,13 +295,36 @@ export default function AddPropertyForm() {
   };
 
   const create_button = async (e) => {
+
     if (!validateFields()) {
-      alert("Please fill in all required fields!");
+      toast.custom((t) => (
+        <div
+          className={`${
+            t.visible ? "animate-enter" : "animate-leave"
+          } fixed top-2 right-2 bg-black border mt-[40px] border-black text-white flex items-center justify-center rounded-lg shadow-md font-bold h-[60px] w-[250px] text-sm`}
+        >
+          Please complete all fields!{" "}
+        </div>
+      ));
       return;
     }
+    
+    if(!Public_Id){
+       toast.custom((t) => (
+        <div
+          className={`${
+            t.visible ? "animate-enter" : "animate-leave"
+          } fixed top-2 right-2 bg-black border mt-[40px] border-black text-white flex items-center justify-center rounded-lg shadow-md font-bold h-[60px] w-[250px] text-sm`}
+        >
+          Connect wallet!{" "}
+        </div>
+      ));
+      return;
+    }
+
     e.preventDefault();
 
-    // List of required fields and their current values
+
     const requiredFields = {
       propertyName,
       description,
@@ -212,29 +342,25 @@ export default function AddPropertyForm() {
       country,
       latitude,
       longitude,
+      Public_Id,
     };
 
-    // Collect any empty field names
     const emptyFields = Object.entries(requiredFields).filter(
       ([key, value]) => !value || value.toString().trim() === ""
     );
 
     if (files.length === 0 || emptyFields.length > 0) {
       if (files.length === 0) {
-        alert("Please select at least one image.");
+        toast.custom((t) => (
+          <div
+            className={`${
+              t.visible ? "animate-enter" : "animate-leave"
+            } fixed top-2 right-2 bg-black border mt-[40px] border-black text-white flex items-center justify-center rounded-lg shadow-md font-bold h-[60px] w-[250px] text-sm`}
+          >
+            Please select at least one image.{" "}
+          </div>
+        ));
       }
-
-      if (emptyFields.length > 0) {
-        alert("Please fill in all required fields.");
-        // Optionally highlight inputs (set errors for styling)
-        setFieldErrors(
-          emptyFields.reduce((acc, [key]) => {
-            acc[key] = true;
-            return acc;
-          }, {})
-        );
-      }
-
       return;
     }
 
@@ -289,6 +415,7 @@ export default function AddPropertyForm() {
     formData.append("latitude", latitude);
     formData.append("longitude", longitude);
     formData.append("imageURLs", JSON.stringify(imageURLs));
+    formData.append("Public_Id", Public_Id);
 
     try {
       const response = await fetch("/api/create_listing", {
@@ -351,7 +478,9 @@ export default function AddPropertyForm() {
   }
 
   if (created_listing === true) {
+    router.push("/properties")
     return (
+
       <div className="bg-black min-h-screen text-white flex justify-center items-center">
         created yay
       </div>
@@ -364,7 +493,7 @@ export default function AddPropertyForm() {
         <div className="h-screen flex flex-col overflow-hidden">
           {/* Navbar */}
           <Navbar />
-
+          <Toaster />
           {/* Main content */}
           <div className="flex flex-1 overflow-hidden">
             {/* Sidebar - stays fixed */}
@@ -378,6 +507,7 @@ export default function AddPropertyForm() {
                 <h1 className="text-2xl font-semibold mb-2">
                   Add New Property
                 </h1>
+
                 <p className="mb-6 text-gray-600">
                   Create a new property listing with detailed information
                 </p>
@@ -764,6 +894,38 @@ export default function AddPropertyForm() {
                         <option value="Brazil">Brazil</option>
                         <option value="SouthAfrica">South Africa</option>
                       </select>
+                    </div>
+
+                    <div>
+                      <div className="text-xl mt-8 font-medium mb-4">
+                        Payment
+                      </div>
+                      {!Wallet_connected && (
+                        <button
+                          onClick={Connectwallet}
+                          className="relative cursor-pointer group overflow-hidden px-4 py-2 border w-full border-black rounded text-black"
+                        >
+                          <span className="absolute bottom-0 left-0 w-full h-0 bg-black transition-all duration-300 ease-out group-hover:h-full origin-bottom"></span>
+                          <span className="relative z-10 transition-colors duration-300 group-hover:text-white">
+                            Connect wallet
+                          </span>
+                        </button>
+                      )}
+
+                      {Wallet_connected && (
+                        <div className="space-y-4 p-4 bg-white rounded-lg shadow-md border border-gray-200">
+                          <div className="flex flex-col space-y-2">
+                            <div  className="flex items-center">
+                              <span className="font-din font-bold text-gray-700 min-w-[80px]">
+                                Your ID:
+                              </span>
+                              <span className="text-gray-900 font-medium break-all">
+                                {Public_Id}
+                              </span>
+                            </div>
+                          </div>
+                        </div>
+                      )}
                     </div>
                   </div>
 

@@ -6,6 +6,8 @@ import { useParams } from "next/navigation";
 import dynamic from "next/dynamic";
 import { motion, AnimatePresence } from "framer-motion";
 import { useRouter } from "next/navigation";
+import toast, { Toaster } from "react-hot-toast";
+
 
 const PropertyDetails = () => {
   const router = useRouter();
@@ -60,7 +62,15 @@ const PropertyDetails = () => {
       if (response.ok) {
         router.push("/applications");
       } else if (response.status === 409) {
-        alert("Add already exists");
+        toast.custom((t) => (
+        <div
+          className={`${
+            t.visible ? "animate-enter" : "animate-leave"
+          } fixed top-2 right-2 bg-black border mt-[40px] border-black text-white flex items-center justify-center rounded-lg shadow-md font-bold h-[60px] w-[250px] text-sm`}
+        >
+          Application alredy exist {" "}
+        </div>
+      ));
         setLoading(false)
 
       } else {
@@ -212,7 +222,7 @@ const PropertyDetails = () => {
       <div className="fixed top-0 left-0 w-full z-50">
         <Navbar />
       </div>
-
+ <Toaster />
       {loading ? (
         <div className="flex justify-center items-center h-[800px] ">
           <div className="w-12 h-12 border-4 border-gray-300 border-t-black rounded-full animate-spin"></div>

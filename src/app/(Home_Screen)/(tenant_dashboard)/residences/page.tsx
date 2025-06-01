@@ -4,12 +4,135 @@ import React, { useState, useEffect } from "react";
 import Navbar from "@/app/components/Navbar";
 import Sidebar from "@/app/components/Sidebar";
 import { useRouter } from "next/navigation";
+import { BrowserProvider, parseEther } from "ethers";
+import toast, { Toaster } from "react-hot-toast";
 
 const page = () => {
   const router = useRouter();
   const [userId, setUserId] = useState(null);
   const [data, setdata] = useState(null);
   const [loading, setLoading] = useState(true); // 👈 Loading state
+  const [Wallet_connected, setWallet_connected] = useState(false);
+  const [Public_Id, setPublic_Id] = useState("");
+  const [ethRate, setEthRate] = useState(null);
+
+  useEffect(() => {
+    async function getEthRate() {
+      const res = await fetch(
+        "https://api.coingecko.com/api/v3/simple/price?ids=ethereum&vs_currencies=usd"
+      );
+      const data = await res.json();
+      setEthRate(1 / data.ethereum.usd);
+    }
+    getEthRate();
+  }, []);
+
+  const handleSend = async (addid, id, amount1) => {
+    //nigger
+
+    const reciver_id = id;
+    const amount = amount1;
+    const addID = addid;
+
+    if (!window.ethereum) return alert("MetaMask not detected");
+    if (!ethRate) return alert("ETH price not loaded");
+
+    const ethAmount = (parseFloat(amount) * ethRate).toFixed(6);
+
+    try {
+      const provider = new BrowserProvider(window.ethereum);
+      const signer = await provider.getSigner();
+
+      const tx = await signer.sendTransaction({
+        to: reciver_id,
+        value: parseEther(ethAmount),
+      });
+
+      if (tx) {
+        const response = await fetch("/api/Billing_history", {
+          method: "POST",
+          credentials: "include",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({ addID, ethAmount }),
+        });
+
+        if (response) {
+          toast.custom((t) => (
+            <div
+              className={`${
+                t.visible ? "animate-enter" : "animate-leave"
+              } fixed top-2 right-2 bg-black border mt-[40px] border-black text-white flex items-center justify-center rounded-lg shadow-md font-bold h-[60px] w-[250px] text-sm`}
+            >
+              Transaction successfull!{" "}
+            </div>
+          ));
+        }
+      } else {
+        toast.custom((t) => (
+          <div
+            className={`${
+              t.visible ? "animate-enter" : "animate-leave"
+            } fixed top-2 right-2 bg-black border mt-[40px] border-black text-white flex items-center justify-center rounded-lg shadow-md font-bold h-[60px] w-[250px] text-sm`}
+          >
+            Something went wrong!{" "}
+          </div>
+        ));
+      }
+    } catch (err) {
+      console.error(err);
+      toast.custom((t) => (
+        <div
+          className={`${
+            t.visible ? "animate-enter" : "animate-leave"
+          } fixed top-2 right-2 bg-black border mt-[40px] border-black text-white flex items-center justify-center rounded-lg shadow-md font-bold h-[60px] w-[250px] text-sm`}
+        >
+          Something went wrong!{" "}
+        </div>
+      ));
+    }
+  };
+
+  const Connectwallet = async () => {
+    if (!window.ethereum) {
+      alert("Please install MetaMask");
+      return;
+    }
+
+    let metamaskProvider = null;
+
+    if (Array.isArray(window.ethereum.providers)) {
+      metamaskProvider = window.ethereum.providers.find((p) => p.isMetaMask);
+    } else if (window.ethereum.isMetaMask) {
+      metamaskProvider = window.ethereum;
+    }
+
+    if (!metamaskProvider) {
+      alert("MetaMask wallet not found! Please install MetaMask.");
+      return;
+    }
+
+    try {
+      const accounts = await metamaskProvider.request({
+        method: "eth_requestAccounts",
+      });
+      console.log("Connected MetaMask account:", accounts[0]);
+      setPublic_Id(accounts[0]);
+    } catch (error) {
+      console.error("Connection rejected or failed:", error);
+    }
+  };
+
+  useEffect(() => {
+    Connectwallet();
+  }, [Connectwallet]);
+
+  useEffect(() => {
+    if (Public_Id !== null && Public_Id !== "") {
+      setWallet_connected(true);
+    }
+  }, [Public_Id]);
 
   useEffect(() => {
     const getUserId = async () => {
@@ -67,6 +190,8 @@ const page = () => {
   return (
     <div className="h-screen flex flex-col overflow-hidden">
       <Navbar />
+      <Toaster />
+
       <div className="flex flex-1 overflow-hidden">
         <div className="w-56 flex-shrink-0 bg-gray-100 overflow-y-auto">
           <Sidebar />
@@ -85,7 +210,7 @@ const page = () => {
                 .map((property, index) => (
                   <div
                     key={index}
-                    className="rounded-2xl flex flex-row shadow-lg border border-gray-300 w-[1200px]"
+                    className="rounded-2xl flex flex-row shadow-lg border h-[332px] border-gray-300 w-[1200px]"
                   >
                     <div>
                       <div className="w-80 rounded-2xl h-[330px] overflow-hidden shadow-lg border cursor-pointer border-gray-300">
@@ -149,165 +274,92 @@ const page = () => {
                     </div>
 
                     <div className="flex flex-col md:flex-row gap-4  mr-4 ml-4">
-                      <div className="flex-shrink-0 p-4 border border-gray-300 mt-2 mb-2 rounded-lg shadow-lg min-w-[200px] md:w-auto">
-                        <h1 className="font-bold mb-2">Payment Method</h1>
+                      <div className="flex-shrink-0 p-4 border border-gray-300 items-center justify-center flex flex-col  mt-2 mb-2 rounded-lg shadow-lg min-w-[200px] md:w-auto">
+                        <h1 className="font-bold mb-2">Payment </h1>
+                        {!Wallet_connected && (
+                          <button
+                            onClick={Connectwallet}
+                            className="relative cursor-pointer group overflow-hidden px-4 py-2 border border-black rounded text-black"
+                          >
+                            <span className="absolute bottom-0 left-0 w-full h-0 bg-black transition-all duration-300 ease-out group-hover:h-full origin-bottom"></span>
+                            <span className="relative z-10 transition-colors duration-300 group-hover:text-white">
+                              Connect wallet
+                            </span>
+                          </button>
+                        )}
+                        {Wallet_connected && (
+                          <div className="space-y-4 p-4 bg-white rounded-lg shadow-md border border-gray-200">
+                            <div className="flex flex-col space-y-2">
+                              <div className="flex items-center">
+                                <span className="font-din font-bold text-gray-700 min-w-[80px]">
+                                  Your ID:
+                                </span>
+                                <span className="text-gray-900 font-medium break-all">
+                                  {Public_Id}
+                                </span>
+                              </div>
+
+                              <div className="flex items-center">
+                                <span className="font-din font-bold text-gray-700 min-w-[80px]">
+                                  Bill:
+                                </span>
+                                <span className="text-black font-semibold">
+                                  ${property.pricePerMonth}
+                                </span>
+                              </div>
+
+                              <div className="flex items-center">
+                                <span className="font-din font-bold text-gray-700 min-w-[80px]">
+                                  Due Date:
+                                </span>
+                                <span className="text-gray-900">10/02/25</span>
+                              </div>
+                            </div>
+
+                            <div className="pt-2">
+                              <button
+                                onClick={() =>
+                                  handleSend(
+                                    property.addId,
+                                    property.Public_Id,
+                                    property.pricePerMonth
+                                  )
+                                }
+                                className=" cursor-pointer w-[500px] relative group overflow-hidden px-4 py-2 border border-black rounded text-black"
+                              >
+                                <span className="absolute bottom-0 left-0 w-full h-0 bg-black transition-all duration-300 ease-out group-hover:h-full origin-bottom"></span>
+
+                                <span className="relative z-10 transition-colors duration-300 group-hover:text-white">
+                                  Pay Now
+                                </span>
+                              </button>
+                            </div>
+                          </div>
+                        )}
                       </div>
 
-                      <div className="flex-grow p-4 border border-gray-300 mt-2 mb-2 rounded-lg shadow-lg min-w-[300px] max-w-full">
+                      <div className="flex-grow p-4 border border-gray-300 mt-2 mb-2 rounded-lg shadow-lg w-full max-w-full overflow-hidden">
                         <h1 className="font-bold mb-2">Billing History</h1>
-
                         <div className="overflow-y-auto max-h-64">
-                          {" "}
-                          {/* This will make the content scrollable after 256px height */}
-                          <table className="min-w-full divide-y divide-gray-200">
+                          <table className="w-full table-fixed divide-y divide-gray-200">
                             <thead className="bg-gray-50">
                               <tr>
-                                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                                  User
-                                </th>
-                                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                                <th className="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                                   Date
                                 </th>
-                                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                                <th className="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                                   Amount
-                                </th>
-                                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                                  Status
                                 </th>
                               </tr>
                             </thead>
                             <tbody className="bg-white divide-y divide-gray-200">
-                              {/* Dummy transaction data */}
-                              {[
-                                {
-                                  id: 1,
-                                  name: "John Doe",
-                                  date: "2023-05-15",
-                                  amount: "$125.00",
-                                  status: "Completed",
-                                },
-                                {
-                                  id: 2,
-                                  name: "Jane Smith",
-                                  date: "2023-05-14",
-                                  amount: "$89.50",
-                                  status: "Pending",
-                                },
-                                {
-                                  id: 3,
-                                  name: "Robert Johnson",
-                                  date: "2023-05-14",
-                                  amount: "$230.75",
-                                  status: "Completed",
-                                },
-                                {
-                                  id: 4,
-                                  name: "Emily Davis",
-                                  date: "2023-05-13",
-                                  amount: "$65.20",
-                                  status: "Failed",
-                                },
-                                {
-                                  id: 5,
-                                  name: "Michael Brown",
-                                  date: "2023-05-12",
-                                  amount: "$154.99",
-                                  status: "Completed",
-                                },
-                                {
-                                  id: 6,
-                                  name: "Sarah Wilson",
-                                  date: "2023-05-12",
-                                  amount: "$42.50",
-                                  status: "Completed",
-                                },
-                                {
-                                  id: 7,
-                                  name: "David Taylor",
-                                  date: "2023-05-11",
-                                  amount: "$199.99",
-                                  status: "Pending",
-                                },
-                                {
-                                  id: 8,
-                                  name: "Jessica Anderson",
-                                  date: "2023-05-10",
-                                  amount: "$87.30",
-                                  status: "Completed",
-                                },
-                                {
-                                  id: 9,
-                                  name: "Thomas Martinez",
-                                  date: "2023-05-09",
-                                  amount: "$210.00",
-                                  status: "Completed",
-                                },
-                                {
-                                  id: 10,
-                                  name: "Lisa Robinson",
-                                  date: "2023-05-08",
-                                  amount: "$55.75",
-                                  status: "Failed",
-                                },
-                                {
-                                  id: 11,
-                                  name: "William Clark",
-                                  date: "2023-05-07",
-                                  amount: "$175.25",
-                                  status: "Completed",
-                                },
-                                {
-                                  id: 12,
-                                  name: "Karen Rodriguez",
-                                  date: "2023-05-06",
-                                  amount: "$92.40",
-                                  status: "Pending",
-                                },
-                                {
-                                  id: 13,
-                                  name: "James Lewis",
-                                  date: "2023-05-05",
-                                  amount: "$135.60",
-                                  status: "Completed",
-                                },
-                                {
-                                  id: 14,
-                                  name: "Nancy Lee",
-                                  date: "2023-05-04",
-                                  amount: "$68.90",
-                                  status: "Completed",
-                                },
-                                {
-                                  id: 15,
-                                  name: "Daniel Walker",
-                                  date: "2023-05-03",
-                                  amount: "$220.50",
-                                  status: "Failed",
-                                },
-                              ].map((transaction) => (
-                                <tr key={transaction.id}>
-                                  <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">
-                                    {transaction.name}
+                              {property.date?.map((date, index) => (
+                                <tr key={index}>
+                                  <td className="px-4 py-2 text-sm text-gray-700">
+                                    {date}
                                   </td>
-                                  <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                                    {transaction.date}
-                                  </td>
-                                  <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                                    {transaction.amount}
-                                  </td>
-                                  <td className="px-6 py-4 whitespace-nowrap">
-                                    <span
-                                      className={`px-2 inline-flex text-xs leading-5 font-semibold rounded-full 
-                                        ${
-                                        transaction.status === "Completed"
-                                        ? "bg-green-100 text-green-800"
-                                        : transaction.status === "Pending"
-                                        ? "bg-yellow-100 text-yellow-800"
-                                        : "bg-red-100 text-red-800"
-                                      }`}
-                                      >
-                                      {transaction.status}
-                                    </span>
+                                  <td className="px-4 py-2 text-sm text-gray-700">
+                                    ${property.amount[index]}
                                   </td>
                                 </tr>
                               ))}

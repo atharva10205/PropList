@@ -224,8 +224,8 @@ const Page = () => {
                         </div>
                       </div>
 
-                      <div className="flex-grow p-4 border border-gray-300 mt-2 mb-2 rounded-lg shadow-lg min-w-[300px] max-w-full">
-                        <h1 className="font-bold mb-2">Message,</h1>
+                      <div className="flex-grow p-4 border border-gray-300 mt-2 mb-2 rounded-lg shadow-lg  min-w-[300px] max-w-[600px]">
+                        <h1 className="font-bold mb-2">Message</h1>
                         <h2 className="break-words">{application.message}</h2>
                       </div>
                     </div>

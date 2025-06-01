@@ -52,7 +52,9 @@ export async function POST(req) {
         country: form.get("country"),
         latitude: parseFloat(form.get("latitude")),
         longitude: parseFloat(form.get("longitude")),
-        imageURLs, // 👈 Include parsed image URLs (must exist in schema)
+        Public_Id: form.get("Public_Id"),
+
+        imageURLs,
         user: {
           connect: { id: userId },
         },

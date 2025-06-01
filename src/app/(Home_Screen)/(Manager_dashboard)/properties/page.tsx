@@ -96,7 +96,7 @@ const Page = () => {
                 properties.map((property, index) => (
                   <div
                     key={index}
-                    className="w-80 rounded-2xl  overflow-hidden shadow-lg border cursor-pointer border-gray-200"
+                    className="w-80 rounded-2xl  overflow-hidden hover:shadow-xl border cursor-pointer border-gray-300"
                   >
                     <div className="relative">
                       <img

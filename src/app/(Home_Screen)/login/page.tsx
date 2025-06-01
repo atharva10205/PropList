@@ -1,6 +1,7 @@
 "use client";
 import React, { useState } from "react";
 import { useRouter } from "next/navigation";
+import toast, { Toaster } from "react-hot-toast";
 
 const Page = () => {
   const router = useRouter();
@@ -33,12 +34,22 @@ const Page = () => {
       console.log("Login success!", data);
       router.push("/home");
     } catch (err) {
-      alert("mau");
+      toast.custom((t) => (
+        <div
+          className={`${
+            t.visible ? "animate-enter" : "animate-leave"
+          } fixed top-2 right-2 bg-white border border-black text-black flex items-center justify-center rounded-lg shadow-md font-bold h-[60px] w-[250px] text-sm`}
+        >
+           Something went wrong!
+        </div>
+      ));
     }
   };
 
   return (
     <div className="min-h-screen bg-white text-black flex items-center justify-center">
+      <Toaster />
+
       <div className="w-full max-w-md p-8 border border-black rounded-2xl shadow-md">
         <h1 className="text-3xl font-bold mb-6 text-center">Login</h1>
 
@@ -62,7 +73,6 @@ const Page = () => {
             className="relative w-full py-2 cursor-pointer text-black overflow-hidden group border border-black rounded-md"
           >
             <span className="absolute bottom-0 left-0 w-full h-0 bg-black origin-bottom transition-all duration-300 ease-out group-hover:h-full"></span>
-
             <span className="relative z-10 transition-colors duration-300 group-hover:text-white">
               Login
             </span>

@@ -4,6 +4,7 @@ import React, { useState, useEffect } from "react";
 import Navbar from "@/app/components/Navbar";
 import Sidebar from "@/app/components/Sidebar";
 import { useRouter } from "next/navigation";
+import toast, { Toaster } from "react-hot-toast";
 
 const Page = () => {
   const router = useRouter();
@@ -68,6 +69,16 @@ const Page = () => {
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ e: id }),
     });
+
+      toast.custom((t) => (
+        <div
+          className={`${
+            t.visible ? "animate-enter" : "animate-leave"
+          } fixed top-2 right-2 bg-black border mt-[40px] border-black text-white flex items-center justify-center rounded-lg shadow-md font-bold h-[60px] w-[250px] text-sm`}
+        >
+          Deleted{" "}
+        </div>
+      ));
     
     setTimeout(() => {
       setData((prev) => ({
@@ -82,6 +93,7 @@ const Page = () => {
     <div className="h-screen flex flex-col overflow-hidden">
       <Navbar />
       <div className="flex flex-1 overflow-hidden">
+        <Toaster />
         <div className="w-56 flex-shrink-0 bg-gray-100 overflow-y-auto">
           <Sidebar />
         </div>

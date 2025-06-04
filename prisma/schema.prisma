@@ -14,6 +14,7 @@ model User {
   password   String
   role       String
   createdAt  DateTime   @default(now())
+  pfpUrl     String    @default("https://i.pinimg.com/736x/cb/45/72/cb4572f19ab7505d552206ed5dfb3739.jpg")
   properties Property[]
   Like       Like[]
 }

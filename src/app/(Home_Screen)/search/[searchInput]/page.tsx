@@ -262,11 +262,7 @@ const Page = () => {
                             {marker.city}, {marker.state}, {marker.country}
                           </p>
                           <div className="flex items-center mb-3">
-                            <span className="text-yellow-400 mr-1">★</span>
-                            <span className="text-sm font-medium">4.8</span>
-                            <span className="text-sm text-gray-500 ml-1">
-                              (347 Reviews)
-                            </span>
+                           
                             <span className="text-sm font-semibold ml-auto">
                               ${marker.pricePerMonth || "--"}
                             </span>
@@ -286,7 +282,7 @@ const Page = () => {
                             <div className="flex items-center gap-1">
                               <img
                                 className="h-[15px] ml-2 w-[15px]"
-                                src="https://img.icons8.com/?size=100&id=468&format=png&color=000000"
+                            src="https://img.icons8.com/?size=100&id=HiiMjneqmobf&format=png&color=000000"
                                 alt=""
                               />
                               {marker.baths} Baths

@@ -1,21 +1,39 @@
-import { NextResponse } from "next/server";
 import prisma from "../../../../lib/prisma";
-import { cookies } from "next/headers";
 
-async function getUsernameByEmail(emailFromCookie) {
-  if (!emailFromCookie) return null;
+export async function POST(req) {
+  try {
+    const { userId } = await req.json();
 
-  const user = await prisma.user.findUnique({
-    where: { email: emailFromCookie },
-    select: { username: true },
-  });
+    if (!userId) {
+      return new Response(JSON.stringify({ error: "userId is required" }), {
+        status: 400,
+        headers: { "Content-Type": "application/json" },
+      });
+    }
 
-  return user?.username || null;
-}
+    const user = await prisma.user.findUnique({
+      where: { id: userId },
+      select: { username: true, pfpUrl: true },
+    });
 
-export async function GET() {
-  const cookieStore = await cookies(); // ✅ await here
-  const email = cookieStore.get("email")?.value;
-  const username = await getUsernameByEmail(email);
-  return NextResponse.json({ username });
+    if (!user) {
+      return new Response(JSON.stringify({ error: "User not found" }), {
+        status: 404,
+        headers: { "Content-Type": "application/json" },
+      });
+    }
+
+    return new Response(JSON.stringify(user), {
+      status: 200,
+      headers: { "Content-Type": "application/json" },
+    });
+
+    
+  } catch (error) {
+    console.error("Server error:", error);
+    return new Response(JSON.stringify({ error: "Internal Server Error" }), {
+      status: 500,
+      headers: { "Content-Type": "application/json" },
+    });
+  }
 }

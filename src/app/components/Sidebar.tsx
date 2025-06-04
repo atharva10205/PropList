@@ -34,7 +34,7 @@ const Sidebar = () => {
 
   return (
     <div className="w-[180px] h-[calc(100vh-50px)] bg-gray-100 p-4 border-r border-gray-300">
-      <h2 className="text-lg font-semibold mb-6">Renter View</h2>
+      <h2 className="text-lg font-semibold mb-6">Tenent View</h2>
       <ul className="space-y-4">
         {menuItems.map(({ name, path, icon }) => (
           <li key={path}>

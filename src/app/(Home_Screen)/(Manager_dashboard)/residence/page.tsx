@@ -273,7 +273,7 @@ const Page = () => {
                         )}
                       </div>
 
-                      <div className="flex-grow p-4 border border-gray-300 mt-2 mb-2 rounded-lg shadow-lg  max-w-[300px] overflow-hidden">
+                      <div className="flex-grow p-4 border border-gray-300 mt-2 mb-2 rounded-lg shadow-lg  max-w-[400px] overflow-hidden">
                         <h1 className="font-bold mb-2">Billing History</h1>
 
                         <div className="overflow-y-auto max-h-64">
@@ -295,7 +295,7 @@ const Page = () => {
                                     {date}
                                   </td>
                                   <td className="px-4 py-2 text-sm text-gray-700">
-                                    ${application.property.amount[index]}
+                                    {application.property.amount[index]} eth
                                   </td>
                                 </tr>
                               ))}

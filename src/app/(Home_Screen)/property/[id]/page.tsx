@@ -8,7 +8,6 @@ import { motion, AnimatePresence } from "framer-motion";
 import { useRouter } from "next/navigation";
 import toast, { Toaster } from "react-hot-toast";
 
-
 const PropertyDetails = () => {
   const router = useRouter();
   const params = useParams();
@@ -47,9 +46,8 @@ const PropertyDetails = () => {
   }, []);
 
   const submit = async () => {
-    setLoading(true)
+    setLoading(true);
     try {
-      
       const response = await fetch("/api/application_submit", {
         method: "POST",
         credentials: "include",
@@ -63,27 +61,24 @@ const PropertyDetails = () => {
         router.push("/applications");
       } else if (response.status === 409) {
         toast.custom((t) => (
-        <div
-          className={`${
-            t.visible ? "animate-enter" : "animate-leave"
-          } fixed top-2 right-2 bg-black border mt-[40px] border-black text-white flex items-center justify-center rounded-lg shadow-md font-bold h-[60px] w-[250px] text-sm`}
-        >
-          Application alredy exist {" "}
-        </div>
-      ));
-        setLoading(false)
-
+          <div
+            className={`${
+              t.visible ? "animate-enter" : "animate-leave"
+            } fixed top-2 right-2 bg-black border mt-[40px] border-black text-white flex items-center justify-center rounded-lg shadow-md font-bold h-[60px] w-[250px] text-sm`}
+          >
+            Application alredy exist{" "}
+          </div>
+        ));
+        setLoading(false);
       } else {
         console.error("Error from server:", data.message);
         alert(`Error: ${data.message}`);
-        setLoading(false)
-
+        setLoading(false);
       }
     } catch (error) {
       console.error("Fetch error:", error);
       alert("Something went wrong. Please try again.");
-      setLoading(false)
-
+      setLoading(false);
     }
   };
 
@@ -145,13 +140,32 @@ const PropertyDetails = () => {
   }, [userId]);
 
   const handleLikeToggle = async () => {
-    const response = await fetch("/api/like_button", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ propertyId, userId }),
-    });
-    const result = await response.json();
-    setLiked(result.like);
+    if (IsAuthenticated !== true) {
+      toast.custom((t) => (
+        <div
+          className={`${
+            t.visible ? "animate-enter" : "animate-leave"
+          } fixed top-2 right-2 bg-white border mt-[40px] border-black text-black flex items-center justify-center rounded-lg shadow-md font-bold h-[60px] w-[250px] text-sm`}
+        >
+          SignUp to like
+        </div>
+      ));
+      return;
+    }
+
+    try {
+      const response = await fetch("/api/like_button", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ propertyId, userId }),
+      });
+
+      const result = await response.json();
+      setLiked(result.like);
+    } catch (error) {
+      console.error("Like toggle failed:", error);
+      toast.error("Something went wrong!");
+    }
   };
 
   useEffect(() => {
@@ -222,7 +236,7 @@ const PropertyDetails = () => {
       <div className="fixed top-0 left-0 w-full z-50">
         <Navbar />
       </div>
- <Toaster />
+      <Toaster />
       {loading ? (
         <div className="flex justify-center items-center h-[800px] ">
           <div className="w-12 h-12 border-4 border-gray-300 border-t-black rounded-full animate-spin"></div>
@@ -362,19 +376,18 @@ const PropertyDetails = () => {
             </div>
 
             {role === "tenant" && (
-               <motion.div
-               onClick={() => setsubmit_popup(true)}
-               className="relative w-full h-[40px] overflow-hidden group border border-gray-200 cursor-pointer flex items-center justify-center rounded text-center"
-               whileHover={{ scale: 1.01 }}
-               whileTap={{ scale: 0.99 }}
-             >
-               <span className="absolute bottom-0 left-0 w-full h-0 bg-black origin-bottom transition-all duration-300 ease-out group-hover:h-full"></span>
-               <span className="relative z-10 transition-colors duration-300 group-hover:text-white">
-                 Submit Application
-               </span>
-             </motion.div>
-            ) }
-           
+              <motion.div
+                onClick={() => setsubmit_popup(true)}
+                className="relative w-full h-[40px] overflow-hidden group border border-gray-200 cursor-pointer flex items-center justify-center rounded text-center"
+                whileHover={{ scale: 1.01 }}
+                whileTap={{ scale: 0.99 }}
+              >
+                <span className="absolute bottom-0 left-0 w-full h-0 bg-black origin-bottom transition-all duration-300 ease-out group-hover:h-full"></span>
+                <span className="relative z-10 transition-colors duration-300 group-hover:text-white">
+                  Submit Application
+                </span>
+              </motion.div>
+            )}
 
             <AnimatePresence>
               {submit_popup && (
@@ -469,10 +482,116 @@ const PropertyDetails = () => {
             </div>
           </div>
 
-          <div className="bg-gray-900 h-[166px] w-full">
-            <h1 className="text-white flex items-center justify-center">
-              Footer
-            </h1>
+          <div className="bg-black w-full py-8 px-4 sm:px-6 lg:px-8">
+            <div className="max-w-7xl mx-auto flex flex-col md:flex-row items-center justify-between">
+              {/* Logo and Brand */}
+              <div className="flex items-center mb-6 md:mb-0">
+                <div
+                  className="h-10 w-10 rounded-full overflow-hidden cursor-pointer"
+                  onClick={() => router.push("/home")}
+                >
+                  <img
+                    className="h-full w-full scale-150 object-cover"
+                    src="https://i.pinimg.com/736x/61/85/c2/6185c254877b80aa71dbe737971a753b.jpg"
+                    alt="HOMIFI Logo"
+                  />
+                </div>
+                <div
+                  onClick={() => router.push("/home")}
+                  className="ml-4 border-l-4 border-gray-300 cursor-pointer pl-3 group"
+                >
+                  <span className="text-white font-thin text-3xl tracking-tight relative">
+                    HOM<span className="font-bold">IFI</span>
+                    <span className="absolute bottom-0 left-0 w-0 h-0.5 bg-white transition-all duration-300 group-hover:w-full"></span>
+                  </span>
+                </div>
+              </div>
+
+              {/* Links */}
+              <div className="flex flex-wrap justify-center gap-6 md:gap-8">
+                <a
+                  href="#"
+                  className="text-gray-300 hover:text-white transition-colors"
+                >
+                  About
+                </a>
+                <a
+                  href="#"
+                  className="text-gray-300 hover:text-white transition-colors"
+                >
+                  Services
+                </a>
+                <a
+                  href="#"
+                  className="text-gray-300 hover:text-white transition-colors"
+                >
+                  Contact
+                </a>
+                <a
+                  href="#"
+                  className="text-gray-300 hover:text-white transition-colors"
+                >
+                  Privacy Policy
+                </a>
+              </div>
+
+              {/* Social Icons (optional) */}
+              <div className="flex gap-4 items-center  mt-6 ">
+                <div className="mr-2">
+                  <a
+                    href="#"
+                    className="text-gray-400 hover:text-white transition-colors"
+                  >
+                    <span className="sr-only "></span>
+                    <img
+                      onClick={() => {
+                        router.push(
+                          "https://www.instagram.com/atharva_pandhare/"
+                        );
+                      }}
+                      className="h-7 w-7  bg-white cursor-pointer"
+                      src="https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcR2Y1eJXcUkhkRH9qnj68_PxtVUeEjbBtqPJRqzpnU-PtJD4IZy1G5Kp_tjnlsM2jrJkno&usqp=CAU"
+                      alt=""
+                    />
+                  </a>
+                </div>
+                <a
+                  href="#"
+                  className="text-gray-400 hover:text-white transition-colors"
+                >
+                  <span className="sr-only"></span>
+                  <img
+                    onClick={() => {
+                      router.push("https://github.com/atharva10205");
+                    }}
+                    className="h-9 w-9 bg-white rounded-full cursor-pointer"
+                    src="https://img.icons8.com/?size=100&id=RHLuYrY4GjUv&format=png&color=000000"
+                    alt=""
+                  />
+                </a>
+                <a
+                  href="#"
+                  className="text-gray-400 hover:text-white transition-colors"
+                >
+                  <span className="sr-only"></span>
+                  <img
+                    onClick={() => {
+                      router.push("https://x.com/AtharvaPandhar4");
+                    }}
+                    className="h-9 w-9  cursor-pointer"
+                    src="https://img.freepik.com/free-vector/new-2023-twitter-logo-x-icon-design_1017-45418.jpg?semt=ais_items_boosted&w=740"
+                    alt=""
+                  />
+                </a>
+              </div>
+            </div>
+
+            {/* Copyright */}
+            <div className="mt-8 pt-6 border-t border-gray-800 text-center text-gray-400 text-sm">
+              <p>
+                &copy; {new Date().getFullYear()} HOMIFI. All rights reserved.
+              </p>
+            </div>
           </div>
         </>
       )}

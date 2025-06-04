@@ -10,6 +10,33 @@ const Navbar = () => {
   const [username, setusername] = useState("");
   const [role, setrole] = useState("");
   const [notification_popup, setnotification_popup] = useState(false);
+  const [userId, setUserId] = useState(null);
+
+
+  useEffect(() => {
+    const getUserId = async () => {
+      try {
+        const res = await fetch("/api/user_id", {
+          method: "POST",
+          credentials: "include",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({}),
+        });
+        const data = await res.json();
+
+         if (res.ok) {
+          setUserId(data.userId);
+        } else {
+          console.log("Error from backend:");
+        }
+      } catch (error) {
+        console.log("Fetch error:");
+      }
+    };
+    getUserId();
+  }, []);
 
   useEffect(() => {
     const checkAuth = async () => {
@@ -21,7 +48,7 @@ const Navbar = () => {
           setrole(data.user.role);
         }
       } catch (err) {
-        console.error("Failed to check auth", err);
+        console.log("Failed to check auth", err);
         setIsAuthenticated(false);
       }
     };
@@ -31,15 +58,23 @@ const Navbar = () => {
   useEffect(() => {
     const getuserdata = async () => {
       try {
-        const response = await fetch("/api/user_data");
+        const response = await fetch("/api/user_data" , {
+           method: "POST",
+          credentials: "include",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({ userId }),
+        });
         const data = await response.json();
-        setusername(data.username);
+        console.log("niginginigginga", data);
+        setusername(data);
       } catch (error) {
         console.log("Error while fetching getuserdata:", error);
       }
     };
     getuserdata();
-  }, []);
+  }, [userId]);
 
   useEffect(() => {
     const handleClickOutside = (event) => {
@@ -61,25 +96,35 @@ const Navbar = () => {
       if (res.ok) {
         setIsAuthenticated(false);
       } else {
-        console.error("Logout failed");
+        console.log("Logout failed");
       }
     } catch (err) {
-      console.error("Logout error:", err);
+      console.log("Logout error:", err);
     }
   };
 
   return (
     <div className="flex stickey top-0">
       <div className="bg-black text-white h-[50px] w-full flex justify-between items-center">
-        <img
-          onClick={() => {
-            router.push("/home");
-          }}
-          className="h-[35px] cursor-pointer w-[35px] ml-2 rounded-full"
-          src="https://i.pinimg.com/736x/c2/7f/bd/c27fbd4ba881ed0492c15c6a7465cc70.jpg"
-          alt=""
-        />
-        <div className="text-white ml-4">I am a navbar</div>
+        <div
+          className="h-[35px] w-[35px] ml-2 rounded-full overflow-hidden cursor-pointer"
+          onClick={() => router.push("/home")}
+        >
+          <img
+            className="h-full w-full scale-150 object-cover"
+            src="https://i.pinimg.com/736x/61/85/c2/6185c254877b80aa71dbe737971a753b.jpg"
+            alt=""
+          />
+        </div>
+        <div
+          onClick={() => router.push("/home")}
+          className="ml-4 border-l-4 border-gray-300 cursor-pointer pl-3 group"
+        >
+          <span className="text-white font-thin text-3xl tracking-tight relative">
+            HOM<span className="font-bold">IFI</span>
+            <span className="absolute bottom-0 left-0 w-0 h-0.5 bg-white transition-all duration-300 group-hover:w-full"></span>
+          </span>
+        </div>{" "}
         <div className="ml-auto mr-4">
           {!IsAuthenticated ? (
             <>
@@ -113,7 +158,7 @@ const Navbar = () => {
                 />
               </div> */}
 
-              <div
+              {/* <div
                 onClick={() => {
                   setnotification_popup((prev) => !prev),
                     setShowDropdown(false);
@@ -129,26 +174,51 @@ const Navbar = () => {
                   src="https://img.icons8.com/?size=100&id=83193&format=png&color=FFFFFF"
                   className="absolute top-0 left-0 h-full w-full hidden group-hover:block"
                   alt=""
+                   src="https://cdn-icons-png.freepik.com/512/8861/8861091.png"
                 />
-              </div>
+              </div> */}
 
               <div
                 onClick={() => {
-                  setShowDropdown((prev) => !prev),
-                    setnotification_popup(false);
+                  setShowDropdown((prev) => !prev);
+                  setnotification_popup(false);
                 }}
-                className="flex flex-row items-center justify-center cursor-pointer"
+                className="flex flex-row items-center justify-center  cursor-pointer group relative px-3 py-2 rounded-lg hover:bg-white/10 transition-all duration-200"
               >
-                <img
-                  src="https://cdn-icons-png.freepik.com/512/8861/8861091.png"
-                  className="rounded-full mr-1 bg-white h-[35px] w-[35px]"
-                  alt=""
-                />
-                <div className="font-bold">{username}</div>
-              </div>
+                {/* Profile picture - always visible without hover effects */}
+                <div className="relative mr-2">
+                  <img
+                    src={username.pfpUrl}
+                    className="rounded-full h-[40px] w-[40px] border-2 border-white/30 object-cover"
+                    alt="Profile"
+                  />
+                </div>
 
+                {/* Username with animated underline */}
+                <div className="font-bold text-white relative">
+                  {username.username}
+                  <span className="absolute -bottom-1 left-0 w-0 h-0.5 bg-white transition-all duration-300 group-hover:w-full"></span>
+                </div>
+
+                {/* Chevron icon */}
+                <svg
+                  className={`ml-2 h-4 w-4 text-white transition-transform duration-200 ${
+                    showDropdown ? "rotate-180" : ""
+                  }`}
+                  fill="none"
+                  viewBox="0 0 24 24"
+                  stroke="currentColor"
+                >
+                  <path
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    strokeWidth={2}
+                    d="M19 9l-7 7-7-7"
+                  />
+                </svg>
+              </div>
               {showDropdown && (
-                <div className="absolute top-12 right-0 bg-black text-white shadow-md rounded-xl p-3 z-50 w-48 flex flex-col space-y-2">
+                <div className="absolute top-12 mt-5 right-0 bg-black text-white shadow-md rounded-xl p-3 z-50 w-48 flex flex-col space-y-2">
                   <button
                     onClick={() => {
                       if (role === "tenant") {
@@ -166,7 +236,13 @@ const Navbar = () => {
                   </button>
 
                   <button
-                    onClick={() => router.push("/settings")}
+                    onClick={() => {
+                      if (role === "tenant") {
+                        router.push("/settings");
+                      } else {
+                        router.push("/setting");
+                      }
+                    }}
                     className="relative overflow-hidden group text-left px-4 py-2 rounded cursor-pointer "
                   >
                     <span className="absolute bottom-0 left-0 w-full h-0 bg-white origin-bottom transition-all duration-300 ease-out group-hover:h-full"></span>
@@ -184,26 +260,6 @@ const Navbar = () => {
                       Logout
                     </span>
                   </button>
-                </div>
-              )}
-
-              {notification_popup && (
-                <div className="absolute top-12 right-0 bg-white text-white shadow-md rounded-xl p-3 z-50 h-[400px] w-[400px] flex flex-col space-y-2">
-                  <div className="h-[60px] flex items-start space-x-3 ml-5 rounded-lg w-full border border-gray-300 p-2 overflow-hidden">
-                    <img
-                      className="bg-red-500 rounded-full h-[50px] w-[50px]"
-                      src=""
-                      alt=""
-                    />
-
-                    <div className="flex-1 overflow-y-auto text-black text-sm max-h-[50px] pr-2">
-                      Lorem ipsum dolor sit, amet consectetur adipisicing elit.
-                      Consequuntur molestias cumque neque ullam nihil sapiente
-                      perferendis odit dolore ratione voluptatibus! Lorem ipsum
-                      dolor sit amet, consectetur adipisicing elit. Saepe,
-                      voluptate!
-                    </div>
-                  </div>
                 </div>
               )}
             </div>

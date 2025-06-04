@@ -50,7 +50,7 @@ const Page = () => {
         body: JSON.stringify({ userId }),
       });
       const data = await response.json();
-      
+
       if (data?.applications?.length) {
         data.applications.reverse();
       }
@@ -62,7 +62,7 @@ const Page = () => {
 
   const handleDeleteClick = async (id) => {
     setFadingOutIds((prev) => [...prev, id]);
-    
+
     await fetch("/api/application_delete", {
       method: "POST",
       credentials: "include",
@@ -70,20 +70,20 @@ const Page = () => {
       body: JSON.stringify({ e: id }),
     });
 
-      toast.custom((t) => (
-        <div
-          className={`${
-            t.visible ? "animate-enter" : "animate-leave"
-          } fixed top-2 right-2 bg-black border mt-[40px] border-black text-white flex items-center justify-center rounded-lg shadow-md font-bold h-[60px] w-[250px] text-sm`}
-        >
-          Deleted{" "}
-        </div>
-      ));
-    
+    toast.custom((t) => (
+      <div
+        className={`${
+          t.visible ? "animate-enter" : "animate-leave"
+        } fixed top-2 right-2 bg-black border mt-[40px] border-black text-white flex items-center justify-center rounded-lg shadow-md font-bold h-[60px] w-[250px] text-sm`}
+      >
+        Deleted{" "}
+      </div>
+    ));
+
     setTimeout(() => {
       setData((prev) => ({
         ...prev,
-        applications: prev.applications.filter((app) => app.id !== id)
+        applications: prev.applications.filter((app) => app.id !== id),
       }));
       setFadingOutIds((prev) => prev.filter((fid) => fid !== id));
     }, 300);
@@ -116,8 +116,8 @@ const Page = () => {
                       : "opacity-100 translate-y-0 scale-100"
                   }`}
                   style={{
-                    transitionProperty: 'opacity, transform',
-                    willChange: 'opacity, transform'
+                    transitionProperty: "opacity, transform",
+                    willChange: "opacity, transform",
                   }}
                 >
                   <div>
@@ -223,14 +223,16 @@ const Page = () => {
                             {property.status?.trim()}
                           </div>
 
-                          <div>
-                            <img
-                              onClick={() => handleDeleteClick(property.id)}
-                              className="h-[25px] mt-3 w-[25px] cursor-pointer"
-                              src="https://img.icons8.com/?size=100&id=67884&format=png&color=000000"
-                              alt="delete"
-                            />
-                          </div>
+                          {property.status?.trim() !== "accepted" && (
+                            <div>
+                              <img
+                                onClick={() => handleDeleteClick(property.id)}
+                                className="h-[25px] mt-3 w-[25px] cursor-pointer"
+                                src="https://img.icons8.com/?size=100&id=67884&format=png&color=000000"
+                                alt="delete"
+                              />
+                            </div>
+                          )}
                         </div>
                       </div>
                     </div>

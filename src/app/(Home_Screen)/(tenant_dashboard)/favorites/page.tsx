@@ -40,7 +40,6 @@ const Page = () => {
     getUserId();
   }, []);
 
-  // Fetch property data
   useEffect(() => {
     const get_data = async () => {
       if (!userId) return;

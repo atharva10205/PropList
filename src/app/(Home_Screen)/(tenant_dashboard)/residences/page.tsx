@@ -16,6 +16,8 @@ const page = () => {
   const [Public_Id, setPublic_Id] = useState("");
   const [ethRate, setEthRate] = useState(null);
 
+  
+
   useEffect(() => {
     async function getEthRate() {
       const res = await fetch(
@@ -28,71 +30,92 @@ const page = () => {
   }, []);
 
   const handleSend = async (addid, id, amount1) => {
-    //nigger
+  const receiverAddress = id;
+  const amount = amount1;
+  const addID = addid;
 
-    const reciver_id = id;
-    const amount = amount1;
-    const addID = addid;
+  if (!window.ethereum) {
+    alert("MetaMask not detected");
+    return;
+  }
 
-    if (!window.ethereum) return alert("MetaMask not detected");
-    if (!ethRate) return alert("ETH price not loaded");
+  let metamaskProvider = null;
+
+  if (Array.isArray(window.ethereum.providers)) {
+    metamaskProvider = window.ethereum.providers.find((p) => p.isMetaMask);
+  } else if (window.ethereum.isMetaMask) {
+    metamaskProvider = window.ethereum;
+  }
+
+  if (!metamaskProvider) {
+    toast.custom((t) => (
+      <div
+        className={`${
+          t.visible ? "animate-enter" : "animate-leave"
+        } fixed top-2 right-2 bg-black border mt-[40px] border-black text-white flex items-center justify-center rounded-lg shadow-md font-bold h-[60px] w-[250px] text-sm`}
+      >
+        No MetaMask detected
+      </div>
+    ));
+    return;
+  }
+
+  if (!ethRate) {
+    alert("ETH price not loaded");
+    return;
+  }
+
+  try {
+    // Request account access (opens MetaMask if not connected)
+    await metamaskProvider.request({ method: "eth_requestAccounts" });
+
+    const provider = new BrowserProvider(metamaskProvider);
+    const signer = await provider.getSigner();
 
     const ethAmount = (parseFloat(amount) * ethRate).toFixed(6);
 
-    try {
-      const provider = new BrowserProvider(window.ethereum);
-      const signer = await provider.getSigner();
+    const tx = await signer.sendTransaction({
+      to: receiverAddress,
+      value: parseEther(ethAmount),
+    });
 
-      const tx = await signer.sendTransaction({
-        to: reciver_id,
-        value: parseEther(ethAmount),
+    if (tx) {
+      const response = await fetch("/api/Billing_history", {
+        method: "POST",
+        credentials: "include",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({ addID, ethAmount }),
       });
 
-      if (tx) {
-        const response = await fetch("/api/Billing_history", {
-          method: "POST",
-          credentials: "include",
-          headers: {
-            "Content-Type": "application/json",
-          },
-          body: JSON.stringify({ addID, ethAmount }),
-        });
-
-        if (response) {
-          toast.custom((t) => (
-            <div
-              className={`${
-                t.visible ? "animate-enter" : "animate-leave"
-              } fixed top-2 right-2 bg-black border mt-[40px] border-black text-white flex items-center justify-center rounded-lg shadow-md font-bold h-[60px] w-[250px] text-sm`}
-            >
-              Transaction successfull!{" "}
-            </div>
-          ));
-        }
-      } else {
+      if (response.ok) {
         toast.custom((t) => (
           <div
             className={`${
               t.visible ? "animate-enter" : "animate-leave"
             } fixed top-2 right-2 bg-black border mt-[40px] border-black text-white flex items-center justify-center rounded-lg shadow-md font-bold h-[60px] w-[250px] text-sm`}
           >
-            Something went wrong!{" "}
+            Transaction successful!
           </div>
         ));
       }
-    } catch (err) {
-      console.error(err);
-      toast.custom((t) => (
-        <div
-          className={`${
-            t.visible ? "animate-enter" : "animate-leave"
-          } fixed top-2 right-2 bg-black border mt-[40px] border-black text-white flex items-center justify-center rounded-lg shadow-md font-bold h-[60px] w-[250px] text-sm`}
-        >
-          Something went wrong!{" "}
-        </div>
-      ));
+    } else {
+      throw new Error("Transaction not created");
     }
-  };
+  } catch (err) {
+    console.error("Transaction Error:", err);
+    toast.custom((t) => (
+      <div
+        className={`${
+          t.visible ? "animate-enter" : "animate-leave"
+        } fixed top-2 right-2 bg-black border mt-[40px] border-black text-white flex items-center justify-center rounded-lg shadow-md font-bold h-[60px] w-[250px] text-sm`}
+      >
+        Something went wrong!
+      </div>
+    ));
+  }
+};
 
   const Connectwallet = async () => {
     if (!window.ethereum) {
@@ -312,7 +335,7 @@ const page = () => {
                                 <span className="font-din font-bold text-gray-700 min-w-[80px]">
                                   Due Date:
                                 </span>
-                                <span className="text-gray-900">10/02/25</span>
+                                <span className="text-gray-900">{property.date}</span>
                               </div>
                             </div>
 
@@ -345,7 +368,7 @@ const page = () => {
                             <thead className="bg-gray-50">
                               <tr>
                                 <th className="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                                  Date
+                                  Date 
                                 </th>
                                 <th className="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                                   Amount
@@ -358,8 +381,8 @@ const page = () => {
                                   <td className="px-4 py-2 text-sm text-gray-700">
                                     {date}
                                   </td>
-                                  <td className="px-4 py-2 text-sm text-gray-700">
-                                    ${property.amount[index]}
+                                  <td className=" text-sm text-gray-700">
+                                    {property.amount[index]} eth
                                   </td>
                                 </tr>
                               ))}

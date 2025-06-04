@@ -1,15 +1,18 @@
 "use client";
-import React, { useState } from "react";
+import React, { useState, useRef } from "react";
 import { useRouter } from "next/navigation";
 import toast, { Toaster } from "react-hot-toast";
 
 const Page = () => {
   const router = useRouter();
+  const fileInputRef = useRef(null);
 
   const [username, setUsername] = useState("");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [role, setRole] = useState("tenant");
+  const [profilePicture, setProfilePicture] = useState(null);
+  const [previewImage, setPreviewImage] = useState(null);
   const [errors, setErrors] = useState({
     username: false,
     email: false,
@@ -25,6 +28,31 @@ const Page = () => {
 
     setErrors(newErrors);
     return !Object.values(newErrors).some(Boolean);
+  };
+
+  const handleImageChange = (e) => {
+    const file = e.target.files[0];
+    if (file) {
+      setProfilePicture(file);
+      const reader = new FileReader();
+      reader.onloadend = () => {
+        setPreviewImage(reader.result);
+      };
+      reader.readAsDataURL(file);
+    }
+  };
+
+  const handleRemoveImage = (e) => {
+    e.stopPropagation();
+    setProfilePicture(null);
+    setPreviewImage(null);
+    if (fileInputRef.current) {
+      fileInputRef.current.value = "";
+    }
+  };
+
+  const handleImageClick = () => {
+    fileInputRef.current.click();
   };
 
   const handleSubmit = async (e) => {
@@ -44,20 +72,27 @@ const Page = () => {
         return;
       }
 
-      const response = await fetch("/api/signup", {
-        method: "POST",
-        body: JSON.stringify({ username, email, password, role }),
-        credentials: "include",
-        headers: { "Content-Type": "application/json" },
-      });
+      const formData = new FormData();
+      formData.append("file", profilePicture);
 
-      const data = await response.json();
+      try {
+        const res = await fetch("/api/upload2", {
+          method: "POST",
+          body: formData,
+        });
 
-      if (!response.ok) {
-        throw new Error(data.error || "Something went wrong");
+        const data = await res.json();
+        console.log("Uploaded file URL(s):", data.urls);
+        const pfpUrl =  data.urls;
+
+        const response = await fetch("/api/signup", {
+          method: "POST",
+          body: JSON.stringify({ username, email, password, role ,pfpUrl }),
+          credentials: "include",
+        });
+      } catch (err) {
+        console.error("Upload failed:", err);
       }
-
-      console.log("Signup success!", data);
       router.push("/home");
     } catch (error) {
       toast.custom((t) => (
@@ -66,7 +101,7 @@ const Page = () => {
             t.visible ? "animate-enter" : "animate-leave"
           } fixed top-2 right-2 bg-white border border-black text-black flex items-center justify-center rounded-lg shadow-md font-bold h-[60px] w-[250px] text-sm`}
         >
-          Something went wrong!
+          {error.message || "Something went wrong!"}
         </div>
       ));
     }
@@ -105,6 +140,54 @@ const Page = () => {
         </div>
 
         <form className="space-y-4" onSubmit={handleSubmit}>
+          <div className="flex flex-col items-center mb-4">
+            <div
+              className="relative w-24 h-24 rounded-full border-2 border-black mb-2 overflow-hidden cursor-pointer"
+              onClick={handleImageClick}
+            >
+              {previewImage ? (
+                <>
+                  <img
+                    src={previewImage}
+                    alt="Profile preview"
+                    className="w-full h-full object-cover"
+                  />
+                  <button
+                    type="button"
+                    onClick={handleRemoveImage}
+                    className="absolute top-0 right-0 bg-red-500 text-white rounded-full w-6 h-6 flex items-center justify-center"
+                  >
+                    ×
+                  </button>
+                </>
+              ) : (
+                <div className="w-full h-full bg-gray-200 flex items-center justify-center">
+                  <svg
+                    xmlns="http://www.w3.org/2000/svg"
+                    className="h-10 w-10 text-gray-500"
+                    fill="none"
+                    viewBox="0 0 24 24"
+                    stroke="currentColor"
+                  >
+                    <path
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                      strokeWidth={2}
+                      d="M12 6v6m0 0v6m0-6h6m-6 0H6"
+                    />
+                  </svg>
+                </div>
+              )}
+            </div>
+            <input
+              type="file"
+              ref={fileInputRef}
+              onChange={handleImageChange}
+              accept="image/*"
+              className="hidden"
+            />
+          </div>
+
           <input
             type="text"
             value={username}

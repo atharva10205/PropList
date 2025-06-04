@@ -30,7 +30,7 @@ const Sidebar_manager = () => {
     },
     {
       name: "Settings",
-      path: "/settings",
+      path: "/setting",
       icon: "https://img.icons8.com/?size=100&id=14099&format=png&color=000000",
     },
   ];

@@ -1,4 +1,5 @@
 import prisma from "../../../../lib/prisma";
+import redis from "../../../../lib/redis";
 
 export async function POST(req) {
   const { userId } = await req.json();
@@ -10,7 +11,6 @@ export async function POST(req) {
   });
 
   const senderIds = applications.map((app) => app.senderId);
-  const application_ID = applications.map((app) => app.id);//gpt thisss 
   const addIds = applications.map((app) => app.addId);
 
   const senders = await prisma.User.findMany({
@@ -70,6 +70,8 @@ export async function POST(req) {
         : null,
     };
   });
+
+  await redis.set(`application:${combinedData}`)
 
 
   return new Response(JSON.stringify(combinedData), {

@@ -470,22 +470,51 @@ export default function AddPropertyForm() {
   }, [selectedLocation1]);
 
   if (creating_screen === true) {
-    return (
-      <div className="bg-black min-h-screen text-white flex justify-center items-center">
-        creating ....
+  return (
+    <div className="bg-black min-h-screen text-white flex flex-col justify-center items-center gap-4">
+      <div className="relative">
+        {/* Animated circles */}
+        <div className="w-16 h-16 border-4 border-blue-500 border-t-transparent rounded-full animate-spin"></div>
+        {/* Optional: Add a second rotating element inside */}
+        <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-8 h-8 border-2 border-white border-b-transparent rounded-full animate-spin animation-delay-75"></div>
       </div>
-    );
-  }
-
-  if (created_listing === true) {
-    router.push("/properties")
-    return (
-
-      <div className="bg-black min-h-screen text-white flex justify-center items-center">
-        created yay
+      <div className="text-xl font-medium tracking-wide">
+        Creating your listing<span className="animate-pulse">...</span>
       </div>
-    );
-  }
+      <p className="text-gray-400 text-sm">This may take a few moments</p>
+    </div>
+  );
+}
+
+if (created_listing === true) {
+  router.push("/properties");
+  return (
+    <div className="bg-black min-h-screen text-white flex flex-col justify-center items-center gap-6">
+      {/* Checkmark animation */}
+      <div className="w-20 h-20 bg-green-500 rounded-full flex items-center justify-center animate-pop-in">
+        <svg 
+          className="w-12 h-12 text-white animate-checkmark"
+          fill="none" 
+          stroke="currentColor" 
+          viewBox="0 0 24 24"
+          strokeWidth="2"
+        >
+          <path strokeLinecap="round" strokeLinejoin="round" d="M5 13l4 4L19 7" />
+        </svg>
+      </div>
+      <h2 className="text-2xl font-bold bg-gradient-to-r from-green-400 to-blue-500 bg-clip-text text-transparent">
+        Success!
+      </h2>
+      <p className="text-gray-300">Your listing has been created</p>
+      <div className="flex items-center gap-2 text-blue-400 animate-pulse">
+        <span>Redirecting</span>
+        <svg className="w-5 h-5 animate-bounce" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path strokeLinecap="round" strokeLinejoin="round" d="M13 5l7 7-7 7M5 5l7 7-7 7" />
+        </svg>
+      </div>
+    </div>
+  );
+}
 
   return (
     <>
@@ -759,7 +788,6 @@ export default function AddPropertyForm() {
                     />
                   </div>
 
-                  {/* Photos */}
                   <div>
                     <h2 className="text-xl font-medium mb-4">Photos</h2>
                     <label
@@ -790,7 +818,6 @@ export default function AddPropertyForm() {
                       />
                     </label>
 
-                    {/* Image Previews */}
                     {previewUrls.length > 0 && (
                       <div className="grid grid-cols-3 gap-4 mt-6">
                         {previewUrls.map((url, index) => (
@@ -804,7 +831,6 @@ export default function AddPropertyForm() {
                       </div>
                     )}
                   </div>
-                  {/* Additional Information */}
                   <div>
                     <h2 className="text-xl font-medium mb-4">
                       Additional Information

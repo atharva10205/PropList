@@ -1,20 +1,22 @@
 "use client";
 
-import React, { useState, useEffect,useRef } from "react";
+import React, { useState, useEffect, useRef } from "react";
 import Navbar from "@/app/components/Navbar";
 import Sidebar_manager from "@/app/components/Sidebar_manager";
 import { useRouter } from "next/navigation";
 import toast, { Toaster } from "react-hot-toast";
 
 const Page = () => {
-   const router = useRouter();
-   const [userId, setUserId] = useState("");
-   const [isLoading, setIsLoading] = useState(true);
-   const [Role, setRole] = useState("");
-   const [Input, setInput] = useState("");
-   const [previewImage, setPreviewImage] = useState(null);
-   const [profilePicture, setProfilePicture] = useState(null);
-   const fileInputRef = useRef(null);
+  const router = useRouter();
+  const [userId, setUserId] = useState("");
+  const [isLoading, setIsLoading] = useState(true);
+  const [Role, setRole] = useState("");
+  const [Input, setInput] = useState("");
+  const [previewImage, setPreviewImage] = useState(null);
+  const [profilePicture, setProfilePicture] = useState(null);
+  const fileInputRef = useRef(null);
+  const [isSidebarOpen, setIsSidebarOpen] = useState(false);
+
   useEffect(() => {
     const getUserId = async () => {
       try {
@@ -226,85 +228,119 @@ const Page = () => {
       ));
     }
   };
-
   return (
-    <div className="h-screen flex flex-col">
+    <div className="h-screen flex flex-col overflow-hidden">
       <Navbar />
       <Toaster />
-      <div className="flex flex-1">
-        <div className="w-56 flex-shrink-0 bg-gray-100 overflow-y-auto">
+
+      {/* Mobile Header */}
+      <div className="md:hidden p-4 bg-white flex justify-between items-center sticky top-0 z-30">
+        <button
+          onClick={() => setIsSidebarOpen(!isSidebarOpen)}
+          className="p-2 rounded-md text-black focus:outline-none focus:ring-2 focus:ring-gray-400"
+          aria-label="Toggle sidebar"
+        >
+          <svg
+            className="w-6 h-6"
+            fill="none"
+            stroke="currentColor"
+            viewBox="0 0 24 24"
+            xmlns="http://www.w3.org/2000/svg"
+          >
+            <path
+              strokeLinecap="round"
+              strokeLinejoin="round"
+              strokeWidth={2}
+              d={
+                isSidebarOpen
+                  ? "M6 18L18 6M6 6l12 12"
+                  : "M4 6h16M4 12h16M4 18h16"
+              }
+            />
+          </svg>
+        </button>
+
+        <h1 className="text-2xl font-bold mb-4 md:mb-8">Settings</h1>
+      </div>
+
+      <div className="flex flex-1 overflow-hidden relative">
+        {/* Sidebar - Made responsive */}
+        <div
+       className={`
+            fixed top-[50px] left-0 z-40 h-full w-64  overflow-y-auto transition-transform duration-300 ease-in-out
+            md:static md:translate-x-0
+            ${
+              isSidebarOpen
+                ? "translate-x-0"
+                : "-translate-x-full"
+            }
+          `}
+        >
           <Sidebar_manager />
         </div>
 
-        <div className="flex-1 p-6 overflow-auto">
-          <h1 className="text-2xl font-bold mb-8">Settings</h1>
+        {isSidebarOpen && (
+          <div
+            className="fixed inset-0  bg-opacity-50 z-10 md:hidden"
+            onClick={() => setIsSidebarOpen(false)}
+          />
+        )}
 
-          {Role === "tenant" ? (
-            <button
-              onClick={tenanat_to_manager}
-              className="relative cursor-pointer group overflow-hidden px-4 py-2 border border-black rounded text-black"
-            >
-              <span className="absolute bottom-0 left-0 w-full h-0 bg-black transition-all duration-300 ease-out group-hover:h-full origin-bottom"></span>
-
-              <span className="relative z-10 transition-colors duration-300 group-hover:text-white">
-                switch to Manager
-              </span>
-            </button>
-          ) : null}
-
-          {Role === "manager" ? (
-            <button
-              onClick={managet_to_tenant}
-              className="relative group overflow-hidden px-4 py-2 border border-black rounded text-black"
-            >
-              <span className="absolute bottom-0 left-0 w-full h-0 bg-black transition-all duration-300 ease-out group-hover:h-full origin-bottom"></span>
-
-              <span className="relative z-10 transition-colors duration-300 group-hover:text-white">
-                switch to Tenant
-              </span>
-            </button>
-          ) : null}
-
-          <div className=" flex gap-4 flex-row mt-15">
-            <div>
+        <div
+          className={`flex-1 overflow-y-auto p-6 transition-opacity duration-300 ${
+            isSidebarOpen ? "opacity-50 md:opacity-100" : "opacity-100"
+          }`}
+        >
+          <div className="mb-8">
+            {Role === "tenant" && (
               <button
-                onClick={handel_name_change}
-                className="relative group overflow-hidden px-4 w-[158px] cursor-pointer py-2 border border-black rounded text-black"
+                onClick={tenanat_to_manager}
+                className="relative cursor-pointer group overflow-hidden px-4 py-2 border border-black rounded text-black"
               >
                 <span className="absolute bottom-0 left-0 w-full h-0 bg-black transition-all duration-300 ease-out group-hover:h-full origin-bottom"></span>
-
                 <span className="relative z-10 transition-colors duration-300 group-hover:text-white">
-                  Change name
+                  switch to Manager
                 </span>
               </button>
-            </div>
+            )}
 
-            <div>
-              <input
-                onChange={(e) => {
-                  setInput(e.target.value);
-                }}
-                className="border border-gray-300 w-[300px] rounded h-[42px]"
-                type="update name"
-              />
-            </div>
+            {Role === "manager" && (
+              <button
+                onClick={managet_to_tenant}
+                className="relative group overflow-hidden px-4 py-2 border border-black rounded text-black"
+              >
+                <span className="absolute bottom-0 left-0 w-full h-0 bg-black transition-all duration-300 ease-out group-hover:h-full origin-bottom"></span>
+                <span className="relative z-10 transition-colors duration-300 group-hover:text-white">
+                  switch to Tenant
+                </span>
+              </button>
+            )}
           </div>
-            <div className=" flex gap-4 items-center  flex-row mt-10">
-            <div>
-              <button
-                onClick={handleSubmit}
-                className="relative group overflow-hidden mr-10 cursor-pointer w-[160px] px-4 py-2 border border-black rounded text-black"
-              >
-                <span className="absolute bottom-0 left-0 w-full h-0 bg-black transition-all duration-300 ease-out group-hover:h-full origin-bottom"></span>
 
-                <span className="relative z-10 transition-colors duration-300 group-hover:text-white">
-                  Change pfp
-                </span>
-              </button>
-            </div>
+          
+          <div className="flex mt-15 flex-col md:flex-row gap-4 mb-8">
+            <input
+              onChange={(e) => setInput(e.target.value)}
+              className="border border-gray-300 w-full md:w-[300px] rounded h-[42px] px-3"
+              type="text"
+              placeholder="Update name"
+            />
 
+            <button
+              onClick={handel_name_change}
+              className="relative group overflow-hidden px-4 w-full md:w-[158px] cursor-pointer py-2 border border-black rounded text-black"
+            >
+              <span className="absolute bottom-0 left-0 w-full h-0 bg-black transition-all duration-300 ease-out group-hover:h-full origin-bottom"></span>
+              <span className="relative z-10 transition-colors duration-300 group-hover:text-white">
+                Change name
+              </span>
+            </button>
+          </div>
+
+          {/* Profile Picture Section - Made responsive */}
+          <div className="flex flex-col mt-15 md:flex-row gap-4 items-center">
             <div
-              className="relative w-24 h-24 rounded-full border-2 border-black mb-2 overflow-hidden cursor-pointer"
+              className="relative w-20 h-20 md:w-24 md:h-24 rounded-full border-2 border-black overflow-hidden cursor-pointer"
               onClick={handleImageClick}
             >
               {previewImage ? (
@@ -317,14 +353,16 @@ const Page = () => {
                   <button
                     type="button"
                     onClick={handleRemoveImage}
-                    className="absolute top-0 right-0 bg-red-500 text-white rounded-full w-6 h-6 flex items-center justify-center"
-                  ></button>
+                    className="absolute top-0 right-0 bg-red-500 text-white rounded-full w-5 h-5 md:w-6 md:h-6 flex items-center justify-center"
+                  >
+                    ×
+                  </button>
                 </>
               ) : (
                 <div className="w-full h-full bg-gray-200 flex items-center justify-center">
                   <svg
                     xmlns="http://www.w3.org/2000/svg"
-                    className="h-10 w-10 text-gray-500"
+                    className="h-8 w-8 md:h-10 md:w-10 text-gray-500"
                     fill="none"
                     viewBox="0 0 24 24"
                     stroke="currentColor"
@@ -339,6 +377,17 @@ const Page = () => {
                 </div>
               )}
             </div>
+
+            <button
+              onClick={handleSubmit}
+              className="relative group overflow-hidden w-full md:w-[160px] px-4 py-2 border border-black rounded text-black"
+            >
+              <span className="absolute bottom-0 left-0 w-full h-0 bg-black transition-all duration-300 ease-out group-hover:h-full origin-bottom"></span>
+              <span className="relative z-10 transition-colors duration-300 group-hover:text-white">
+                Change pfp
+              </span>
+            </button>
+
             <input
               type="file"
               ref={fileInputRef}
@@ -348,11 +397,8 @@ const Page = () => {
             />
           </div>
         </div>
-        </div>
-
-      
       </div>
-    
+    </div>
   );
 };
 

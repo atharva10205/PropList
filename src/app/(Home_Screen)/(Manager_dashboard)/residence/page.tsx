@@ -4,19 +4,68 @@ import React, { useState, useEffect } from "react";
 import Sidebar_manager from "@/app/components/Sidebar_manager";
 import Navbar from "@/app/components/Navbar";
 import { useRouter } from "next/navigation";
+import toast, { Toaster } from "react-hot-toast";
 
 const Page = () => {
   const router = useRouter();
   const [userId, setUserId] = useState(null);
   const [applications, setApplications] = useState(null);
   const [fadingOutIds, setFadingOutIds] = useState([]);
-  const [loading, setLoading] = useState(true); // New loading state
+  const [loading, setLoading] = useState(true);
   const [Wallet_connected, setWallet_connected] = useState(false);
   const [Public_Id, setPublic_Id] = useState("");
+  const [isSidebarOpen, setIsSidebarOpen] = useState(false);
+
+ const changeWallet = async () => {
+  if (!window.ethereum) {
+    toast("Please install MetaMask");
+    return;
+  }
+
+  let metamaskProvider = null;
+
+  if (Array.isArray(window.ethereum.providers)) {
+    metamaskProvider = window.ethereum.providers.find((p) => p.isMetaMask);
+  } else if (window.ethereum.isMetaMask) {
+    metamaskProvider = window.ethereum;
+  }
+
+  if (!metamaskProvider) {
+    toast("MetaMask not found");
+    return;
+  }
+
+  try {
+    await metamaskProvider.request({
+      method: "wallet_requestPermissions",
+      params: [{ eth_accounts: {} }],
+    });
+
+    const accounts = await metamaskProvider.request({
+      method: "eth_requestAccounts",
+    });
+
+    if (accounts.length > 0) {
+      setPublic_Id(accounts[0]);
+      console.log("Connected to:", accounts[0]);
+    }
+  } catch (err) {
+    console.error("Wallet connection error:", err);
+  }
+};
+
 
   const Connectwallet = async () => {
     if (!window.ethereum) {
-      alert("Please install MetaMask");
+      toast.custom((t) => (
+        <div
+          className={`${
+            t.visible ? "animate-enter" : "animate-leave"
+          } fixed top-2 right-2 bg-black border mt-[40px] border-black text-white flex items-center justify-center rounded-lg shadow-md font-bold h-[60px] w-[250px] text-sm`}
+        >
+          Please install MetaMask{" "}
+        </div>
+      ));
       return;
     }
 
@@ -29,7 +78,15 @@ const Page = () => {
     }
 
     if (!metamaskProvider) {
-      alert("MetaMask wallet not found! Please install MetaMask.");
+      toast.custom((t) => (
+        <div
+          className={`${
+            t.visible ? "animate-enter" : "animate-leave"
+          } fixed top-2 right-2 bg-black border mt-[40px] border-black text-white flex items-center justify-center rounded-lg shadow-md font-bold h-[60px] w-[250px] text-sm`}
+        >
+          Please install MetaMask{" "}
+        </div>
+      ));
       return;
     }
 
@@ -44,17 +101,15 @@ const Page = () => {
     }
   };
 
-    useEffect(() => {
-      Connectwallet();
-    }, [Connectwallet]);
+  useEffect(() => {
+    Connectwallet();
+  }, [Connectwallet]);
 
   useEffect(() => {
     if (Public_Id !== null && Public_Id !== "") {
       setWallet_connected(true);
     }
   }, [Public_Id]);
-
-  
 
   useEffect(() => {
     const getUserId = async () => {
@@ -107,47 +162,63 @@ const Page = () => {
     getApplications();
   }, [userId]);
 
-  const handleRemoveWithAnimation = (id) => {
-    setFadingOutIds((prev) => [...prev, id]);
-    setTimeout(() => {
-      setApplications((prev) => prev.filter((app) => app.applicationId !== id));
-      setFadingOutIds((prev) => prev.filter((fid) => fid !== id));
-    }, 300);
-  };
-
-  const accept_button = async (id) => {
-    await fetch("/api/accept_button", {
-      method: "POST",
-      credentials: "include",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ applicationId: id }),
-    });
-    handleRemoveWithAnimation(id);
-  };
-
-  const decline_button = async (id) => {
-    await fetch("/api/decline_button", {
-      method: "POST",
-      credentials: "include",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ applicationId: id }),
-    });
-    handleRemoveWithAnimation(id);
-  };
-
   const filteredApplications =
     applications?.filter((app) => app.status === "accepted") || [];
 
   return (
     <div className="h-screen flex flex-col overflow-hidden">
+      {/* Navbar */}
       <Navbar />
-      <div className="flex flex-1 overflow-hidden">
-        <div className="w-64 flex-shrink-0 bg-gray-100 overflow-y-auto">
-          <Sidebar_manager />
-        </div>
+      <Toaster />
 
-        <div className="flex-1 overflow-y-auto p-4">
-          <h1 className="text-2xl font-bold mb-4">Residences</h1>
+      <div className="md:hidden flex justify-between items-center p-4 bg-white  z-30">
+        <button
+          aria-label="Toggle sidebar"
+          onClick={() => setIsSidebarOpen(!isSidebarOpen)}
+          className="text-black focus:outline-none"
+        >
+          <svg
+            className="w-6 h-6"
+            fill="none"
+            stroke="currentColor"
+            viewBox="0 0 24 24"
+            xmlns="http://www.w3.org/2000/svg"
+          >
+            <path
+              strokeLinecap="round"
+              strokeLinejoin="round"
+              strokeWidth={2}
+              d="M4 6h16M4 12h16M4 18h16"
+            />
+          </svg>
+        </button>
+      </div>
+
+      <div className="flex flex-1 overflow-hidden relative">
+        {/* Sidebar */}
+        <aside
+          className={`
+            fixed top-[50px] left-0 z-40 h-full w-64 bg-gray-100 overflow-y-auto transition-transform duration-300 ease-in-out
+            md:static md:translate-x-0
+            ${isSidebarOpen ? "translate-x-0" : "-translate-x-full"}
+          `}
+        >
+          <Sidebar_manager />
+        </aside>
+
+        {/* Overlay behind sidebar on mobile */}
+        {isSidebarOpen && (
+          <div
+            className="fixed inset-0  bg-opacity-50 z-30 md:hidden"
+            onClick={() => setIsSidebarOpen(false)}
+          />
+        )}
+
+        {/* Main Content */}
+        <main className="flex-1 overflow-y-auto p-4">
+          <h1 className="text-2xl font-bold mb-4 hidden md:block">
+            Residences
+          </h1>
 
           {loading ? (
             <div className="flex justify-center items-center h-full">
@@ -166,7 +237,12 @@ const Page = () => {
                     }`}
                   >
                     {/* Property Card */}
-                    <div className="w-full lg:w-80 rounded-2xl h-auto lg:h-[360px] overflow-hidden shadow-lg border cursor-pointer border-gray-200 m-4 lg:m-0">
+                    <div
+                      className="w-[calc(100%-30px)]  lg:w-80 rounded-2xl h-auto lg:h-[360px] overflow-hidden shadow-lg border cursor-pointer border-gray-200 m-4 lg:m-0"
+                      onClick={() =>
+                        router.push(`/property/${application.property.id}`)
+                      }
+                    >
                       <div className="relative">
                         <img
                           src={
@@ -175,17 +251,9 @@ const Page = () => {
                           }
                           alt={application.property.propertyName}
                           className="h-48 w-full object-cover"
-                          onClick={() =>
-                            router.push(`/property/${application.property.id}`)
-                          }
                         />
                       </div>
-                      <div
-                        onClick={() =>
-                          router.push(`/property/${application.property.id}`)
-                        }
-                        className="p-4"
-                      >
+                      <div className="p-4">
                         <h2 className="text-lg font-bold">
                           {application.property.propertyName}
                         </h2>
@@ -217,8 +285,8 @@ const Page = () => {
                     </div>
 
                     {/* Sender Info and Buttons */}
-                    <div className="flex flex-col md:flex-row gap-4 mr-4 ml-4 w flex-grow">
-                      <div className="flex-shrink-0 p-4 border border-gray-300 items-center justify-center flex flex-col  mt-2 mb-2 rounded-lg shadow-lg min-w-[200px] md:w-auto">
+                    <div className="flex flex-col md:flex-row gap-4 mr-4 ml-4 flex-grow">
+                      <div className="flex-shrink-0 p-4 border border-gray-300 items-center justify-center flex flex-col mt-2 mb-2 rounded-lg shadow-lg min-w-[200px] md:w-auto">
                         <h1 className="font-bold mb-2">Payment </h1>
                         {!Wallet_connected && (
                           <button
@@ -261,11 +329,14 @@ const Page = () => {
                             </div>
 
                             <div className="pt-2">
-                              <button className=" cursor-pointer w-[500px] relative group overflow-hidden px-4 py-2 border border-black rounded text-black">
+                              <button
+                                onClick={changeWallet}
+                                className="cursor-pointer w-full relative group overflow-hidden px-4 py-2 border border-black rounded text-black"
+                              >
                                 <span className="absolute bottom-0 left-0 w-full h-0 bg-black transition-all duration-300 ease-out group-hover:h-full origin-bottom"></span>
 
                                 <span className="relative z-10 transition-colors duration-300 group-hover:text-white">
-                                 Change wallet
+                                  Change wallet
                                 </span>
                               </button>
                             </div>
@@ -273,7 +344,7 @@ const Page = () => {
                         )}
                       </div>
 
-                      <div className="flex-grow p-4 border border-gray-300 mt-2 mb-2 rounded-lg shadow-lg  max-w-[400px] overflow-hidden">
+                      <div className="flex-grow p-4 border border-gray-300 mt-2 mb-2 rounded-lg shadow-lg max-w-full md:max-w-[400px] overflow-hidden">
                         <h1 className="font-bold mb-2">Billing History</h1>
 
                         <div className="overflow-y-auto max-h-64">
@@ -288,7 +359,7 @@ const Page = () => {
                                 </th>
                               </tr>
                             </thead>
-                             <tbody className="bg-white divide-y divide-gray-200">
+                            <tbody className="bg-white divide-y divide-gray-200">
                               {application.property.date?.map((date, index) => (
                                 <tr key={index}>
                                   <td className="px-4 py-2 text-sm text-gray-700">
@@ -311,7 +382,7 @@ const Page = () => {
               )}
             </div>
           )}
-        </div>
+        </main>
       </div>
     </div>
   );

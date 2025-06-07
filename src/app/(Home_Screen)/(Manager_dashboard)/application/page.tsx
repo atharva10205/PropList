@@ -11,6 +11,7 @@ const Page = () => {
   const [applications, setApplications] = useState(null);
   const [fadingOutIds, setFadingOutIds] = useState([]);
   const [loading, setLoading] = useState(true); // New loading state
+  const [isSidebarOpen, setIsSidebarOpen] = useState(false);
 
   useEffect(() => {
     const getUserId = async () => {
@@ -52,7 +53,7 @@ const Page = () => {
 
         const fetchedData = await response.json();
         setApplications(fetchedData);
-        console.log(fetchedData)
+        console.log(fetchedData);
       } catch (err) {
         console.error("Failed to fetch applications:", err);
       } finally {
@@ -71,16 +72,16 @@ const Page = () => {
     }, 300);
   };
 
-  const accept_button = async (id , add_id) => {
+  const accept_button = async (id, add_id) => {
     const response = await fetch("/api/accept_button", {
       method: "POST",
       credentials: "include",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ applicationId: id  , userId , add_id : add_id}),
+      body: JSON.stringify({ applicationId: id, userId, add_id: add_id }),
     });
     handleRemoveWithAnimation(id);
-    if(response){
-      router.push("/residence")
+    if (response) {
+      router.push("/residence");
     }
   };
 
@@ -100,12 +101,50 @@ const Page = () => {
   return (
     <div className="h-screen flex flex-col overflow-hidden">
       <Navbar />
-      <div className="flex flex-1 overflow-hidden">
-        <div className="w-64 flex-shrink-0 bg-gray-100 overflow-y-auto">
+
+      <div className="md:hidden p-4  flex justify-between items-center">
+        <button
+          onClick={() => setIsSidebarOpen(!isSidebarOpen)}
+          className="text-black focus:outline-none"
+        >
+          <svg
+            className="w-6 h-6"
+            fill="none"
+            stroke="currentColor"
+            viewBox="0 0 24 24"
+            xmlns="http://www.w3.org/2000/svg"
+          >
+            <path
+              strokeLinecap="round"
+              strokeLinejoin="round"
+              strokeWidth={2}
+              d="M4 6h16M4 12h16M4 18h16"
+            />
+          </svg>
+        </button>
+      </div>
+
+      <div className="flex flex-1 overflow-hidden relative">
+        <div
+          className={`fixed md:static top-[50px] left-0 h-[calc(100vh-40px)] w-64  overflow-y-auto z-20 transform transition-transform duration-300 ease-in-out ${
+            isSidebarOpen ? "translate-x-0" : "-translate-x-full"
+          } md:translate-x-0`}
+        >
           <Sidebar_manager />
         </div>
 
-        <div className="flex-1 overflow-y-auto p-4">
+        {isSidebarOpen && (
+          <div
+            className="fixed inset-0  bg-opacity-50 z-10 md:hidden"
+            onClick={() => setIsSidebarOpen(false)}
+          />
+        )}
+
+        <div
+          className={`flex-1 overflow-y-auto p-4 transition-opacity duration-300 ${
+            isSidebarOpen ? "opacity-50 md:opacity-100" : "opacity-100"
+          }`}
+        >
           <h1 className="text-2xl font-bold mb-4">Applications</h1>
 
           {loading ? (
@@ -124,8 +163,9 @@ const Page = () => {
                         : "opacity-100"
                     }`}
                   >
-                    <div className="w-full lg:w-80 rounded-2xl h-auto lg:h-[360px] overflow-hidden shadow-lg border cursor-pointer border-gray-200 m-4 lg:m-0">
-                      <div className="relative">
+                    {/* Property Card */}
+                    <div className="w-[calc(100%-30px)] lg:w-80 rounded-2xl h-auto lg:h-[360px] overflow-hidden shadow-lg border cursor-pointer border-gray-200 m-4 lg:m-0">
+                      <div className="relative ">
                         <img
                           src={
                             application.property.imageURL ||
@@ -174,13 +214,14 @@ const Page = () => {
                       </div>
                     </div>
 
+                    {/* Applicant Info & Message */}
                     <div className="flex flex-col md:flex-row gap-4 mr-4 ml-4 flex-grow">
                       <div className="flex-shrink-0 p-4 border border-gray-300 mt-2 mb-2 rounded-lg shadow-lg w-full md:w-auto">
                         <h1 className="font-bold">From,</h1>
                         <div className="flex flex-row mt-5 items-center">
                           <img
                             className="h-[60px] w-[60px] mr-4 rounded-full"
-                            src="https://imgs.search.brave.com/5UXUrwnw8J0ENnlCfKBvy2iT3ZiU9L2WC2CXtxFJfO0/rs:fit:860:0:0:0/g:ce/aHR0cHM6Ly93YWxs/cGFwZXJzLmNvbS9p/bWFnZXMvaGQvcGZw/LXBpY3R1cmVzLWsz/ZHF4bjNuMG5heGVm/bjIuanBn"
+                            src={application.sender.pfpUrl}
                             alt="profile"
                           />
                           <h1 className="break-all">
@@ -200,7 +241,10 @@ const Page = () => {
                         <div className="flex flex-col mt-10 space-y-5">
                           <button
                             onClick={() =>
-                              accept_button(application.applicationId ,application.property.id )
+                              accept_button(
+                                application.applicationId,
+                                application.property.id
+                              )
                             }
                             className="relative group h-[30px] border cursor-pointer border-gray-300 shadow-lg rounded-[5px] overflow-hidden"
                           >
@@ -209,7 +253,6 @@ const Page = () => {
                               Accept
                             </span>
                           </button>
-
                           <button
                             onClick={() =>
                               decline_button(application.applicationId)
@@ -224,7 +267,7 @@ const Page = () => {
                         </div>
                       </div>
 
-                      <div className="flex-grow p-4 border border-gray-300 mt-2 mb-2 rounded-lg shadow-lg  min-w-[300px] max-w-[600px]">
+                      <div className="flex-grow p-4 border border-gray-300 mt-2 mb-2 rounded-lg shadow-lg min-w-[300px] max-w-[600px]">
                         <h1 className="font-bold mb-2">Message</h1>
                         <h2 className="break-words">{application.message}</h2>
                       </div>

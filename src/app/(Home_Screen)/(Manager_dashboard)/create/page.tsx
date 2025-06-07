@@ -25,10 +25,10 @@ export default function AddPropertyForm() {
   const [role, setrole] = useState("");
   const [Wallet_connected, setWallet_connected] = useState(false);
   const [Public_Id, setPublic_Id] = useState("");
+  const [isSidebarOpen, setIsSidebarOpen] = useState(false);
 
   const Connectwallet = async () => {
     if (!window.ethereum) {
-      
       return;
     }
 
@@ -41,7 +41,7 @@ export default function AddPropertyForm() {
     }
 
     if (!metamaskProvider) {
-       toast.custom((t) => (
+      toast.custom((t) => (
         <div
           className={`${
             t.visible ? "animate-enter" : "animate-leave"
@@ -66,7 +66,6 @@ export default function AddPropertyForm() {
 
   const Connectwallet1 = async () => {
     if (!window.ethereum) {
-      
       return;
     }
 
@@ -79,7 +78,6 @@ export default function AddPropertyForm() {
     }
 
     if (!metamaskProvider) {
-    
       return;
     }
 
@@ -161,16 +159,15 @@ export default function AddPropertyForm() {
         const { lat, lon } = response.data[0];
         setSelectedLocation({ lat: parseFloat(lat), lng: parseFloat(lon) });
       } else {
-        
-         toast.custom((t) => (
-        <div
-          className={`${
-            t.visible ? "animate-enter" : "animate-leave"
-          } fixed top-2 right-2 bg-black border mt-[40px] border-black text-white flex items-center justify-center rounded-lg shadow-md font-bold h-[60px] w-[250px] text-sm`}
-        >
-          Place not found{" "}
-        </div>
-      ));
+        toast.custom((t) => (
+          <div
+            className={`${
+              t.visible ? "animate-enter" : "animate-leave"
+            } fixed top-2 right-2 bg-black border mt-[40px] border-black text-white flex items-center justify-center rounded-lg shadow-md font-bold h-[60px] w-[250px] text-sm`}
+          >
+            Place not found{" "}
+          </div>
+        ));
       }
     } catch (error) {
       toast.custom((t) => (
@@ -268,15 +265,15 @@ export default function AddPropertyForm() {
       },
       (err) => {
         console.error("Error getting location:", err);
-         toast.custom((t) => (
-        <div
-          className={`${
-            t.visible ? "animate-enter" : "animate-leave"
-          } fixed top-2 right-2 bg-black border mt-[40px] border-black text-white flex items-center justify-center rounded-lg shadow-md font-bold h-[60px] w-[250px] text-sm`}
-        >
-          API down{" "}
-        </div>
-      ));
+        toast.custom((t) => (
+          <div
+            className={`${
+              t.visible ? "animate-enter" : "animate-leave"
+            } fixed top-2 right-2 bg-black border mt-[40px] border-black text-white flex items-center justify-center rounded-lg shadow-md font-bold h-[60px] w-[250px] text-sm`}
+          >
+            API down{" "}
+          </div>
+        ));
       }
     );
   };
@@ -295,7 +292,6 @@ export default function AddPropertyForm() {
   };
 
   const create_button = async (e) => {
-
     if (!validateFields()) {
       toast.custom((t) => (
         <div
@@ -308,9 +304,9 @@ export default function AddPropertyForm() {
       ));
       return;
     }
-    
-    if(!Public_Id){
-       toast.custom((t) => (
+
+    if (!Public_Id) {
+      toast.custom((t) => (
         <div
           className={`${
             t.visible ? "animate-enter" : "animate-leave"
@@ -323,7 +319,6 @@ export default function AddPropertyForm() {
     }
 
     e.preventDefault();
-
 
     const requiredFields = {
       propertyName,
@@ -453,7 +448,7 @@ export default function AddPropertyForm() {
 
   const memoizedMap = useMemo(() => {
     return (
-      <div className="h-[403px] w-[973px] bg-gray-300 flex items-center justify-center">
+      <div className="h-[403px]  w-[380px] md:w-[973px] bg-gray-300 flex items-center justify-center">
         <MapView3
           markerCoords={selectedLocation}
           onLocationSelect={setSelectedLocation1}
@@ -470,65 +465,109 @@ export default function AddPropertyForm() {
   }, [selectedLocation1]);
 
   if (creating_screen === true) {
-  return (
-    <div className="bg-black min-h-screen text-white flex flex-col justify-center items-center gap-4">
-      <div className="relative">
-        {/* Animated circles */}
-        <div className="w-16 h-16 border-4 border-blue-500 border-t-transparent rounded-full animate-spin"></div>
-        {/* Optional: Add a second rotating element inside */}
-        <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-8 h-8 border-2 border-white border-b-transparent rounded-full animate-spin animation-delay-75"></div>
+    return (
+      <div className="bg-black min-h-screen text-white flex flex-col justify-center items-center gap-4">
+        <div className="relative">
+          {/* Animated circles */}
+          <div className="w-16 h-16 border-4 border-blue-500 border-t-transparent rounded-full animate-spin"></div>
+          {/* Optional: Add a second rotating element inside */}
+          <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-8 h-8 border-2 border-white border-b-transparent rounded-full animate-spin animation-delay-75"></div>
+        </div>
+        <div className="text-xl font-medium tracking-wide">
+          Creating your listing<span className="animate-pulse">...</span>
+        </div>
+        <p className="text-gray-400 text-sm">This may take a few moments</p>
       </div>
-      <div className="text-xl font-medium tracking-wide">
-        Creating your listing<span className="animate-pulse">...</span>
-      </div>
-      <p className="text-gray-400 text-sm">This may take a few moments</p>
-    </div>
-  );
-}
+    );
+  }
 
-if (created_listing === true) {
-  router.push("/properties");
-  return (
-    <div className="bg-black min-h-screen text-white flex flex-col justify-center items-center gap-6">
-      {/* Checkmark animation */}
-      <div className="w-20 h-20 bg-green-500 rounded-full flex items-center justify-center animate-pop-in">
-        <svg 
-          className="w-12 h-12 text-white animate-checkmark"
-          fill="none" 
-          stroke="currentColor" 
-          viewBox="0 0 24 24"
-          strokeWidth="2"
-        >
-          <path strokeLinecap="round" strokeLinejoin="round" d="M5 13l4 4L19 7" />
-        </svg>
+  if (created_listing === true) {
+    router.push("/properties");
+    return (
+      <div className="bg-black min-h-screen text-white flex flex-col justify-center items-center gap-6">
+        {/* Checkmark animation */}
+        <div className="w-20 h-20 bg-green-500 rounded-full flex items-center justify-center animate-pop-in">
+          <svg
+            className="w-12 h-12 text-white animate-checkmark"
+            fill="none"
+            stroke="currentColor"
+            viewBox="0 0 24 24"
+            strokeWidth="2"
+          >
+            <path
+              strokeLinecap="round"
+              strokeLinejoin="round"
+              d="M5 13l4 4L19 7"
+            />
+          </svg>
+        </div>
+        <h2 className="text-2xl font-bold bg-gradient-to-r from-green-400 to-blue-500 bg-clip-text text-transparent">
+          Success!
+        </h2>
+        <p className="text-gray-300">Your listing has been created</p>
+        <div className="flex items-center gap-2 text-blue-400 animate-pulse">
+          <span>Redirecting</span>
+          <svg
+            className="w-5 h-5 animate-bounce"
+            fill="none"
+            stroke="currentColor"
+            viewBox="0 0 24 24"
+          >
+            <path
+              strokeLinecap="round"
+              strokeLinejoin="round"
+              d="M13 5l7 7-7 7M5 5l7 7-7 7"
+            />
+          </svg>
+        </div>
       </div>
-      <h2 className="text-2xl font-bold bg-gradient-to-r from-green-400 to-blue-500 bg-clip-text text-transparent">
-        Success!
-      </h2>
-      <p className="text-gray-300">Your listing has been created</p>
-      <div className="flex items-center gap-2 text-blue-400 animate-pulse">
-        <span>Redirecting</span>
-        <svg className="w-5 h-5 animate-bounce" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-          <path strokeLinecap="round" strokeLinejoin="round" d="M13 5l7 7-7 7M5 5l7 7-7 7" />
-        </svg>
-      </div>
-    </div>
-  );
-}
+    );
+  }
 
   return (
     <>
       {role === "manager" ? (
         <div className="h-screen flex flex-col overflow-hidden">
-          {/* Navbar */}
           <Navbar />
           <Toaster />
-          {/* Main content */}
-          <div className="flex flex-1 overflow-hidden">
-            {/* Sidebar - stays fixed */}
-            <div className="w-[190px] h-full overflow-y-auto border-r">
-              <Sidebar_manager />
-            </div>
+          <div className="md:hidden p-4 bg-white shadow-md flex justify-between items-center">
+            {/* Hamburger Menu on Left */}
+            <button
+              onClick={() => setIsSidebarOpen(!isSidebarOpen)}
+              className="text-black focus:outline-none"
+            >
+              <svg
+                className="w-6 h-6"
+                fill="none"
+                stroke="currentColor"
+                viewBox="0 0 24 24"
+                xmlns="http://www.w3.org/2000/svg"
+              >
+                <path
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  strokeWidth={2}
+                  d="M4 6h16M4 12h16M4 18h16"
+                />
+              </svg>
+            </button>
+          </div>
+         <div className="flex flex-1 overflow-hidden relative">
+        {/* Sidebar */}
+        <div
+          className={`fixed md:static z-20 top-[50px]  left-0 h-full w-64  overflow-y-auto transform transition-transform duration-300 ease-in-out ${
+            isSidebarOpen ? "translate-x-0" : "-translate-x-full"
+          } md:translate-x-0`}
+        >
+          <Sidebar_manager />
+        </div>
+
+         {isSidebarOpen && (
+          <div
+            className="fixed inset-0  bg-opacity-50 z-10 md:hidden"
+            onClick={() => setIsSidebarOpen(false)}
+          />
+        )}
 
             {/* Form area - scrolls */}
             <div className="flex-1 overflow-y-auto">
@@ -941,7 +980,7 @@ if (created_listing === true) {
                       {Wallet_connected && (
                         <div className="space-y-4 p-4 bg-white rounded-lg shadow-md border border-gray-200">
                           <div className="flex flex-col space-y-2">
-                            <div  className="flex items-center">
+                            <div className="flex items-center">
                               <span className="font-din font-bold text-gray-700 min-w-[80px]">
                                 Your ID:
                               </span>
@@ -962,18 +1001,16 @@ if (created_listing === true) {
                       <div>
                         <button
                           onClick={handleUseMyLocation}
-                          className={`relative px-4 py-2 rounded cursor-pointer overflow-hidden group border transition-all duration-300 ${
+                          className={`relative px-4 py-2 rounded cursor-pointer w-full md:w-fit overflow-hidden group border transition-all duration-300 ${
                             my_location
                               ? "bg-black text-white border-black"
                               : "bg-white text-black border-gray-200"
                           }`}
                         >
-                          {/* Animated fill from bottom to top */}
                           {!my_location && (
                             <span className="absolute bottom-0 left-0 w-full h-0 bg-black origin-bottom transition-all duration-300 ease-out group-hover:h-full" />
                           )}
 
-                          {/* Text stays above and turns white on hover */}
                           <span
                             className={`relative z-10 transition-colors duration-300 ${
                               my_location ? "" : "group-hover:text-white"
@@ -992,7 +1029,7 @@ if (created_listing === true) {
                             setdog(false);
                             setmy_location(false);
                           }}
-                          className={`relative px-4 py-2 rounded cursor-pointer overflow-hidden group border transition-all duration-300 ${
+                          className={`relative px-4 py-2 rounded  w-full md:w-fit cursor-pointer overflow-hidden group border transition-all duration-300 ${
                             search_location
                               ? "bg-black text-white border-black"
                               : "bg-white text-black border-gray-200"
@@ -1050,14 +1087,14 @@ if (created_listing === true) {
 
                   {/* Map */}
                   {my_location && coords && (
-                    <div className="h-[403px] w-[973px] bg-gray-300 flex items-center justify-center">
+                    <div className="h-[403px] w-[380px] md:w-[973px] bg-gray-300 flex items-center justify-center">
                       <MapView1 markerCoords={coords} />
                     </div>
                   )}
                   {search_location && memoizedMap}
 
                   {dog && (
-                    <div className="h-[403px] w-[973px] bg-gray-300 flex items-center justify-center">
+                    <div className="h-[403px]  w-[380px] md:w-[973px] bg-gray-300 flex items-center justify-center">
                       <MapView2 />
                     </div>
                   )}

@@ -1,5 +1,4 @@
 import prisma from "../../../../lib/prisma";
-import redis from "../../../../lib/redis";
 
 export async function POST(req) {
   const { userId } = await req.json();
@@ -23,6 +22,7 @@ export async function POST(req) {
       id: true,
       username: true,
       email: true,
+      pfpUrl:true,
     },
   });
 
@@ -51,11 +51,12 @@ export async function POST(req) {
       applicationId: app.id,
       contact: app.contact,
       message: app.message,
-      status: app.status, 
+      status: app.status,
       sender: {
         id: sender?.id,
         username: sender?.username,
         email: sender?.email,
+        pfpUrl:sender?.pfpUrl,
       },
       property: property
         ? {
@@ -63,16 +64,13 @@ export async function POST(req) {
             propertyName: property.propertyName,
             description: property.description,
             pricePerMonth: property.pricePerMonth,
-            imageURL: property.imageURLs?.[0] || null, 
+            imageURL: property.imageURLs?.[0] || null,
             beds: property.beds,
             baths: property.baths,
           }
         : null,
     };
   });
-
-  await redis.set(`application:${combinedData}`)
-
 
   return new Response(JSON.stringify(combinedData), {
     headers: {

@@ -9,9 +9,9 @@ const Page = () => {
   const router = useRouter();
   const [userId, setUserId] = useState("");
   const [properties, setProperties] = useState([]);
-  const [isLoading, setIsLoading] = useState(true); // NEW: loading state
+  const [isLoading, setIsLoading] = useState(true);
+  const [isSidebarOpen, setIsSidebarOpen] = useState(false);
 
-  // Fetch userId
   useEffect(() => {
     const getUserId = async () => {
       try {
@@ -56,6 +56,7 @@ const Page = () => {
 
         const result = await response.json();
         setProperties(result);
+        console.log("liked", result);
       } catch (error) {
         console.error("Error fetching properties:", error);
       } finally {
@@ -67,54 +68,90 @@ const Page = () => {
   }, [userId]);
 
   return (
-    <div className="h-screen flex flex-col">
+    <div className="h-screen flex flex-col overflow-hidden">
       <Navbar />
 
-      <div className="flex flex-1">
-      <div className="w-56 flex-shrink-0 bg-gray-100 overflow-y-auto">
+      <div className="md:hidden p-4 bg-white flex justify-between items-center">
+        <button
+          onClick={() => setIsSidebarOpen(!isSidebarOpen)}
+          className="text-black focus:outline-none"
+        >
+          <svg
+            className="w-6 h-6"
+            fill="none"
+            stroke="currentColor"
+            strokeWidth="2"
+            viewBox="0 0 24 24"
+            xmlns="http://www.w3.org/2000/svg"
+          >
+            <path
+              strokeLinecap="round"
+              strokeLinejoin="round"
+              d="M4 6h16M4 12h16M4 18h16"
+            ></path>
+          </svg>
+        </button>
+        <h1 className="text-lg font-semibold">Favorites</h1>
+      </div>
+
+      {isSidebarOpen && (
+        <div
+          className="fixed inset-0 z-10  bg-opacity-50 md:hidden"
+          onClick={() => setIsSidebarOpen(false)}
+        ></div>
+      )}
+
+      <div className="flex flex-1 relative overflow-hidden">
+        <div
+          className={`fixed md:static z-20 top-[50px] left-0 h-full w-56 overflow-y-auto transform transition-transform duration-300 ease-in-out ${
+            isSidebarOpen ? "translate-x-0" : "-translate-x-full"
+          } md:translate-x-0`}
+        >
           <Sidebar />
         </div>
 
-        <div className="flex-1 p-6 overflow-auto">
-          <h1 className="text-2xl font-bold mb-4">Favorites</h1>
-
+        {/* Main Content */}
+        <div className="flex-1 p-4 md:p-6 overflow-auto w-full">
+          <h1 className="text-2xl font-bold mb-4 hidden md:block">Favorites</h1>
 
           {isLoading ? (
             <div className="flex justify-center items-center h-full">
               <div className="w-12 h-12 border-4 border-gray-300 border-t-black rounded-full animate-spin"></div>
-              </div>
+            </div>
           ) : (
             <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-6">
               {properties.map((item) => (
                 <div
-                  key={item.id}
-                  className="w-80 rounded-2xl overflow-hidden cursor-pointer shadow-lg border border-gray-200"
+                  key={item.property.id}
+                  className="w-full rounded-2xl overflow-hidden cursor-pointer shadow-lg border border-gray-200"
                 >
                   <div className="relative">
                     <img
-                      src={item.imageURLs?.[0] || "/placeholder.jpg"}
-                      alt={item.propertyName || "Property Image"}
+                      src={item.property.imageURL || "/placeholder.jpg"}
+                      alt={item.property.propertyName || "Property Image"}
                       className="h-48 w-full object-cover"
-                      onClick={() => router.push(`/property/${item.id}`)}
+                      onClick={() =>
+                        router.push(`/property/${item.property.id}`)
+                      }
                     />
                   </div>
 
                   <div
-                    onClick={() => router.push(`/property/${item.id}`)}
+                    onClick={() => router.push(`/property/${item.property.id}`)}
                     className="p-4"
                   >
                     <h2 className="text-lg font-bold">
-                      {item.propertyName || "Unnamed Property"}
+                      {item.property.propertyName || "Unnamed Property"}
                     </h2>
                     <p className="text-sm text-gray-600 mb-2">
-                      {item.city || "Unknown City"},{" "}
-                      {item.state || "Unknown State"},{" "}
-                      {item.country || "Unknown Country"}
+                      {item.property.city || "Unknown City"},{" "}
+                      {item.property.state || "Unknown State"},{" "}
+                      {item.property.country || "Unknown Country"}
                     </p>
                     <div className="flex items-center mb-3">
                       <span className="text-sm font-semibold ml-auto">
-                        {item.pricePerMonth
-                          ? `₹${item.pricePerMonth}`
+                        {item.property.pricePerMonth
+                          ? `₹${item.property.pricePerMonth}`
                           : "Price N/A"}
                       </span>
                       <span className="text-sm text-gray-500">/month</span>
@@ -126,7 +163,7 @@ const Page = () => {
                           src="https://img.icons8.com/?size=100&id=561&format=png&color=000000"
                           alt=""
                         />
-                        {item.beds || 0} Bed
+                        {item.property.beds || 0} Bed
                       </div>
                       <div className="flex items-center gap-1">
                         <img
@@ -134,7 +171,7 @@ const Page = () => {
                           src="https://img.icons8.com/?size=100&id=HiiMjneqmobf&format=png&color=000000"
                           alt=""
                         />
-                        {item.baths || 0} Bath
+                        {item.property.baths || 0} Bath
                       </div>
                       <div className="flex items-center gap-1">
                         <img
@@ -142,7 +179,7 @@ const Page = () => {
                           src="https://img.icons8.com/?size=100&id=912&format=png&color=000000"
                           alt=""
                         />
-                        {item.amenities || "Amenities"}
+                        {item.property.amenities || "Amenities"}
                       </div>
                     </div>
                   </div>

@@ -15,6 +15,7 @@ const Page = () => {
   const [previewImage, setPreviewImage] = useState(null);
   const [profilePicture, setProfilePicture] = useState(null);
   const fileInputRef = useRef(null);
+  const [isSidebarOpen, setIsSidebarOpen] = useState(false);
 
   useEffect(() => {
     const getUserId = async () => {
@@ -230,97 +231,127 @@ const Page = () => {
   };
 
   return (
-    <div className="h-screen flex flex-col">
+    <div className="h-screen flex flex-col overflow-hidden">
       <Navbar />
       <Toaster />
-      <div className="flex flex-1 flex-row">
-        <div className="w-56 flex-shrink-0 bg-gray-100 overflow-y-auto">
+
+      {/* Mobile Topbar */}
+      <div className="md:hidden p-4 bg-white shadow flex justify-between items-center">
+        <button
+          onClick={() => setIsSidebarOpen(!isSidebarOpen)}
+          className="text-black"
+        >
+          <svg
+            className="w-6 h-6"
+            fill="none"
+            stroke="currentColor"
+            strokeWidth="2"
+            viewBox="0 0 24 24"
+          >
+            <path
+              strokeLinecap="round"
+              strokeLinejoin="round"
+              d="M4 6h16M4 12h16M4 18h16"
+            />
+          </svg>
+        </button>
+        <h1 className="text-xl font-bold">Settings</h1>
+      </div>
+
+      {isSidebarOpen && (
+        <div
+          className="fixed inset-0  bg-opacity-40 z-10 md:hidden"
+          onClick={() => setIsSidebarOpen(false)}
+        />
+      )}
+
+      <div className="flex flex-1 overflow-hidden">
+        {/* Sidebar */}
+        <div
+          className={`fixed md:static z-20 top-[50px] left-0 h-full w-56  overflow-y-auto transform transition-transform duration-300 ease-in-out ${
+            isSidebarOpen ? "translate-x-0" : "-translate-x-full"
+          } md:translate-x-0`}
+        >
           <Sidebar />
         </div>
 
-        <div className="flex-1 p-6 overflow-auto">
-          <h1 className="text-2xl font-bold mb-8">Settings</h1>
+        {/* Main content */}
+        <div className="flex-1 p-4 md:p-6 overflow-auto">
+          <h1 className="text-2xl font-bold mb-8 hidden md:block">Settings</h1>
 
-          {Role === "tenant" ? (
+          {Role === "tenant" && (
             <button
               onClick={tenanat_to_manager}
-              className="relative cursor-pointer group overflow-hidden px-4 py-2 border border-black rounded text-black"
+              className="relative cursor-pointer group overflow-hidden px-4 py-2 border border-black rounded text-black mb-4"
             >
-              <span className="absolute bottom-0 left-0 w-full h-0 bg-black transition-all duration-300 ease-out group-hover:h-full origin-bottom"></span>
-
-              <span className="relative z-10 transition-colors duration-300 group-hover:text-white">
-                switch to Manager
+              <span className="absolute bottom-0 left-0 w-full h-0 bg-black transition-all duration-300 group-hover:h-full origin-bottom" />
+              <span className="relative z-10 group-hover:text-white">
+                Switch to Manager
               </span>
             </button>
-          ) : null}
+          )}
 
-          {Role === "manager" ? (
+          {Role === "manager" && (
             <button
               onClick={managet_to_tenant}
-              className="relative group overflow-hidden cursor-pointer px-4 py-2 border border-black rounded text-black"
+              className="relative group overflow-hidden cursor-pointer px-4 py-2 border border-black rounded text-black mb-4"
             >
-              <span className="absolute bottom-0 left-0 w-full h-0 bg-black transition-all duration-300 ease-out group-hover:h-full origin-bottom"></span>
-
-              <span className="relative z-10 transition-colors duration-300 group-hover:text-white">
-                switch to Tenant
+              <span className="absolute bottom-0 left-0 w-full h-0 bg-black transition-all duration-300 group-hover:h-full origin-bottom" />
+              <span className="relative z-10 group-hover:text-white">
+                Switch to Tenant
               </span>
             </button>
-          ) : null}
+          )}
 
-          <div className=" flex gap-4 flex-row mt-15">
-            <div>
-              <button
-                onClick={handel_name_change}
-                className="relative group overflow-hidden px-4 w-[170px] cursor-pointer py-2 border border-black rounded text-black"
-              >
-                <span className="absolute bottom-0 left-0 w-full h-0 bg-black transition-all duration-300 ease-out group-hover:h-full origin-bottom"></span>
+          {/* Change name section */}
+          <div className="flex flex-col sm:flex-row gap-4 items-start sm:items-center mb-10">
+            <button
+              onClick={handel_name_change}
+              className="relative group w-full sm:w-[170px] overflow-hidden cursor-pointer px-4 py-2 border border-black rounded text-black"
+            >
+              <span className="absolute bottom-0 left-0 w-full h-0 bg-black transition-all duration-300 group-hover:h-full origin-bottom" />
+              <span className="relative z-10 group-hover:text-white">
+                Change Name
+              </span>
+            </button>
 
-                <span className="relative z-10 transition-colors duration-300 group-hover:text-white">
-                  Change name
-                </span>
-              </button>
-            </div>
-
-            <div>
-              <input
-                onChange={(e) => {
-                  setInput(e.target.value);
-                }}
-                className="border border-gray-300 w-[300px] rounded h-[42px]"
-                type="update name"
-              />
-            </div>
+            <input
+              onChange={(e) => setInput(e.target.value)}
+              className="border border-gray-300 w-full sm:w-[300px] rounded h-[42px] px-2"
+              type="text"
+              placeholder="Update name"
+            />
           </div>
-          <div className=" flex gap-4 items-center  flex-row mt-10">
-            <div>
-              <button
-                onClick={handleSubmit}
-                className="relative group overflow-hidden mr-10 cursor-pointer w-[170px] px-4 py-2 border border-black rounded text-black"
-              >
-                <span className="absolute bottom-0 left-0 w-full h-0 bg-black transition-all duration-300 ease-out group-hover:h-full origin-bottom"></span>
 
-                <span className="relative z-10 transition-colors duration-300 group-hover:text-white">
-                  Change pfp
-                </span>
-              </button>
-            </div>
+          {/* Change profile picture section */}
+          <div className="flex flex-col sm:flex-row items-start sm:items-center gap-4">
+            <button
+              onClick={handleSubmit}
+              className="relative group overflow-hidden cursor-pointer w-full sm:w-[170px] px-4 py-2 border border-black rounded text-black"
+            >
+              <span className="absolute bottom-0 left-0 w-full h-0 bg-black transition-all duration-300 group-hover:h-full origin-bottom" />
+              <span className="relative z-10 group-hover:text-white">
+                Change PFP
+              </span>
+            </button>
 
             <div
-              className="relative w-24 h-24 rounded-full border-2 border-black mb-2 overflow-hidden cursor-pointer"
+              className="relative w-24 h-24 rounded-full border-2 border-black overflow-hidden cursor-pointer"
               onClick={handleImageClick}
             >
               {previewImage ? (
                 <>
                   <img
                     src={previewImage}
-                    alt="Profile preview"
+                    alt="Profile Preview"
                     className="w-full h-full object-cover"
                   />
                   <button
-                    type="button"
                     onClick={handleRemoveImage}
                     className="absolute top-0 right-0 bg-red-500 text-white rounded-full w-6 h-6 flex items-center justify-center"
-                  ></button>
+                  >
+                    ×
+                  </button>
                 </>
               ) : (
                 <div className="w-full h-full bg-gray-200 flex items-center justify-center">
@@ -341,6 +372,7 @@ const Page = () => {
                 </div>
               )}
             </div>
+
             <input
               type="file"
               ref={fileInputRef}

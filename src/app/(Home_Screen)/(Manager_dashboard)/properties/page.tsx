@@ -9,7 +9,9 @@ const Page = () => {
   const router = useRouter();
   const [userId, setUserId] = useState(null);
   const [properties, setProperties] = useState([]);
-  const [loading, setLoading] = useState(true); // Spinner state
+  const [loading, setLoading] = useState(true); 
+    const [isSidebarOpen, setIsSidebarOpen] = useState(false);
+
 
   // Get the logged-in user's ID
   useEffect(() => {
@@ -69,34 +71,70 @@ const Page = () => {
     getProperties();
   }, [userId]);
 
-  return (
+    return (
     <div className="h-screen flex flex-col overflow-hidden">
       <Navbar />
 
-      <div className="flex flex-1 overflow-hidden">
-        <div className="w-64 flex-shrink-0 bg-gray-100 overflow-y-auto">
+      {/* Mobile Header */}
+      <div className="md:hidden p-4 bg-white shadow-md flex justify-between items-center">
+        {/* Hamburger Menu on Left */}
+        <button
+          onClick={() => setIsSidebarOpen(!isSidebarOpen)}
+          className="text-black focus:outline-none"
+        >
+          <svg
+            className="w-6 h-6"
+            fill="none"
+            stroke="currentColor"
+            viewBox="0 0 24 24"
+            xmlns="http://www.w3.org/2000/svg"
+          >
+            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 6h16M4 12h16M4 18h16" />
+          </svg>
+        </button>
+      </div>
+
+      <div className="flex flex-1 overflow-hidden relative">
+        {/* Sidebar */}
+        <div
+          className={`fixed md:static z-20 top-[50px]  left-0 h-full w-64  overflow-y-auto transform transition-transform duration-300 ease-in-out ${
+            isSidebarOpen ? "translate-x-0" : "-translate-x-full"
+          } md:translate-x-0`}
+        >
           <Sidebar_manager />
         </div>
 
-        <div className="flex-1 overflow-y-auto p-6 bg-white">
+        {isSidebarOpen && (
+          <div
+            className="fixed inset-0  bg-opacity-50 z-10 md:hidden"
+            onClick={() => setIsSidebarOpen(false)}
+          />
+        )}
+
+        {/* Main Content (opacity 50% on mobile when sidebar open) */}
+        <div
+          className={`flex-1 overflow-y-auto p-6 bg-white transition-opacity duration-300 ${
+            isSidebarOpen ? "opacity-50 md:opacity-100" : "opacity-100"
+          }`}
+        >
           <h1 className="text-2xl font-bold">My Properties</h1>
           <h3 className="mb-4 text-gray-600">
             View and manage your properties listing
           </h3>
 
           {loading ? (
-            <div className="flex justify-center  items-center h-full">
-              <div className="w-12 h-12 border-4 border-gray-300 border-t-black  rounded-full animate-spin"></div>
-              </div>
+            <div className="flex justify-center items-center h-full">
+              <div className="w-12 h-12 border-4 border-gray-300 border-t-black rounded-full animate-spin" />
+            </div>
           ) : (
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-9 mt-4">
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 mt-4">
               {properties.length === 0 ? (
                 <p className="text-gray-500">No properties found.</p>
               ) : (
                 properties.map((property, index) => (
                   <div
                     key={index}
-                    className="w-80 rounded-2xl  overflow-hidden hover:shadow-xl border cursor-pointer border-gray-300"
+                    className="w-full rounded-2xl overflow-hidden hover:shadow-xl border cursor-pointer border-gray-300"
                   >
                     <div className="relative">
                       <img
@@ -117,19 +155,18 @@ const Page = () => {
                         {property.propertyName}
                       </h2>
                       <p className="text-sm text-gray-600 mb-2">
-                        {property.address}, {property.city},{" "}
-                        {property.country}
+                        {property.address}, {property.city}, {property.country}
                       </p>
-                      <div className="flex  items-center mb-4">
+                      <div className="flex items-center mb-4">
                         <span className="text-sm font-semibold ml-auto">
-                          ${property.pricePerMonth}
+                          ₹{property.pricePerMonth}
                         </span>
                         <span className="text-sm text-gray-500">/month</span>
                       </div>
                       <div className="flex justify-between text-gray-600 text-sm">
                         <div className="flex items-center gap-1">
                           <img
-                            className="h-[15px] ml-2 w-[15px]"
+                            className="h-[15px] w-[15px]"
                             src="https://img.icons8.com/?size=100&id=561&format=png&color=000000"
                             alt=""
                           />

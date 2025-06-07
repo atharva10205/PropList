@@ -18,7 +18,8 @@ const SidebarFilters = ({ onFilterChange }) => {
     const newActiveList = ActiveList.includes(item)
       ? ActiveList.filter((i) => i !== item)
       : [...ActiveList, item];
-    
+
+    console.log(newActiveList);
     setActiveList(newActiveList);
     onFilterChange(newActiveList);
   };
@@ -33,14 +34,27 @@ const SidebarFilters = ({ onFilterChange }) => {
         }`}
       >
         <span className="absolute bottom-0 left-0 w-full h-0 bg-black origin-bottom transition-all duration-300 ease-out group-hover:h-full"></span>
-        <span className={`relative z-10 transition-colors duration-300 group-hover:text-white ${isActive ? "text-white" : ""}`}>
+        <span
+          className={`relative z-10 transition-colors duration-300 group-hover:text-white ${
+            isActive ? "text-white" : ""
+          }`}
+        >
           {label}
         </span>
       </button>
     );
   };
 
-  const propertyTypes = ["House", "Villa", "Apartment", "Room", "Studio", "Penthouse", "Duplex", "Townhouse"];
+  const propertyTypes = [
+    "House",
+    "Villa",
+    "Apartment",
+    "Room",
+    "Studio",
+    "Penthouse",
+    "Duplex",
+    "Townhouse",
+  ];
   const conveniences = ["Pets", "Parking", "Hot Tubs", "Wifi"];
 
   return (
@@ -60,7 +74,12 @@ const SidebarFilters = ({ onFilterChange }) => {
           <span>$200</span>
           <span>$1200</span>
         </div>
-        <input type="range" min="200" max="1200" className="w-full accent-black" />
+        <input
+          type="range"
+          min="200"
+          max="1200"
+          className="w-full accent-black"
+        />
       </div>
 
       <div>
@@ -72,7 +91,7 @@ const SidebarFilters = ({ onFilterChange }) => {
         </div>
       </div>
 
-      <button 
+      <button
         className="w-full bg-black text-white py-2 rounded"
         onClick={() => onFilterChange(ActiveList)}
       >
@@ -113,10 +132,11 @@ const NavbarFilters = () => {
 };
 
 const Page = () => {
-  const [selectedLocation, setSelectedLocation] = useState<any>(null);
-  const [approx_coordinates, setapprox_coordinates] = useState([]);
-  const [add_data, setadd_data] = useState([]);
-  const [filteredData, setFilteredData] = useState([]);
+  const [selectedLocation, setSelectedLocation] = useState<
+    [number, number] | null
+  >(null);
+  const [add_data, setadd_data] = useState<{ markers: any[] }>({ markers: [] });
+  const [filteredData, setFilteredData] = useState<any[]>([]);
   const params = useParams();
   const router = useRouter();
   const searchInput = decodeURIComponent(params.searchInput as string);
@@ -150,15 +170,6 @@ const Page = () => {
         const data = await response.json();
         setadd_data(data);
         setFilteredData(data.markers || []);
-        console.log("data:", data);
-
-        if (Array.isArray(data.markers)) {
-          const latLngArray = data.markers.map((marker) => [
-            marker.latitude,
-            marker.longitude,
-          ]);
-          setapprox_coordinates(latLngArray);
-        }
       } catch (error) {
         console.error("Error fetching markers:", error);
       }
@@ -173,15 +184,26 @@ const Page = () => {
       setFilteredData(add_data.markers || []);
       return;
     }
-    
+
     const filtered = (add_data.markers || []).filter((property) => {
       return filters.some((filter) => {
         // Property type filter
-        if (["House", "Villa", "Apartment", "Room", "Studio", "Penthouse", "Duplex", "Townhouse"].includes(filter)) {
+        if (
+          [
+            "House",
+            "Villa",
+            "Apartment",
+            "Room",
+            "Studio",
+            "Penthouse",
+            "Duplex",
+            "Townhouse",
+          ].includes(filter)
+        ) {
           return property.propertyType?.toLowerCase() === filter.toLowerCase();
         }
         // Conveniences filter
-        switch(filter) {
+        switch (filter) {
           case "Pets":
             return property.petsAllowed === true;
           case "Parking":
@@ -195,18 +217,96 @@ const Page = () => {
         }
       });
     });
-    
+
     setFilteredData(filtered);
-    
-    // Update map markers based on filtered data
-    if (Array.isArray(filtered)) {
-      const latLngArray = filtered.map((marker) => [
-        marker.latitude,
-        marker.longitude,
-      ]);
-      setapprox_coordinates(latLngArray);
-    }
+
+    // if (Array.isArray(filtered)) {
+    //   const latLngArray = filtered.map((marker) => [
+    //     marker.latitude,
+    //     marker.longitude,
+    //   ]);
+    //   setapprox_coordinates(latLngArray);
+    // }
   };
+
+  const Property_listings = ({ filteredData }) => {
+    console.log("filterddata", filteredData);
+    const router = useRouter();
+
+    return (
+      <div className="flex-1 p-2 bg-white cursor-pointer">
+        {filteredData?.map((marker, index) => (
+          <div
+            key={marker.id || index}
+            className="border border-gray-300 rounded-lg mb-4"
+          >
+            <div className="flex-1 p-2 bg-white cursor-pointer">
+              <div className="w-full rounded-2xl overflow-hidden shadow-lg border border-gray-200">
+                <div className="relative">
+                  <img
+                    src={
+                      marker.imageURLs?.[0] || "https://via.placeholder.com/300"
+                    }
+                    alt={marker.propertyName}
+                    className="h-48 w-full object-cover"
+                    onClick={() => router.push(`/property/${marker.id}`)}
+                  />
+                </div>
+                <div
+                  onClick={() => router.push(`/property/${marker.id}`)}
+                  className="p-4"
+                >
+                  <h2 className="text-lg font-bold">{marker.propertyName}</h2>
+                  <p className="text-sm text-gray-600 mb-2">
+                    {marker.city}, {marker.state}, {marker.country}
+                  </p>
+                  <div className="flex items-center mb-3">
+                    <span className="text-sm font-semibold ml-auto">
+                      ${marker.pricePerMonth || "--"}
+                    </span>
+                    <span className="text-sm text-gray-500">/month</span>
+                  </div>
+                  <div className="flex justify-between text-gray-600 text-sm">
+                    <div className="flex items-center gap-1">
+                      <img
+                        className="h-[15px] ml-2 w-[15px]"
+                        src="https://img.icons8.com/?size=100&id=561&format=png&color=000000"
+                        alt=""
+                      />
+                      {marker.beds} Beds
+                    </div>
+                    <div className="flex items-center gap-1">
+                      <img
+                        className="h-[15px] ml-2 w-[15px]"
+                        src="https://img.icons8.com/?size=100&id=HiiMjneqmobf&format=png&color=000000"
+                        alt=""
+                      />
+                      {marker.baths} Baths
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        ))}
+      </div>
+    );
+  };
+
+  const useIsDesktop = () => {
+    const [isDesktop, setIsDesktop] = useState(false);
+
+    useEffect(() => {
+      const checkScreenSize = () => setIsDesktop(window.innerWidth >= 768);
+      checkScreenSize();
+      window.addEventListener("resize", checkScreenSize);
+      return () => window.removeEventListener("resize", checkScreenSize);
+    }, []);
+
+    return isDesktop;
+  };
+
+  const isDesktop = useIsDesktop();
 
   return (
     <div className="h-screen overflow-hidden">
@@ -215,86 +315,22 @@ const Page = () => {
       </div>
 
       <div className="pt-16 pb-2 px-4 h-full flex flex-col gap-4 overflow-hidden">
-        <NavbarFilters />
+        {isDesktop && <NavbarFilters />}
         <div className="flex gap-4 h-full overflow-hidden">
-          <SidebarFilters onFilterChange={handleFilterChange} />
-
-          <div className="flex flex-row gap-4 h-full overflow-hidden">
-            <div className="border border-gray-300 w-[850px] rounded-lg p-4 bg-white flex flex-col">
-              <div className="w-full flex-grow rounded overflow-hidden">
-                <MapView
-                  onLocationSelect={selectedLocation}
-                  markers={approx_coordinates}
-                />
+          {isDesktop && <SidebarFilters onFilterChange={handleFilterChange} />}
+          <div className="flex flex-col md:flex-row gap-4 flex-1 overflow-y-auto">
+            {isDesktop && (
+              <div className="border border-gray-300 w-[850px] rounded-lg p-4 bg-white flex flex-col">
+                <div className="w-full flex-grow rounded overflow-hidden">
+                  <MapView
+                    onLocationSelect={selectedLocation}
+                    markers={filteredData}
+                  />
+                </div>
               </div>
-            </div>
+            )}
 
-            <div className="border border-gray-300 w-[310px] h-full rounded-lg overflow-y-auto">
-              <div className="flex-1 p-2 bg-white cursor-pointer">
-                {filteredData?.map((marker, index) => (
-                  <div
-                    key={marker.id || index}
-                    className="border border-gray-300 rounded-lg mb-4"
-                  >
-                    <div className="flex-1 p-2 bg-white cursor-pointer">
-                      <div className="w-full rounded-2xl overflow-hidden shadow-lg border border-gray-200">
-                        <div className="relative">
-                          <img
-                            src={
-                              marker.imageURLs?.[0] ||
-                              "https://via.placeholder.com/300"
-                            }
-                            alt={marker.propertyName}
-                            className="h-48 w-full object-cover"
-                            onClick={() =>
-                              router.push(`/property/${marker.id}`)
-                            }
-                          />
-                        </div>
-                        <div
-                          onClick={() => router.push(`/property/${marker.id}`)}
-                          className="p-4"
-                        >
-                          <h2 className="text-lg font-bold">
-                            {marker.propertyName}
-                          </h2>
-                          <p className="text-sm text-gray-600 mb-2">
-                            {marker.city}, {marker.state}, {marker.country}
-                          </p>
-                          <div className="flex items-center mb-3">
-                           
-                            <span className="text-sm font-semibold ml-auto">
-                              ${marker.pricePerMonth || "--"}
-                            </span>
-                            <span className="text-sm text-gray-500">
-                              /month
-                            </span>
-                          </div>
-                          <div className="flex justify-between text-gray-600 text-sm">
-                            <div className="flex items-center gap-1">
-                              <img
-                                className="h-[15px] ml-2 w-[15px]"
-                                src="https://img.icons8.com/?size=100&id=561&format=png&color=000000"
-                                alt=""
-                              />
-                              {marker.beds} Beds
-                            </div>
-                            <div className="flex items-center gap-1">
-                              <img
-                                className="h-[15px] ml-2 w-[15px]"
-                            src="https://img.icons8.com/?size=100&id=HiiMjneqmobf&format=png&color=000000"
-                                alt=""
-                              />
-                              {marker.baths} Baths
-                            </div>
-                          </div>
-                        </div>
-                      </div>
-                    </div>
-                  </div>
-                ))}
-              </div>
-            </div>
+            <Property_listings filteredData={filteredData} />
           </div>
         </div>
       </div>

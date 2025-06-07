@@ -11,6 +11,7 @@ const Page = () => {
   const [userId, setUserId] = useState(null);
   const [data, setData] = useState(null);
   const [fadingOutIds, setFadingOutIds] = useState([]);
+  const [isSidebarOpen, setIsSidebarOpen] = useState(false);
 
   useEffect(() => {
     const getUserId = async () => {
@@ -50,6 +51,7 @@ const Page = () => {
         body: JSON.stringify({ userId }),
       });
       const data = await response.json();
+      console.log(data)
 
       if (data?.applications?.length) {
         data.applications.reverse();
@@ -89,28 +91,67 @@ const Page = () => {
     }, 300);
   };
 
-  return (
+    return (
     <div className="h-screen flex flex-col overflow-hidden">
       <Navbar />
-      <div className="flex flex-1 overflow-hidden">
-        <Toaster />
-        <div className="w-56 flex-shrink-0 bg-gray-100 overflow-y-auto">
+      <Toaster/>
+
+      <div className="md:hidden p-4 bg-white shadow-md flex justify-between items-center">
+        <button
+          onClick={() => setIsSidebarOpen(!isSidebarOpen)}
+          className="text-black focus:outline-none"
+          aria-label="Toggle Sidebar"
+        >
+          <svg
+            className="w-6 h-6"
+            fill="none"
+            stroke="currentColor"
+            viewBox="0 0 24 24"
+            xmlns="http://www.w3.org/2000/svg"
+          >
+            <path
+              strokeLinecap="round"
+              strokeLinejoin="round"
+              strokeWidth={2}
+              d="M4 6h16M4 12h16M4 18h16"
+            />
+          </svg>
+        </button>
+        <h1 className="text-xl font-bold">Application</h1>
+      </div>
+
+      <div className="flex flex-1 overflow-hidden relative">
+        <div
+          className={`fixed md:static z-20 top-[50px] left-0 h-full w-56  overflow-y-auto transform transition-transform duration-300 ease-in-out ${
+            isSidebarOpen ? "translate-x-0" : "-translate-x-full"
+          } md:translate-x-0`}
+        >
           <Sidebar />
         </div>
 
-        <div className="flex-1 overflow-y-auto p-4">
-          <h1 className="text-2xl font-bold mb-4">Application</h1>
+        {isSidebarOpen && (
+          <div
+            className="fixed inset-0  bg-opacity-50 z-10 md:hidden"
+            onClick={() => setIsSidebarOpen(false)}
+          />
+        )}
 
+        {/* Main Content */}
+        <div
+          className={`flex-1 overflow-y-auto p-4 bg-white transition-opacity duration-300 ${
+            isSidebarOpen ? "opacity-50 md:opacity-100" : "opacity-100"
+          }`}
+        >
           {!data ? (
             <div className="flex items-center justify-center h-full">
               <div className="w-12 h-12 border-4 border-gray-300 border-t-black rounded-full animate-spin"></div>
             </div>
           ) : (
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-1 gap-7 mt-4">
-              {data?.applications?.map((property, index) => (
+              {data.applications.map((property, index) => (
                 <div
                   key={index}
-                  className={`rounded-2xl flex flex-row shadow-lg border border-gray-300 w-[1200px] transition-all duration-300 ease-out ${
+                  className={`rounded-2xl flex flex-col md:flex-row shadow-lg border border-gray-300 max-w-full transition-all duration-300 ease-out ${
                     fadingOutIds.includes(property.id)
                       ? "opacity-0 -translate-y-4 scale-95"
                       : "opacity-100 translate-y-0 scale-100"
@@ -121,37 +162,25 @@ const Page = () => {
                   }}
                 >
                   <div>
-                    <div className="w-80 rounded-2xl h-[330px] overflow-hidden shadow-lg border cursor-pointer border-gray-200">
+                    <div className="w-full md:w-80 rounded-2xl h-[330px] overflow-hidden shadow-lg border cursor-pointer border-gray-200">
                       <div className="relative">
                         <img
-                          src={
-                            property.propertyimage ||
-                            "https://via.placeholder.com/300"
-                          }
+                          src={property.propertyimage || "https://via.placeholder.com/300"}
                           alt={property.propertyName}
                           className="h-48 w-full object-cover"
-                          onClick={() =>
-                            router.push(`/property/${property.addId}`)
-                          }
+                          onClick={() => router.push(`/property/${property.addId}`)}
                         />
                       </div>
                       <div
-                        onClick={() =>
-                          router.push(`/property/${property.addId}`)
-                        }
+                        onClick={() => router.push(`/property/${property.addId}`)}
                         className="p-4"
                       >
-                        <h2 className="text-lg font-bold">
-                          {property.propertyName}
-                        </h2>
+                        <h2 className="text-lg font-bold">{property.propertyName}</h2>
                         <p className="text-sm text-gray-600 mb-2">
-                          {property.address || ""} {property.city || ""}{" "}
-                          {property.country || ""}
+                          {property.address || ""} {property.city || ""} {property.country || ""}
                         </p>
                         <div className="flex items-center mb-4">
-                          <span className="text-sm font-semibold ml-auto">
-                            ${property.pricePerMonth}
-                          </span>
+                          <span className="text-sm font-semibold ml-auto">${property.pricePerMonth}</span>
                           <span className="text-sm text-gray-500">/month</span>
                         </div>
                         <div className="flex justify-between text-gray-600 text-sm">
@@ -171,31 +200,25 @@ const Page = () => {
                             />
                             {property.baths} Bath
                           </div>
-                          <div className="flex items-center gap-1">
-                            {property.amenities || ""}
-                          </div>
+                          <div className="flex items-center gap-1">{property.amenities || ""}</div>
                         </div>
                       </div>
                     </div>
                   </div>
 
-                  <div className="flex flex-col md:flex-row gap-4 mr-4 ml-4">
+                  <div className="flex flex-col md:flex-row gap-4 mr-4 ml-4 w-full">
                     <div className="flex-shrink-0 p-4 border border-gray-300 mt-2 mb-2 rounded-lg shadow-lg min-w-[200px] md:w-auto">
                       <h1 className="font-bold">To,</h1>
                       <div className="flex flex-row mt-5 items-center">
                         <img
                           className="h-[60px] w-[60px] mr-4 rounded-full"
-                          src="https://imgs.search.brave.com/5UXUrwnw8J0ENnlCfKBvy2iT3ZiU9L2WC2CXtxFJfO0/rs:fit:860:0:0:0/g:ce/aHR0cHM6Ly93YWxs/cGFwZXJzLmNvbS9p/bWFnZXMvaGQvcGZw/LXBpY3R1cmVzLWsz/ZHF4bjNuMG5heGVm/bjIuanBn"
+                          src={property.pfpUrl}
                           alt=""
                         />
-                        <h1 className="break-all">
-                          {property.managerUsername || "Manager"}
-                        </h1>
+                        <h1 className="break-all">{property.managerUsername || "Manager"}</h1>
                       </div>
                       <div>
-                        <h1 className="font-bold mt-10">
-                          contact: {property.contact}
-                        </h1>
+                        <h1 className="font-bold mt-10">contact: {property.contact}</h1>
                       </div>
 
                       <div className="flex flex-col mt-5">
@@ -237,7 +260,7 @@ const Page = () => {
                       </div>
                     </div>
 
-                    <div className="flex-grow p-4 border border-gray-300 mt-2 mb-2 rounded-lg shadow-lg w-[640px]">
+                    <div className="flex-grow p-4 border border-gray-300 mt-2 mb-2 rounded-lg shadow-lg w-full md:w-[640px]">
                       <h1 className="font-bold mb-2">Message,</h1>
                       <h2 className="break-words">{property.message}</h2>
                     </div>

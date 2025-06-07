@@ -7,6 +7,7 @@ import dynamic from "next/dynamic";
 import { motion, AnimatePresence } from "framer-motion";
 import { useRouter } from "next/navigation";
 import toast, { Toaster } from "react-hot-toast";
+import Footer from "@/app/components/Footer";
 
 const PropertyDetails = () => {
   const router = useRouter();
@@ -233,12 +234,14 @@ const PropertyDetails = () => {
 
   return (
     <div>
+      {/* Fixed Navbar */}
       <div className="fixed top-0 left-0 w-full z-50">
         <Navbar />
       </div>
       <Toaster />
+
       {loading ? (
-        <div className="flex justify-center items-center h-[800px] ">
+        <div className="flex justify-center items-center h-[800px]">
           <div className="w-12 h-12 border-4 border-gray-300 border-t-black rounded-full animate-spin"></div>
         </div>
       ) : (
@@ -246,7 +249,7 @@ const PropertyDetails = () => {
           <AnimatePresence>
             {selectedImage && (
               <motion.div
-                className="fixed inset-0 bg-black/80 flex items-center justify-center z-50"
+                className="fixed inset-0 bg-black/80 flex items-center  justify-center z-50"
                 onClick={() => setSelectedImage(null)}
                 initial={{ opacity: 0 }}
                 animate={{ opacity: 1 }}
@@ -255,8 +258,8 @@ const PropertyDetails = () => {
               >
                 <motion.img
                   src={selectedImage}
-                  alt="Enlarged"
-                  className="max-w-3xl max-h-[90vh] object-contain rounded shadow-lg"
+                  alt="Selected Property"
+                  className="max-w-3xl max-h-[90vh] object-contain w-full rounded shadow-lg"
                   onClick={(e) => e.stopPropagation()}
                   initial={{ scale: 0.9, opacity: 0 }}
                   animate={{ scale: 1, opacity: 1 }}
@@ -267,25 +270,46 @@ const PropertyDetails = () => {
             )}
           </AnimatePresence>
 
+          {/* Main Content */}
           <div className="max-w-6xl mt-[60px] mx-auto p-4 space-y-6">
+            {/* Images Grid */}
             {info?.imageURLs && (
-              <div className="grid grid-cols-3 cursor-pointer gap-2">
-                {info.imageURLs.map((url: string, index: number) => (
-                  <motion.img
-                    key={index}
-                    src={url}
-                    alt={`Property image ${index + 1}`}
-                    className="h-48 w-full object-cover rounded"
-                    onClick={() => setSelectedImage(url)}
-                    whileHover={{ scale: 1.02 }}
-                    transition={{ duration: 0.2 }}
-                  />
-                ))}
+              <div>
+                {/* Mobile view: horizontal scrollable slider */}
+                <div className="flex gap-2 overflow-x-auto sm:hidden">
+                  {info.imageURLs.map((url: string, index: number) => (
+                    <motion.img
+                      key={index}
+                      src={url}
+                      alt={`Property image ${index + 1}`}
+                      className="h-48 min-w-[250px] object-cover rounded flex-shrink-0"
+                      onClick={() => setSelectedImage(url)}
+                      whileHover={{ scale: 1.02 }}
+                      transition={{ duration: 0.2 }}
+                    />
+                  ))}
+                </div>
+
+                {/* Tablet/Desktop view: grid */}
+                <div className="hidden sm:grid sm:grid-cols-2 md:grid-cols-3 gap-2 cursor-pointer">
+                  {info.imageURLs.map((url: string, index: number) => (
+                    <motion.img
+                      key={index}
+                      src={url}
+                      alt={`Property image ${index + 1}`}
+                      className="h-48 w-full object-cover rounded"
+                      onClick={() => setSelectedImage(url)}
+                      whileHover={{ scale: 1.02 }}
+                      transition={{ duration: 0.2 }}
+                    />
+                  ))}
+                </div>
               </div>
             )}
 
+            {/* Property Info */}
             <div className="space-y-2">
-              <div className="flex flex-row justify-between">
+              <div className="flex justify-between items-center">
                 <h1 className="text-2xl font-bold">{info?.propertyName}</h1>
                 <motion.button
                   onClick={handleLikeToggle}
@@ -299,15 +323,17 @@ const PropertyDetails = () => {
                         : "https://img.icons8.com/?size=100&id=p7MI4JnqXYvv&format=png&color=000000"
                     }
                     className="h-[20px] w-[20px] object-contain"
-                    alt="heart icon"
+                    alt="Heart Icon"
                   />
                 </motion.button>
               </div>
+
               <p className="text-gray-600">
                 {info?.address}, {info?.city}, {info?.state}, {info?.country},{" "}
                 {info?.postalCode}
               </p>
-              <div className="flex flex-wrap gap-4 text-sm border-t border-b py-2">
+
+              <div className="flex flex-wrap gap-4 text-sm border-y py-2">
                 <span>
                   Monthly Rent: <strong>${info?.pricePerMonth}</strong>
                 </span>
@@ -323,6 +349,7 @@ const PropertyDetails = () => {
               </div>
             </div>
 
+            {/* Description */}
             <div>
               <h2 className="text-lg font-semibold mb-1">
                 About {info?.propertyName}
@@ -332,9 +359,10 @@ const PropertyDetails = () => {
               </p>
             </div>
 
+            {/* Villa Features */}
             <div>
               <h2 className="text-lg font-semibold mb-2">Villa Features</h2>
-              <div className="grid grid-cols-3 gap-4 text-center text-sm">
+              <div className="grid grid-cols-2 sm:grid-cols-3 gap-4 text-center text-sm">
                 {[
                   {
                     label: "Parking Included",
@@ -370,11 +398,13 @@ const PropertyDetails = () => {
               </div>
             </div>
 
+            {/* Highlights */}
             <div>
               <h2 className="text-lg font-semibold mb-2">Highlights</h2>
               <p className="text-sm text-gray-700">{info?.highlights}</p>
             </div>
 
+            {/* Submit Application */}
             {role === "tenant" && (
               <motion.div
                 onClick={() => setsubmit_popup(true)}
@@ -389,10 +419,11 @@ const PropertyDetails = () => {
               </motion.div>
             )}
 
-            <AnimatePresence>
-              {submit_popup && (
+            {/* Popup */}
+            {submit_popup && (
+              <AnimatePresence>
                 <motion.div
-                  className="fixed h-full inset-0 bg-black/70 flex items-center justify-center z-50"
+                  className="fixed inset-0 bg-black/70 flex items-center justify-center z-50"
                   onClick={() => setsubmit_popup(false)}
                   initial={{ opacity: 0 }}
                   animate={{ opacity: 1 }}
@@ -407,32 +438,32 @@ const PropertyDetails = () => {
                     exit={{ scale: 0.9, opacity: 0 }}
                     transition={{ type: "spring", stiffness: 300, damping: 25 }}
                   >
-                    <div>
-                      <div className="flex flex-row mt-5 items-center">
-                        <motion.img
-                          className="h-[60px] w-[60px] mr-4 rounded-full"
-                          src="https://imgs.search.brave.com/5UXUrwnw8J0ENnlCfKBvy2iT3ZiU9L2WC2CXtxFJfO0/rs:fit:860:0:0:0/g:ce/aHR0cHM6Ly93YWxs/cGFwZXJzLmNvbS9p/bWFnZXMvaGQvcGZw/LXBpY3R1cmVzLWsz/ZHF4bjNuMG5heGVm/bjIuanBn"
-                          alt=""
-                          initial={{ scale: 0.8 }}
-                          animate={{ scale: 1 }}
-                          transition={{ delay: 0.1 }}
-                        />
-                        <h1 className="break-all">
-                          {user_data?.username || "xyz"}
-                        </h1>
-                      </div>
+                    {/* User Info */}
+                    <div className="mt-5 flex items-center gap-4">
+                      <motion.img
+                        className="h-[60px] w-[60px] rounded-full"
+                        src="https://imgs.search.brave.com/5UXUrwnw8J0ENnlCfKBvy2iT3ZiU9L2WC2CXtxFJfO0/rs:fit:860:0:0:0/g:ce/aHR0cHM6Ly93YWxs/cGFwZXJzLmNvbS9p/bWFnZXMvaGQvcGZw/LXBpY3R1cmVzLWsz/ZHF4bjNuMG5heGVm/bjIuanBn"
+                        alt="User Avatar"
+                        initial={{ scale: 0.8 }}
+                        animate={{ scale: 1 }}
+                        transition={{ delay: 0.1 }}
+                      />
+                      <h1 className="break-all">
+                        {user_data?.username || "xyz"}
+                      </h1>
+                    </div>
 
-                      <div className="flex mt-5 flex-row items-center">
-                        <h1 className="font-bold mr-2">Email:</h1>
-                        <h1 className="break-all">
+                    <div className="mt-4">
+                      <div className="flex gap-2 items-center">
+                        <strong>Email:</strong>
+                        <span className="break-all">
                           {user_data?.email || "xyz"}
-                        </h1>
+                        </span>
                       </div>
-
-                      <div className="flex flex-row items-center mt-1">
-                        <h1 className="font-bold mr-2">Contact:</h1>
+                      <div className="flex gap-2 items-center mt-1">
+                        <strong>Contact:</strong>
                         <motion.input
-                          className="border border-gray-300 shadow-lg rounded-[5px]"
+                          className="border border-gray-300 shadow-lg rounded px-2"
                           type="number"
                           onChange={(e) => setContact(e.target.value)}
                           whileFocus={{
@@ -441,35 +472,36 @@ const PropertyDetails = () => {
                           }}
                         />
                       </div>
-
-                      <motion.div
-                        className="h-[300px] mt-4 w-[670px] rounded-lg border border-gray-300 shadow-lg p-4 outline-none"
-                        contentEditable
-                        placeholder="Message"
-                        onInput={(e) => setMessage(e.currentTarget.textContent)}
-                        suppressContentEditableWarning={true}
-                        whileFocus={{
-                          boxShadow: "0 0 0 2px rgba(0, 0, 255, 0.2)",
-                        }}
-                      ></motion.div>
-
-                      <motion.button
-                        onClick={submit}
-                        className="relative group overflow-hidden w-[670px] cursor-pointer mt-2 rounded-lg h-[40px] border border-gray-300 shadow-lg"
-                        whileHover={{ scale: 1.01 }}
-                        whileTap={{ scale: 0.98 }}
-                      >
-                        <span className="absolute h-0 bottom-0 left-0 w-full bg-black origin-bottom transition-all duration-300 ease-out group-hover:h-full"></span>
-                        <span className="z-10 relative transition-colors duration-300 group-hover:text-white">
-                          Submit
-                        </span>
-                      </motion.button>
                     </div>
+
+                    <motion.div
+                      className="h-[300px] mt-4 w-full rounded-lg border border-gray-300 shadow-lg p-4 outline-none"
+                      contentEditable
+                      placeholder="Message"
+                      onInput={(e) => setMessage(e.currentTarget.textContent)}
+                      suppressContentEditableWarning
+                      whileFocus={{
+                        boxShadow: "0 0 0 2px rgba(0, 0, 255, 0.2)",
+                      }}
+                    ></motion.div>
+
+                    <motion.button
+                      onClick={submit}
+                      className="relative group overflow-hidden w-full mt-2 rounded-lg h-[40px] border border-gray-300 shadow-lg"
+                      whileHover={{ scale: 1.01 }}
+                      whileTap={{ scale: 0.98 }}
+                    >
+                      <span className="absolute h-0 bottom-0 left-0 w-full bg-black origin-bottom transition-all duration-300 ease-out group-hover:h-full"></span>
+                      <span className="relative z-10 transition-colors duration-300 group-hover:text-white">
+                        Submit
+                      </span>
+                    </motion.button>
                   </motion.div>
                 </motion.div>
-              )}
-            </AnimatePresence>
+              </AnimatePresence>
+            )}
 
+            {/* Map */}
             <div>
               <h2 className="text-lg font-semibold mb-2">Map</h2>
               <div className="h-[410px] w-full border border-gray-300">
@@ -482,117 +514,7 @@ const PropertyDetails = () => {
             </div>
           </div>
 
-          <div className="bg-black w-full py-8 px-4 sm:px-6 lg:px-8">
-            <div className="max-w-7xl mx-auto flex flex-col md:flex-row items-center justify-between">
-              {/* Logo and Brand */}
-              <div className="flex items-center mb-6 md:mb-0">
-                <div
-                  className="h-10 w-10 rounded-full overflow-hidden cursor-pointer"
-                  onClick={() => router.push("/home")}
-                >
-                  <img
-                    className="h-full w-full scale-150 object-cover"
-                    src="https://i.pinimg.com/736x/61/85/c2/6185c254877b80aa71dbe737971a753b.jpg"
-                    alt="HOMIFI Logo"
-                  />
-                </div>
-                <div
-                  onClick={() => router.push("/home")}
-                  className="ml-4 border-l-4 border-gray-300 cursor-pointer pl-3 group"
-                >
-                  <span className="text-white font-thin text-3xl tracking-tight relative">
-                    HOM<span className="font-bold">IFI</span>
-                    <span className="absolute bottom-0 left-0 w-0 h-0.5 bg-white transition-all duration-300 group-hover:w-full"></span>
-                  </span>
-                </div>
-              </div>
-
-              {/* Links */}
-              <div className="flex flex-wrap justify-center gap-6 md:gap-8">
-                <a
-                  href="#"
-                  className="text-gray-300 hover:text-white transition-colors"
-                >
-                  About
-                </a>
-                <a
-                  href="#"
-                  className="text-gray-300 hover:text-white transition-colors"
-                >
-                  Services
-                </a>
-                <a
-                  href="#"
-                  className="text-gray-300 hover:text-white transition-colors"
-                >
-                  Contact
-                </a>
-                <a
-                  href="#"
-                  className="text-gray-300 hover:text-white transition-colors"
-                >
-                  Privacy Policy
-                </a>
-              </div>
-
-              {/* Social Icons (optional) */}
-              <div className="flex gap-4 items-center  mt-6 ">
-                <div className="mr-2">
-                  <a
-                    href="#"
-                    className="text-gray-400 hover:text-white transition-colors"
-                  >
-                    <span className="sr-only "></span>
-                    <img
-                      onClick={() => {
-                        router.push(
-                          "https://www.instagram.com/atharva_pandhare/"
-                        );
-                      }}
-                      className="h-7 w-7  bg-white cursor-pointer"
-                      src="https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcR2Y1eJXcUkhkRH9qnj68_PxtVUeEjbBtqPJRqzpnU-PtJD4IZy1G5Kp_tjnlsM2jrJkno&usqp=CAU"
-                      alt=""
-                    />
-                  </a>
-                </div>
-                <a
-                  href="#"
-                  className="text-gray-400 hover:text-white transition-colors"
-                >
-                  <span className="sr-only"></span>
-                  <img
-                    onClick={() => {
-                      router.push("https://github.com/atharva10205");
-                    }}
-                    className="h-9 w-9 bg-white rounded-full cursor-pointer"
-                    src="https://img.icons8.com/?size=100&id=RHLuYrY4GjUv&format=png&color=000000"
-                    alt=""
-                  />
-                </a>
-                <a
-                  href="#"
-                  className="text-gray-400 hover:text-white transition-colors"
-                >
-                  <span className="sr-only"></span>
-                  <img
-                    onClick={() => {
-                      router.push("https://x.com/AtharvaPandhar4");
-                    }}
-                    className="h-9 w-9  cursor-pointer"
-                    src="https://img.freepik.com/free-vector/new-2023-twitter-logo-x-icon-design_1017-45418.jpg?semt=ais_items_boosted&w=740"
-                    alt=""
-                  />
-                </a>
-              </div>
-            </div>
-
-            {/* Copyright */}
-            <div className="mt-8 pt-6 border-t border-gray-800 text-center text-gray-400 text-sm">
-              <p>
-                &copy; {new Date().getFullYear()} HOMIFI. All rights reserved.
-              </p>
-            </div>
-          </div>
+          <Footer />
         </>
       )}
     </div>

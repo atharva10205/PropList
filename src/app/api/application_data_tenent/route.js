@@ -21,6 +21,7 @@ export async function POST(req) {
       select: {
         id: true,
         username: true,
+        pfpUrl: true,
       },
     });
 
@@ -40,6 +41,7 @@ export async function POST(req) {
         contact: app.contact,
         message: app.message,
         status: app.status,
+        pfpUrl: manager ? manager.pfpUrl : null,
         managerUsername: manager ? manager.username : null,
         propertyimage: property ? property.imageURLs[0] : null,
         propertyName: property ? property.propertyName : null,

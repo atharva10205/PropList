@@ -5,11 +5,9 @@ export async function POST(req) {
     const { userId } = await req.json();
 
     if (!userId) {
-      return new Response(JSON.stringify({ error: "userId is required" }), {
-        status: 400,
-        headers: { "Content-Type": "application/json" },
-      });
+      return;
     }
+
 
     const user = await prisma.user.findUnique({
       where: { id: userId },

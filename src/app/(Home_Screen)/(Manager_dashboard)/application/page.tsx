@@ -6,12 +6,34 @@ import Navbar from "@/app/components/Navbar";
 import { useRouter } from "next/navigation";
 import Image from "next/image";
 
+type Application = {
+  applicationId: string | number;
+  status: string;
+  property: {
+    id: string | number;
+    imageURL?: string;
+    propertyName: string;
+    pricePerMonth: number;
+    beds: number;
+    baths: number;
+  };
+  sender: {
+    pfpUrl: string;
+    username: string;
+    email: string;
+  };
+  contact: string;
+  message: string;
+};
+
 const Page = () => {
   const router = useRouter();
-  const [userId, setUserId] = useState(null);
-  const [applications, setApplications] = useState(null);
-  const [fadingOutIds, setFadingOutIds] = useState([]);
-  const [loading, setLoading] = useState(true); 
+
+  // Explicitly typing state variables
+  const [userId, setUserId] = useState<string | null>(null);
+  const [applications, setApplications] = useState<Application[] | null>(null);
+  const [fadingOutIds, setFadingOutIds] = useState<(string | number)[]>([]);
+  const [loading, setLoading] = useState(true);
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
 
   useEffect(() => {
@@ -65,20 +87,22 @@ const Page = () => {
     getApplications();
   }, [userId]);
 
-  const handleRemoveWithAnimation = (id : string) => {
+  const handleRemoveWithAnimation = (id: string | number) => {
     setFadingOutIds((prev) => [...prev, id]);
     setTimeout(() => {
-      setApplications((prev) => prev.filter((app) => app.applicationId !== id));
+      setApplications((prev) =>
+        prev ? prev.filter((app) => app.applicationId !== id) : null
+      );
       setFadingOutIds((prev) => prev.filter((fid) => fid !== id));
     }, 300);
   };
 
-  const accept_button = async (id, add_id) => {
+  const accept_button = async (id: string | number, add_id: string | number) => {
     const response = await fetch("/api/accept_button", {
       method: "POST",
       credentials: "include",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ applicationId: id, userId, add_id: add_id }),
+      body: JSON.stringify({ applicationId: id, userId, add_id }),
     });
     handleRemoveWithAnimation(id);
     if (response) {
@@ -86,7 +110,7 @@ const Page = () => {
     }
   };
 
-  const decline_button = async (id) => {
+  const decline_button = async (id: string | number) => {
     await fetch("/api/decline_button", {
       method: "POST",
       credentials: "include",
@@ -239,9 +263,7 @@ const Page = () => {
                         </div>
                         <div className="flex mt-5 flex-row items-center">
                           <h1 className="font-bold mr-2">Email:</h1>
-                          <h1 className="break-all">
-                            {application.sender.email}
-                          </h1>
+                          <h1 className="break-all">{application.sender.email}</h1>
                         </div>
                         <div className="flex flex-row items-center mt-1">
                           <h1 className="font-bold mr-2">Contact:</h1>
@@ -263,9 +285,7 @@ const Page = () => {
                             </span>
                           </button>
                           <button
-                            onClick={() =>
-                              decline_button(application.applicationId)
-                            }
+                            onClick={() => decline_button(application.applicationId)}
                             className="relative group h-[30px] border cursor-pointer border-gray-300 shadow-lg rounded-[5px] overflow-hidden"
                           >
                             <span className="absolute bottom-0 left-0 w-full h-0 bg-black origin-bottom transition-all duration-300 ease-out group-hover:h-full"></span>

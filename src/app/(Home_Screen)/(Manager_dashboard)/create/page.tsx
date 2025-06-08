@@ -29,41 +29,42 @@ export default function AddPropertyForm() {
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
 
   const Connectwallet = async () => {
-    if (!window.ethereum) {
-      return;
-    }
+  if (!window.ethereum) {
+    return;
+  }
 
-    let metamaskProvider = null;
+  let metamaskProvider = null;
 
-    if (Array.isArray(window.ethereum.providers)) {
-      metamaskProvider = window.ethereum.providers.find((p) => p.isMetaMask);
-    } else if (window.ethereum.isMetaMask) {
-      metamaskProvider = window.ethereum;
-    }
+  if (Array.isArray(window.ethereum.providers)) {
+    metamaskProvider = window.ethereum.providers.find((p) => p.isMetaMask);
+  } else if (window.ethereum.isMetaMask) {
+    metamaskProvider = window.ethereum;
+  }
 
-    if (!metamaskProvider) {
-      toast.custom((t) => (
-        <div
-          className={`${
-            t.visible ? "animate-enter" : "animate-leave"
-          } fixed top-2 right-2 bg-black border mt-[40px] border-black text-white flex items-center justify-center rounded-lg shadow-md font-bold h-[60px] w-[250px] text-sm`}
-        >
-          No metamask detected{" "}
-        </div>
-      ));
-      return;
-    }
+  if (!metamaskProvider) {
+    toast.custom((t) => (
+      <div
+        className={`${
+          t.visible ? "animate-enter" : "animate-leave"
+        } fixed top-2 right-2 bg-black border mt-[40px] border-black text-white flex items-center justify-center rounded-lg shadow-md font-bold h-[60px] w-[250px] text-sm`}
+      >
+        No metamask detected{" "}
+      </div>
+    ));
+    return;
+  }
 
-    try {
-      const accounts = await metamaskProvider.request({
-        method: "eth_requestAccounts",
-      });
-      console.log("Connected MetaMask account:", accounts[0]);
-      setPublic_Id(accounts[0]);
-    } catch (error) {
-      console.error("Connection rejected or failed:", error);
-    }
-  };
+ try {
+  const accounts = await metamaskProvider.request({
+    method: "eth_requestAccounts",
+  }) as string[];
+  console.log("Connected MetaMask account:", accounts[0]);
+  setPublic_Id(accounts[0]);
+} catch (error) {
+  console.error("Connection rejected or failed:", error);
+}
+
+};
 
   useEffect(() => {
   const Connectwallet1 = async () => {
@@ -83,15 +84,17 @@ export default function AddPropertyForm() {
       return;
     }
 
-    try {
-      const accounts = await metamaskProvider.request({
-        method: "eth_requestAccounts",
-      });
-      console.log("Connected MetaMask account:", accounts[0]);
-      setPublic_Id(accounts[0]);
-    } catch (error) {
-      console.error("Connection rejected or failed:", error);
-    }
+   try {
+  const accounts = await metamaskProvider.request({
+    method: "eth_requestAccounts",
+  }) as string[]; // 👈 explicitly cast to string array
+
+  console.log("Connected MetaMask account:", accounts[0]);
+  setPublic_Id(accounts[0]);
+} catch (error) {
+  console.error("Connection rejected or failed:", error);
+}
+
   };
   Connectwallet1();
   }, [])
@@ -126,28 +129,28 @@ export default function AddPropertyForm() {
   }, [role]);
 
   const validateFields = () => {
-    const newErrors = {};
+  const newErrors: { [key: string]: boolean } = {};
 
-    if (!propertyName.trim()) newErrors.propertyName = true;
-    if (!pricePerMonth) newErrors.pricePerMonth = true;
-    if (!securityDeposit) newErrors.securityDeposit = true;
-    if (!applicationFee) newErrors.applicationFee = true;
-    if (!beds) newErrors.beds = true;
-    if (!baths) newErrors.baths = true;
-    if (!squareFeet) newErrors.squareFeet = true;
-    if (!Public_Id) newErrors.Public_Id = true;
-    if (!address.trim()) newErrors.address = true;
-    if (!city.trim()) newErrors.city = true;
-    if (!state.trim()) newErrors.state = true;
-    if (!postalCode) newErrors.postalCode = true;
-    if (!country) newErrors.country = true;
-    if (!propertyType) newErrors.propertyType = true;
-    if (files.length === 0) newErrors.files = true;
+  if (!propertyName.trim()) newErrors.propertyName = true;
+  if (!pricePerMonth) newErrors.pricePerMonth = true;
+  if (!securityDeposit) newErrors.securityDeposit = true;
+  if (!applicationFee) newErrors.applicationFee = true;
+  if (!beds) newErrors.beds = true;
+  if (!baths) newErrors.baths = true;
+  if (!squareFeet) newErrors.squareFeet = true;
+  if (!Public_Id) newErrors.Public_Id = true;
+  if (!address.trim()) newErrors.address = true;
+  if (!city.trim()) newErrors.city = true;
+  if (!state.trim()) newErrors.state = true;
+  if (!postalCode) newErrors.postalCode = true;
+  if (!country) newErrors.country = true;
+  if (!propertyType) newErrors.propertyType = true;
+  if (files.length === 0) newErrors.files = true;
 
-    setErrors(newErrors);
+  setErrors(newErrors);
 
-    return Object.keys(newErrors).length === 0;
-  };
+  return Object.keys(newErrors).length === 0;
+};
 
   const get_coordinate = (query: string) => {
     handleSearch(query);

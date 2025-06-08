@@ -65,7 +65,7 @@ const Page = () => {
     getApplications();
   }, [userId]);
 
-  const handleRemoveWithAnimation = (id) => {
+  const handleRemoveWithAnimation = (id : string) => {
     setFadingOutIds((prev) => [...prev, id]);
     setTimeout(() => {
       setApplications((prev) => prev.filter((app) => app.applicationId !== id));

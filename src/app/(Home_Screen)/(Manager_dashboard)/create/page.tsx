@@ -11,15 +11,19 @@ import Image from "next/image";
 export default function AddPropertyForm() {
   const router = useRouter();
 
-  const [coords, setCoords] = useState(null);
+  const [coords, setCoords] = useState<{ lat: number; lng: number } | null>(
+    null
+  );
   const [showMap, setShowMap] = useState(false);
   const [my_location, setmy_location] = useState(false); // Default false
   const [search_location, setsearch_location] = useState(false);
   const [query, setQuery] = useState("");
   const [suggestions, setSuggestions] = useState([]);
   const [dog, setdog] = useState(true);
-  const [selectedLocation, setSelectedLocation] = useState(null);
-  const [previewUrls, setPreviewUrls] = useState([]);
+  const [selectedLocation, setSelectedLocation] = useState<{
+    lat: number;
+    lng: number;
+  } | null>(null);
   const [created_listing, setcreated_listing] = useState(false);
   const [creating_screen, setcreating_screen] = useState(false);
   const [errors, setErrors] = useState({});
@@ -29,45 +33,6 @@ export default function AddPropertyForm() {
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
 
   const Connectwallet = async () => {
-  if (!window.ethereum) {
-    return;
-  }
-
-  let metamaskProvider = null;
-
-  if (Array.isArray(window.ethereum.providers)) {
-    metamaskProvider = window.ethereum.providers.find((p) => p.isMetaMask);
-  } else if (window.ethereum.isMetaMask) {
-    metamaskProvider = window.ethereum;
-  }
-
-  if (!metamaskProvider) {
-    toast.custom((t) => (
-      <div
-        className={`${
-          t.visible ? "animate-enter" : "animate-leave"
-        } fixed top-2 right-2 bg-black border mt-[40px] border-black text-white flex items-center justify-center rounded-lg shadow-md font-bold h-[60px] w-[250px] text-sm`}
-      >
-        No metamask detected{" "}
-      </div>
-    ));
-    return;
-  }
-
- try {
-  const accounts = await metamaskProvider.request({
-    method: "eth_requestAccounts",
-  }) as string[];
-  console.log("Connected MetaMask account:", accounts[0]);
-  setPublic_Id(accounts[0]);
-} catch (error) {
-  console.error("Connection rejected or failed:", error);
-}
-
-};
-
-  useEffect(() => {
-  const Connectwallet1 = async () => {
     if (!window.ethereum) {
       return;
     }
@@ -81,27 +46,60 @@ export default function AddPropertyForm() {
     }
 
     if (!metamaskProvider) {
+      toast.custom((t) => (
+        <div
+          className={`${
+            t.visible ? "animate-enter" : "animate-leave"
+          } fixed top-2 right-2 bg-black border mt-[40px] border-black text-white flex items-center justify-center rounded-lg shadow-md font-bold h-[60px] w-[250px] text-sm`}
+        >
+          No metamask detected{" "}
+        </div>
+      ));
       return;
     }
 
-   try {
-  const accounts = await metamaskProvider.request({
-    method: "eth_requestAccounts",
-  }) as string[]; // 👈 explicitly cast to string array
-
-  console.log("Connected MetaMask account:", accounts[0]);
-  setPublic_Id(accounts[0]);
-} catch (error) {
-  console.error("Connection rejected or failed:", error);
-}
-
+    try {
+      const accounts = (await metamaskProvider.request({
+        method: "eth_requestAccounts",
+      })) as string[];
+      console.log("Connected MetaMask account:", accounts[0]);
+      setPublic_Id(accounts[0]);
+    } catch (error) {
+      console.error("Connection rejected or failed:", error);
+    }
   };
-  Connectwallet1();
-  }, [])
 
-  
+  useEffect(() => {
+    const Connectwallet1 = async () => {
+      if (!window.ethereum) {
+        return;
+      }
 
-  
+      let metamaskProvider = null;
+
+      if (Array.isArray(window.ethereum.providers)) {
+        metamaskProvider = window.ethereum.providers.find((p) => p.isMetaMask);
+      } else if (window.ethereum.isMetaMask) {
+        metamaskProvider = window.ethereum;
+      }
+
+      if (!metamaskProvider) {
+        return;
+      }
+
+      try {
+        const accounts = (await metamaskProvider.request({
+          method: "eth_requestAccounts",
+        })) as string[]; // 👈 explicitly cast to string array
+
+        console.log("Connected MetaMask account:", accounts[0]);
+        setPublic_Id(accounts[0]);
+      } catch (error) {
+        console.error("Connection rejected or failed:", error);
+      }
+    };
+    Connectwallet1();
+  }, []);
 
   useEffect(() => {
     if (Public_Id !== null && Public_Id !== "") {
@@ -129,28 +127,28 @@ export default function AddPropertyForm() {
   }, [role]);
 
   const validateFields = () => {
-  const newErrors: { [key: string]: boolean } = {};
+    const newErrors: { [key: string]: boolean } = {};
 
-  if (!propertyName.trim()) newErrors.propertyName = true;
-  if (!pricePerMonth) newErrors.pricePerMonth = true;
-  if (!securityDeposit) newErrors.securityDeposit = true;
-  if (!applicationFee) newErrors.applicationFee = true;
-  if (!beds) newErrors.beds = true;
-  if (!baths) newErrors.baths = true;
-  if (!squareFeet) newErrors.squareFeet = true;
-  if (!Public_Id) newErrors.Public_Id = true;
-  if (!address.trim()) newErrors.address = true;
-  if (!city.trim()) newErrors.city = true;
-  if (!state.trim()) newErrors.state = true;
-  if (!postalCode) newErrors.postalCode = true;
-  if (!country) newErrors.country = true;
-  if (!propertyType) newErrors.propertyType = true;
-  if (files.length === 0) newErrors.files = true;
+    if (!propertyName.trim()) newErrors.propertyName = true;
+    if (!pricePerMonth) newErrors.pricePerMonth = true;
+    if (!securityDeposit) newErrors.securityDeposit = true;
+    if (!applicationFee) newErrors.applicationFee = true;
+    if (!beds) newErrors.beds = true;
+    if (!baths) newErrors.baths = true;
+    if (!squareFeet) newErrors.squareFeet = true;
+    if (!Public_Id) newErrors.Public_Id = true;
+    if (!address.trim()) newErrors.address = true;
+    if (!city.trim()) newErrors.city = true;
+    if (!state.trim()) newErrors.state = true;
+    if (!postalCode) newErrors.postalCode = true;
+    if (!country) newErrors.country = true;
+    if (!propertyType) newErrors.propertyType = true;
+    if (files.length === 0) newErrors.files = true;
 
-  setErrors(newErrors);
+    setErrors(newErrors);
 
-  return Object.keys(newErrors).length === 0;
-};
+    return Object.keys(newErrors).length === 0;
+  };
 
   const get_coordinate = (query: string) => {
     handleSearch(query);
@@ -243,16 +241,17 @@ export default function AddPropertyForm() {
   const [longitude, setlongitude] = useState("");
   const [Bathtub, setBathtub] = useState(false);
   const [Wifi, setWifi] = useState(false);
-  const [files, setFiles] = useState([]);
+  const [files, setFiles] = useState<File[]>([]);
+  const [previewUrls, setPreviewUrls] = useState<string[]>([]);
 
   const handleImageChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     if (e.target.files) {
-      setFiles(Array.from(e.target.files));
-    }
-    const files = Array.from(e.target.files);
+      const selectedFiles = Array.from(e.target.files);
+      setFiles(selectedFiles);
 
-    const previews = files.map((file) => URL.createObjectURL(file));
-    setPreviewUrls(previews);
+      const previews = selectedFiles.map((file) => URL.createObjectURL(file));
+      setPreviewUrls(previews);
+    }
   };
 
   const handleUseMyLocation = () => {
@@ -264,7 +263,7 @@ export default function AddPropertyForm() {
     navigator.geolocation.getCurrentPosition(
       (pos) => {
         const { latitude, longitude } = pos.coords;
-        setCoords({ lat: latitude, lng: longitude });
+        setCoords({ lat: latitude, lng: longitude }); // ✅ Now TypeScript understands this
         setShowMap(false);
       },
       (err) => {
@@ -275,7 +274,7 @@ export default function AddPropertyForm() {
               t.visible ? "animate-enter" : "animate-leave"
             } fixed top-2 right-2 bg-black border mt-[40px] border-black text-white flex items-center justify-center rounded-lg shadow-md font-bold h-[60px] w-[250px] text-sm`}
           >
-            API down{" "}
+            API down
           </div>
         ));
       }
@@ -284,12 +283,12 @@ export default function AddPropertyForm() {
 
   useEffect(() => {
     if (coords) {
-      setlatitude(coords.lat);
-      setlongitude(coords.lng);
+      setlatitude(coords.lat.toString());
+      setlongitude(coords.lng.toString());
     }
   }, [coords]);
 
-  const create_button = async (e) => {
+  const create_button = async (e: React.MouseEvent<HTMLButtonElement>) => {
     if (!validateFields()) {
       toast.custom((t) => (
         <div
@@ -393,10 +392,10 @@ export default function AddPropertyForm() {
     formData.append("beds", beds);
     formData.append("baths", baths);
     formData.append("squareFeet", squareFeet);
-    formData.append("petsAllowed", petsAllowed);
-    formData.append("parkingIncluded", parkingIncluded);
-    formData.append("Bathtub", Bathtub);
-    formData.append("Wifi", Wifi);
+    formData.append("petsAllowed", petsAllowed.toString());
+    formData.append("parkingIncluded", parkingIncluded.toString());
+    formData.append("Bathtub", Bathtub.toString());
+    formData.append("Wifi", Wifi.toString());
     formData.append("propertyType", propertyType);
     formData.append("amenities", amenities);
     formData.append("highlights", highlights);
@@ -434,23 +433,23 @@ export default function AddPropertyForm() {
   } | null>(null);
 
   const memoizedMap = useMemo(() => {
-  return (
-    <div className="h-[403px] w-[380px] md:w-[973px] bg-gray-300 flex items-center justify-center">
-      <MapView3
-        markerCoords={selectedLocation}
-        onLocationSelect={setSelectedLocation1}
-      />
-    </div>
-  );
-}, [selectedLocation, MapView3]); // ✅ now includes MapView3
+    return (
+      <div className="h-[403px] w-[380px] md:w-[973px] bg-gray-300 flex items-center justify-center">
+        <MapView3
+          markerCoords={selectedLocation}
+          onLocationSelect={setSelectedLocation1}
+        />
+      </div>
+    );
+  }, [selectedLocation, MapView3]); // ✅ now includes MapView3
 
+ useEffect(() => {
+  if (selectedLocation1) {
+    setlatitude(selectedLocation1.lat.toString());
+    setlongitude(selectedLocation1.lng.toString());
+  }
+}, [selectedLocation1]);
 
-  useEffect(() => {
-    if (selectedLocation1) {
-      setlatitude(selectedLocation1.lat);
-      setlongitude(selectedLocation1.lng);
-    }
-  }, [selectedLocation1]);
 
   if (creating_screen === true) {
     return (

@@ -1,3 +1,5 @@
+import prisma from "../../../../lib/prisma";
+
 export async function POST() {
   const latestProperties = await prisma.property.findMany({
     orderBy: { createdAt: "desc" },

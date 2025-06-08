@@ -26,7 +26,7 @@ export default async function handler(req, res) {
 
   try {
     
-    const [fields, files] = await new Promise((resolve, reject) => {
+    const [ files] = await new Promise((resolve, reject) => {
       form.parse(req, (err, fields, files) => {
         if (err) {
           console.error("Formidable parse error:", err);

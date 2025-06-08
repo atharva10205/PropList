@@ -1,7 +1,4 @@
-import { NextResponse } from 'next/server';
-import bcrypt from 'bcryptjs';
 import prisma from '../../../../lib/prisma';
-import jwt from 'jsonwebtoken';
 
 export async function POST(req) {
   const { userId , pfpUrl} = await req.json();

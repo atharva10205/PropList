@@ -6,6 +6,7 @@ import axios from "axios";
 import Sidebar_manager from "@/app/components/Sidebar_manager";
 import { useRouter } from "next/navigation";
 import toast, { Toaster } from "react-hot-toast";
+import Image from "next/image";
 
 export default function AddPropertyForm() {
   const router = useRouter();
@@ -17,7 +18,7 @@ export default function AddPropertyForm() {
   const [query, setQuery] = useState("");
   const [suggestions, setSuggestions] = useState([]);
   const [dog, setdog] = useState(true);
-  const [selectedLocation, setSelectedLocation] = useState<any>(null);
+  const [selectedLocation, setSelectedLocation] = useState(null);
   const [previewUrls, setPreviewUrls] = useState([]);
   const [created_listing, setcreated_listing] = useState(false);
   const [creating_screen, setcreating_screen] = useState(false);
@@ -64,6 +65,7 @@ export default function AddPropertyForm() {
     }
   };
 
+  useEffect(() => {
   const Connectwallet1 = async () => {
     if (!window.ethereum) {
       return;
@@ -91,10 +93,12 @@ export default function AddPropertyForm() {
       console.error("Connection rejected or failed:", error);
     }
   };
+  Connectwallet1();
+  }, [])
 
-  useEffect(() => {
-    Connectwallet1();
-  }, [Connectwallet1]);
+  
+
+  
 
   useEffect(() => {
     if (Public_Id !== null && Public_Id !== "") {
@@ -169,7 +173,7 @@ export default function AddPropertyForm() {
           </div>
         ));
       }
-    } catch (error) {
+    } catch {
       toast.custom((t) => (
         <div
           className={`${
@@ -214,7 +218,6 @@ export default function AddPropertyForm() {
     ssr: false,
   });
 
-  const [email, setemail] = useState("");
   const [propertyName, setPropertyName] = useState("");
   const [description, setDescription] = useState("");
   const [pricePerMonth, setPricePerMonth] = useState("");
@@ -235,7 +238,6 @@ export default function AddPropertyForm() {
   const [country, setCountry] = useState("");
   const [latitude, setlatitude] = useState("");
   const [longitude, setlongitude] = useState("");
-  const [image, setImage] = useState(null);
   const [Bathtub, setBathtub] = useState(false);
   const [Wifi, setWifi] = useState(false);
   const [files, setFiles] = useState([]);
@@ -245,7 +247,6 @@ export default function AddPropertyForm() {
       setFiles(Array.from(e.target.files));
     }
     const files = Array.from(e.target.files);
-    setImage(files);
 
     const previews = files.map((file) => URL.createObjectURL(file));
     setPreviewUrls(previews);
@@ -284,12 +285,6 @@ export default function AddPropertyForm() {
       setlongitude(coords.lng);
     }
   }, [coords]);
-
-  const getInputClass = (fieldName) => {
-    return `p-2 border rounded ${
-      errors[fieldName] ? "border-red-500" : "border-gray-300"
-    }`;
-  };
 
   const create_button = async (e) => {
     if (!validateFields()) {
@@ -341,7 +336,7 @@ export default function AddPropertyForm() {
     };
 
     const emptyFields = Object.entries(requiredFields).filter(
-      ([key, value]) => !value || value.toString().trim() === ""
+      ([value]) => !value || value.toString().trim() === ""
     );
 
     if (files.length === 0 || emptyFields.length > 0) {
@@ -430,32 +425,22 @@ export default function AddPropertyForm() {
     }
   };
 
-  useEffect(() => {
-    const get_email = async () => {
-      try {
-        const response = await fetch("/api/user_email");
-        const data = await response.json();
-        setemail(data.email);
-      } catch (error) {}
-    };
-    get_email();
-  }, []);
-
   const [selectedLocation1, setSelectedLocation1] = useState<{
     lat: number;
     lng: number;
   } | null>(null);
 
   const memoizedMap = useMemo(() => {
-    return (
-      <div className="h-[403px]  w-[380px] md:w-[973px] bg-gray-300 flex items-center justify-center">
-        <MapView3
-          markerCoords={selectedLocation}
-          onLocationSelect={setSelectedLocation1}
-        />
-      </div>
-    );
-  }, [selectedLocation]);
+  return (
+    <div className="h-[403px] w-[380px] md:w-[973px] bg-gray-300 flex items-center justify-center">
+      <MapView3
+        markerCoords={selectedLocation}
+        onLocationSelect={setSelectedLocation1}
+      />
+    </div>
+  );
+}, [selectedLocation, MapView3]); // ✅ now includes MapView3
+
 
   useEffect(() => {
     if (selectedLocation1) {
@@ -552,22 +537,22 @@ export default function AddPropertyForm() {
               </svg>
             </button>
           </div>
-         <div className="flex flex-1 overflow-hidden relative">
-        {/* Sidebar */}
-        <div
-          className={`fixed md:static z-20 top-[50px]  left-0 h-full w-64  overflow-y-auto transform transition-transform duration-300 ease-in-out ${
-            isSidebarOpen ? "translate-x-0" : "-translate-x-full"
-          } md:translate-x-0`}
-        >
-          <Sidebar_manager />
-        </div>
+          <div className="flex flex-1 overflow-hidden relative">
+            {/* Sidebar */}
+            <div
+              className={`fixed md:static z-20 top-[50px]  left-0 h-full w-64  overflow-y-auto transform transition-transform duration-300 ease-in-out ${
+                isSidebarOpen ? "translate-x-0" : "-translate-x-full"
+              } md:translate-x-0`}
+            >
+              <Sidebar_manager />
+            </div>
 
-         {isSidebarOpen && (
-          <div
-            className="fixed inset-0  bg-opacity-50 z-10 md:hidden"
-            onClick={() => setIsSidebarOpen(false)}
-          />
-        )}
+            {isSidebarOpen && (
+              <div
+                className="fixed inset-0  bg-opacity-50 z-10 md:hidden"
+                onClick={() => setIsSidebarOpen(false)}
+              />
+            )}
 
             {/* Form area - scrolls */}
             <div className="flex-1 overflow-y-auto">
@@ -860,10 +845,12 @@ export default function AddPropertyForm() {
                     {previewUrls.length > 0 && (
                       <div className="grid grid-cols-3 gap-4 mt-6">
                         {previewUrls.map((url, index) => (
-                          <img
+                          <Image
                             key={index}
                             src={url}
                             alt={`Preview ${index}`}
+                            width={300}
+                            height={128}
                             className="w-full h-32 object-cover rounded"
                           />
                         ))}

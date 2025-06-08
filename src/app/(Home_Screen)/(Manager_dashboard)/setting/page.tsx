@@ -5,11 +5,11 @@ import Navbar from "@/app/components/Navbar";
 import Sidebar_manager from "@/app/components/Sidebar_manager";
 import { useRouter } from "next/navigation";
 import toast, { Toaster } from "react-hot-toast";
+import Image from "next/image";
 
 const Page = () => {
   const router = useRouter();
   const [userId, setUserId] = useState("");
-  const [isLoading, setIsLoading] = useState(true);
   const [Role, setRole] = useState("");
   const [Input, setInput] = useState("");
   const [previewImage, setPreviewImage] = useState(null);
@@ -34,11 +34,11 @@ const Page = () => {
           setUserId(data.userId);
         } else {
           console.error("Error from backend:", data.error);
-          setIsLoading(false);
+          
         }
       } catch (error) {
         console.error("Fetch error:", error);
-        setIsLoading(false);
+        
       }
     };
 
@@ -209,7 +209,7 @@ const Page = () => {
                 t.visible ? "animate-enter" : "animate-leave"
               } fixed top-2 right-2 bg-white border border-black text-black mt-10 flex items-center justify-center rounded-lg shadow-md font-bold h-[60px] w-[250px] text-sm`}
             >
-              "PfP changed"
+              PfP changed
             </div>
           ));
         }
@@ -345,11 +345,14 @@ const Page = () => {
             >
               {previewImage ? (
                 <>
-                  <img
-                    src={previewImage}
-                    alt="Profile preview"
-                    className="w-full h-full object-cover"
-                  />
+                <div className="relative w-full h-full">
+  <Image
+    src={previewImage}
+    alt="Profile preview"
+    fill
+    style={{ objectFit: "cover" }}
+  />
+</div>
                   <button
                     type="button"
                     onClick={handleRemoveImage}

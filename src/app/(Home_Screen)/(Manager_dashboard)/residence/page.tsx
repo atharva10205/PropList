@@ -5,67 +5,20 @@ import Sidebar_manager from "@/app/components/Sidebar_manager";
 import Navbar from "@/app/components/Navbar";
 import { useRouter } from "next/navigation";
 import toast, { Toaster } from "react-hot-toast";
+import Image from "next/image";
 
 const Page = () => {
   const router = useRouter();
   const [userId, setUserId] = useState(null);
   const [applications, setApplications] = useState(null);
-  const [fadingOutIds, setFadingOutIds] = useState([]);
   const [loading, setLoading] = useState(true);
   const [Wallet_connected, setWallet_connected] = useState(false);
   const [Public_Id, setPublic_Id] = useState("");
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
 
- const changeWallet = async () => {
-  if (!window.ethereum) {
-    toast("Please install MetaMask");
-    return;
-  }
-
-  let metamaskProvider = null;
-
-  if (Array.isArray(window.ethereum.providers)) {
-    metamaskProvider = window.ethereum.providers.find((p) => p.isMetaMask);
-  } else if (window.ethereum.isMetaMask) {
-    metamaskProvider = window.ethereum;
-  }
-
-  if (!metamaskProvider) {
-    toast("MetaMask not found");
-    return;
-  }
-
-  try {
-    await metamaskProvider.request({
-      method: "wallet_requestPermissions",
-      params: [{ eth_accounts: {} }],
-    });
-
-    const accounts = await metamaskProvider.request({
-      method: "eth_requestAccounts",
-    });
-
-    if (accounts.length > 0) {
-      setPublic_Id(accounts[0]);
-      console.log("Connected to:", accounts[0]);
-    }
-  } catch (err) {
-    console.error("Wallet connection error:", err);
-  }
-};
-
-
-  const Connectwallet = async () => {
+  const changeWallet = async () => {
     if (!window.ethereum) {
-      toast.custom((t) => (
-        <div
-          className={`${
-            t.visible ? "animate-enter" : "animate-leave"
-          } fixed top-2 right-2 bg-black border mt-[40px] border-black text-white flex items-center justify-center rounded-lg shadow-md font-bold h-[60px] w-[250px] text-sm`}
-        >
-          Please install MetaMask{" "}
-        </div>
-      ));
+      toast("Please install MetaMask");
       return;
     }
 
@@ -78,32 +31,78 @@ const Page = () => {
     }
 
     if (!metamaskProvider) {
-      toast.custom((t) => (
-        <div
-          className={`${
-            t.visible ? "animate-enter" : "animate-leave"
-          } fixed top-2 right-2 bg-black border mt-[40px] border-black text-white flex items-center justify-center rounded-lg shadow-md font-bold h-[60px] w-[250px] text-sm`}
-        >
-          Please install MetaMask{" "}
-        </div>
-      ));
+      toast("MetaMask not found");
       return;
     }
 
     try {
+      await metamaskProvider.request({
+        method: "wallet_requestPermissions",
+        params: [{ eth_accounts: {} }],
+      });
+
       const accounts = await metamaskProvider.request({
         method: "eth_requestAccounts",
       });
-      console.log("Connected MetaMask account:", accounts[0]);
-      setPublic_Id(accounts[0]);
-    } catch (error) {
-      console.error("Connection rejected or failed:", error);
+
+      if (accounts.length > 0) {
+        setPublic_Id(accounts[0]);
+        console.log("Connected to:", accounts[0]);
+      }
+    } catch (err) {
+      console.error("Wallet connection error:", err);
     }
   };
 
   useEffect(() => {
+    const Connectwallet = async () => {
+      if (!window.ethereum) {
+        toast.custom((t) => (
+          <div
+            className={`${
+              t.visible ? "animate-enter" : "animate-leave"
+            } fixed top-2 right-2 bg-black border mt-[40px] border-black text-white flex items-center justify-center rounded-lg shadow-md font-bold h-[60px] w-[250px] text-sm`}
+          >
+            Please install MetaMask{" "}
+          </div>
+        ));
+        return;
+      }
+
+      let metamaskProvider = null;
+
+      if (Array.isArray(window.ethereum.providers)) {
+        metamaskProvider = window.ethereum.providers.find((p) => p.isMetaMask);
+      } else if (window.ethereum.isMetaMask) {
+        metamaskProvider = window.ethereum;
+      }
+
+      if (!metamaskProvider) {
+        toast.custom((t) => (
+          <div
+            className={`${
+              t.visible ? "animate-enter" : "animate-leave"
+            } fixed top-2 right-2 bg-black border mt-[40px] border-black text-white flex items-center justify-center rounded-lg shadow-md font-bold h-[60px] w-[250px] text-sm`}
+          >
+            Please install MetaMask{" "}
+          </div>
+        ));
+        return;
+      }
+
+      try {
+        const accounts = await metamaskProvider.request({
+          method: "eth_requestAccounts",
+        });
+        console.log("Connected MetaMask account:", accounts[0]);
+        setPublic_Id(accounts[0]);
+      } catch (error) {
+        console.error("Connection rejected or failed:", error);
+      }
+    };
+
     Connectwallet();
-  }, [Connectwallet]);
+  }, []);
 
   useEffect(() => {
     if (Public_Id !== null && Public_Id !== "") {
@@ -230,13 +229,8 @@ const Page = () => {
                 filteredApplications.map((application) => (
                   <div
                     key={application.applicationId}
-                    className={`rounded-2xl flex flex-col lg:flex-row shadow-lg border border-gray-300 w-full transition-all duration-300 ease-in-out transform ${
-                      fadingOutIds.includes(application.applicationId)
-                        ? "opacity-0 -translate-y-4 scale-95"
-                        : "opacity-100"
-                    }`}
+                    className={`rounded-2xl flex flex-col lg:flex-row shadow-lg border border-gray-300 w-full transition-all duration-300 ease-in-out transform`}
                   >
-                    {/* Property Card */}
                     <div
                       className="w-[calc(100%-30px)]  lg:w-80 rounded-2xl h-auto lg:h-[360px] overflow-hidden shadow-lg border cursor-pointer border-gray-200 m-4 lg:m-0"
                       onClick={() =>
@@ -244,14 +238,17 @@ const Page = () => {
                       }
                     >
                       <div className="relative">
-                        <img
-                          src={
-                            application.property.imageURL ||
-                            "https://via.placeholder.com/300"
-                          }
-                          alt={application.property.propertyName}
-                          className="h-48 w-full object-cover"
-                        />
+                        <div className="relative w-full h-48 rounded overflow-hidden">
+                          <Image
+                            src={
+                              application.property.imageURL ||
+                              "https://via.placeholder.com/300"
+                            }
+                            alt={application.property.propertyName}
+                            fill
+                            style={{ objectFit: "cover" }}
+                          />
+                        </div>
                       </div>
                       <div className="p-4">
                         <h2 className="text-lg font-bold">
@@ -265,18 +262,22 @@ const Page = () => {
                         </div>
                         <div className="flex justify-between text-gray-600 text-sm">
                           <div className="flex items-center gap-1">
-                            <img
-                              className="h-[15px] ml-2 w-[15px]"
+                            <Image
+                              className="ml-2"
                               src="https://img.icons8.com/?size=100&id=561&format=png&color=000000"
                               alt="beds icon"
+                              width={15}
+                              height={15}
                             />
                             {application.property.beds} Bed
                           </div>
                           <div className="flex items-center gap-1">
-                            <img
-                              className="h-[15px] w-[15px]"
+                            <Image
                               src="https://img.icons8.com/?size=100&id=HiiMjneqmobf&format=png&color=000000"
                               alt="baths icon"
+                              width={15}
+                              height={15}
+                              className=""
                             />
                             {application.property.baths} Bath
                           </div>

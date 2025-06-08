@@ -14,7 +14,7 @@ export default function AboutPage() {
           Welcome to <span className="font-semibold">HomiFi</span> — your go-to property rental platform designed for ease, speed, and convenience.
         </p>
         <p className="text-lg mb-4">
-          Whether you're a property owner or someone looking for the perfect rental, our SaaS solution offers a seamless experience to manage listings, communicate with tenants, and handle payments — all in one place.
+          Whether you are a property owner or someone looking for the perfect rental, our SaaS solution offers a seamless experience to manage listings, communicate with tenants, and handle payments — all in one place.
         </p>
         <p className="text-lg mb-4">
           We believe in minimalism, performance, and clarity. That’s why our dashboard and booking flow are crafted with a modern black and white theme that makes everything feel crisp and professional.

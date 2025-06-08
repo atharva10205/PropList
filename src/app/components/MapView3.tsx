@@ -11,7 +11,6 @@ import { useEffect, useState } from "react";
 import L from "leaflet";
 import "leaflet/dist/leaflet.css";
 import React from "react";
-import Cookies from "js-cookie";
 
 
 delete L.Icon.Default.prototype._getIconUrl;

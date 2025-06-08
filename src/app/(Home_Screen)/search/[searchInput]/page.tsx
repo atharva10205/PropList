@@ -135,10 +135,9 @@ const Page = () => {
   const [selectedLocation, setSelectedLocation] = useState<
     [number, number] | null
   >(null);
-  const [add_data, setadd_data] = useState<{ markers: any[] }>({ markers: [] });
-  const [filteredData, setFilteredData] = useState<any[]>([]);
+  const [add_data, setadd_data] = useState({ markers: [] });
+  const [filteredData, setFilteredData] = useState([]);
   const params = useParams();
-  const router = useRouter();
   const searchInput = decodeURIComponent(params.searchInput as string);
 
   useEffect(() => {
@@ -154,7 +153,7 @@ const Page = () => {
       } else {
         alert("Place not found");
       }
-    } catch (error) {
+    } catch {
       alert("Error fetching location");
     }
   };

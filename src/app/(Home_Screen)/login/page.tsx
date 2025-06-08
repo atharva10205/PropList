@@ -42,7 +42,7 @@ const Page = () => {
 
       console.log("Login success!", data);
       router.push("/home");
-    } catch (err) {
+    } catch {
       toast.custom((t) => (
         <div
           className={`${
@@ -95,7 +95,7 @@ const Page = () => {
         </div>
 
         <div className="flex flex-row items-center justify-center text-sm sm:text-base">
-          <span className="mr-2">Don't have an account?</span>
+          <span className="mr-2">Dont have an account?</span>
           <button
             onClick={() => router.push("/signup")}
             className="text-black font-bold cursor-pointer hover:text-blue-500 hover:underline"

@@ -7,7 +7,8 @@ import { useRouter } from "next/navigation";
 import { BrowserProvider, parseEther } from "ethers";
 import toast, { Toaster } from "react-hot-toast";
 
-const page = () => {
+
+const Page = () => {
   const router = useRouter();
   const [userId, setUserId] = useState(null);
   const [data, setdata] = useState(null);
@@ -34,14 +35,13 @@ const page = () => {
     const addID = addid;
 
     if (!window.ethereum) {
-
-       toast.custom((t) => (
+      toast.custom((t) => (
         <div
           className={`${
             t.visible ? "animate-enter" : "animate-leave"
           } fixed top-2 right-2 bg-black border mt-[40px] border-black text-white flex items-center justify-center rounded-lg shadow-md font-bold h-[60px] w-[250px] text-sm`}
         >
-         MetaMask not detected
+          MetaMask not detected
         </div>
       ));
       return;
@@ -69,14 +69,13 @@ const page = () => {
     }
 
     if (!ethRate) {
-
-       toast.custom((t) => (
+      toast.custom((t) => (
         <div
           className={`${
             t.visible ? "animate-enter" : "animate-leave"
           } fixed top-2 right-2 bg-black border mt-[40px] border-black text-white flex items-center justify-center rounded-lg shadow-md font-bold h-[60px] w-[250px] text-sm`}
         >
-          ETH price not loaded 
+          ETH price not loaded
         </div>
       ));
       return;
@@ -134,57 +133,54 @@ const page = () => {
     }
   };
 
-  const Connectwallet = async () => {
-    if (!window.ethereum) {
-      
-       toast.custom((t) => (
-        <div
-          className={`${
-            t.visible ? "animate-enter" : "animate-leave"
-          } fixed top-2 right-2 bg-black border mt-[40px] border-black text-white flex items-center justify-center rounded-lg shadow-md font-bold h-[60px] w-[250px] text-sm`}
-        >
-          Please install MetaMask
-        </div>
-      ));
-      return;
-    }
-
-    let metamaskProvider = null;
-
-    if (Array.isArray(window.ethereum.providers)) {
-      metamaskProvider = window.ethereum.providers.find((p) => p.isMetaMask);
-    } else if (window.ethereum.isMetaMask) {
-      metamaskProvider = window.ethereum;
-    }
-
-    if (!metamaskProvider) {
-
-      toast.custom((t) => (
-        <div
-          className={`${
-            t.visible ? "animate-enter" : "animate-leave"
-          } fixed top-2 right-2 bg-black border mt-[40px] border-black text-white flex items-center justify-center rounded-lg shadow-md font-bold h-[60px] w-[250px] text-sm`}
-        >
-          MetaMask wallet not found! Please install MetaMask
-        </div>
-      ));
-      return;
-    }
-
-    try {
-      const accounts = await metamaskProvider.request({
-        method: "eth_requestAccounts",
-      });
-      console.log("Connected MetaMask account:", accounts[0]);
-      setPublic_Id(accounts[0]);
-    } catch (error) {
-      console.error("Connection rejected or failed:", error);
-    }
-  };
-
   useEffect(() => {
+    const Connectwallet = async () => {
+      if (!window.ethereum) {
+        toast.custom((t) => (
+          <div
+            className={`${
+              t.visible ? "animate-enter" : "animate-leave"
+            } fixed top-2 right-2 bg-black border mt-[40px] border-black text-white flex items-center justify-center rounded-lg shadow-md font-bold h-[60px] w-[250px] text-sm`}
+          >
+            Please install MetaMask
+          </div>
+        ));
+        return;
+      }
+
+      let metamaskProvider = null;
+
+      if (Array.isArray(window.ethereum.providers)) {
+        metamaskProvider = window.ethereum.providers.find((p) => p.isMetaMask);
+      } else if (window.ethereum.isMetaMask) {
+        metamaskProvider = window.ethereum;
+      }
+
+      if (!metamaskProvider) {
+        toast.custom((t) => (
+          <div
+            className={`${
+              t.visible ? "animate-enter" : "animate-leave"
+            } fixed top-2 right-2 bg-black border mt-[40px] border-black text-white flex items-center justify-center rounded-lg shadow-md font-bold h-[60px] w-[250px] text-sm`}
+          >
+            MetaMask wallet not found! Please install MetaMask
+          </div>
+        ));
+        return;
+      }
+
+      try {
+        const accounts = await metamaskProvider.request({
+          method: "eth_requestAccounts",
+        });
+        console.log("Connected MetaMask account:", accounts[0]);
+        setPublic_Id(accounts[0]);
+      } catch (error) {
+        console.error("Connection rejected or failed:", error);
+      }
+    };
     Connectwallet();
-  }, [Connectwallet]);
+  }, []);
 
   useEffect(() => {
     if (Public_Id !== null && Public_Id !== "") {
@@ -348,7 +344,6 @@ const page = () => {
                     </div>
 
                     <div className="flex flex-col lg:flex-row gap-4 p-4 w-full">
-
                       <div className="p-4 border border-gray-300 rounded-lg shadow-lg flex flex-col items-center lg:w-[600px] w-full ">
                         <h1 className="font-bold  mb-2">Payment</h1>
 
@@ -453,4 +448,4 @@ const page = () => {
   );
 };
 
-export default page;
+export default Page;

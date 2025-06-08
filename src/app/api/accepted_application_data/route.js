@@ -11,7 +11,6 @@ export async function POST(req) {
   });
 
   const senderIds = applications.map((app) => app.senderId);
-  const application_ID = applications.map((app) => app.id);
   const addIds = applications.map((app) => app.addId);
 
   const senders = await prisma.User.findMany({

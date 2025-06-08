@@ -4,13 +4,14 @@ import React, { useState, useEffect } from "react";
 import Sidebar_manager from "@/app/components/Sidebar_manager";
 import Navbar from "@/app/components/Navbar";
 import { useRouter } from "next/navigation";
+import Image from "next/image";
 
 const Page = () => {
   const router = useRouter();
   const [userId, setUserId] = useState(null);
   const [applications, setApplications] = useState(null);
   const [fadingOutIds, setFadingOutIds] = useState([]);
-  const [loading, setLoading] = useState(true); // New loading state
+  const [loading, setLoading] = useState(true); 
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
 
   useEffect(() => {
@@ -166,13 +167,15 @@ const Page = () => {
                     {/* Property Card */}
                     <div className="w-[calc(100%-30px)] lg:w-80 rounded-2xl h-auto lg:h-[360px] overflow-hidden shadow-lg border cursor-pointer border-gray-200 m-4 lg:m-0">
                       <div className="relative ">
-                        <img
+                        <Image
                           src={
                             application.property.imageURL ||
                             "https://via.placeholder.com/300"
                           }
                           alt={application.property.propertyName}
                           className="h-48 w-full object-cover"
+                          width={300}
+                          height={192}
                           onClick={() =>
                             router.push(`/property/${application.property.id}`)
                           }
@@ -195,18 +198,22 @@ const Page = () => {
                         </div>
                         <div className="flex justify-between text-gray-600 text-sm">
                           <div className="flex items-center gap-1">
-                            <img
+                            <Image
                               className="h-[15px] ml-2 w-[15px]"
                               src="https://img.icons8.com/?size=100&id=561&format=png&color=000000"
                               alt="beds icon"
+                              width={15}
+                              height={15}
                             />
                             {application.property.beds} Bed
                           </div>
                           <div className="flex items-center gap-1">
-                            <img
+                            <Image
                               className="h-[15px] w-[15px]"
                               src="https://img.icons8.com/?size=100&id=HiiMjneqmobf&format=png&color=000000"
                               alt="baths icon"
+                              width={15}
+                              height={15}
                             />
                             {application.property.baths} Bath
                           </div>
@@ -219,10 +226,12 @@ const Page = () => {
                       <div className="flex-shrink-0 p-4 border border-gray-300 mt-2 mb-2 rounded-lg shadow-lg w-full md:w-auto">
                         <h1 className="font-bold">From,</h1>
                         <div className="flex flex-row mt-5 items-center">
-                          <img
+                          <Image
                             className="h-[60px] w-[60px] mr-4 rounded-full"
                             src={application.sender.pfpUrl}
                             alt="profile"
+                            width={60}
+                            height={60}
                           />
                           <h1 className="break-all">
                             {application.sender.username}

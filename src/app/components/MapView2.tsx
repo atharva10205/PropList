@@ -1,15 +1,11 @@
 "use client";
 
-import {
-  MapContainer,
-  TileLayer,
-  Marker,
-  useMap,
-  useMapEvents,
-} from "react-leaflet";
-import { useEffect, useState } from "react";
+import { MapContainer, TileLayer, useMap } from "react-leaflet";
+import { useEffect } from "react";
 import L from "leaflet";
 import "leaflet/dist/leaflet.css";
+
+type LatLngTuple = [number, number];
 
 // Fix Leaflet's missing marker icon issue
 L.Icon.Default.mergeOptions({
@@ -21,31 +17,12 @@ L.Icon.Default.mergeOptions({
   popupAnchor: [0, -32]
 });
 
-const LocationMarker = ({
-    onSelect,
-  }: {
-    onSelect: (position: any) => void;
-  }) => {
-    const [position, setPosition] = useState<any>(null);
-  
-    useMapEvents({
-      click(e) {
-        const { latlng } = e; 
-        setPosition(latlng);  
-      },
-    });
-  
-    return position ? <Marker position={position} /> : null;
-  };
-  
-function FlyToLocation1({ coords }: { coords: { lat: number; lng: number } }) {
+function FlyToLocation1({ coords }: { coords?: LatLngTuple }) {
   const map = useMap();
 
   useEffect(() => {
-    if (coords && coords.length === 2) {
-      map.flyTo(coords, 14, {
-        duration: 1.5,
-      });
+    if (coords) {
+      map.flyTo(coords, 13);
     }
   }, [coords, map]);
 
@@ -53,24 +30,21 @@ function FlyToLocation1({ coords }: { coords: { lat: number; lng: number } }) {
 }
 
 export default function MapView2({
-  markerCoords,
-  onLocationSelect,
-}: {
-  markerCoords: any;
-  onLocationSelect: any;
-  
-})  {
+  markerCoords}: {
+  markerCoords?: LatLngTuple;
+  onLocationSelect: (coords: LatLngTuple) => void;
+}) {
   return (
     <MapContainer
       center={markerCoords || [20.5937, 78.9629]}
       zoom={1}
-      style={{ height: "400px", width: "970px", zIndex :0,position:'relative' }}
+      style={{ height: "400px", width: "970px", zIndex: 0, position: 'relative' }}
     >
       <TileLayer
         url="https://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}{r}.png"
         attribution='&copy; <a href="https://carto.com/">CARTO</a>'
       />
-      {<FlyToLocation1 coords={markerCoords} />}
+      <FlyToLocation1 coords={markerCoords} />
     </MapContainer>
   );
 }

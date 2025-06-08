@@ -82,7 +82,6 @@ const Page = () => {
         });
 
         const data = await res.json();
-        console.log("Uploaded file URL(s):", data.urls);
         const pfpUrl =  data.urls;
 
         const response = await fetch("/api/signup", {
@@ -90,10 +89,14 @@ const Page = () => {
           body: JSON.stringify({ username, email, password, role ,pfpUrl }),
           credentials: "include",
         });
+
+        if(response){
+           router.push("/home");
+        }
       } catch (err) {
         console.error("Upload failed:", err);
       }
-      router.push("/home");
+     
     } catch (error) {
       toast.custom((t) => (
         <div

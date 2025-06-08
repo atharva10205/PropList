@@ -11,7 +11,7 @@ export default function ContactPage() {
           Contact Us
         </h1>
         <p className="text-lg mb-4">
-          Have questions, feedback, or need support? We'd love to hear from you.
+          Have questions, feedback, or need support? We will love to hear from you.
         </p>
         <p className="text-lg mb-4">📧 Email: support@HomiFi.com</p>
         <p className="text-lg mb-4">📞 Phone: +91-98765-43210</p>

@@ -9,7 +9,6 @@ const Navbar = () => {
   const dropdownRef = useRef(null);
   const [username, setusername] = useState("");
   const [role, setrole] = useState("");
-  const [notification_popup, setnotification_popup] = useState(false);
   const [userId, setUserId] = useState(null);
 
 
@@ -31,7 +30,7 @@ const Navbar = () => {
         } else {
           console.log("Error from backend:");
         }
-      } catch (error) {
+      } catch  {
         console.log("Fetch error:");
       }
     };
@@ -181,7 +180,6 @@ const Navbar = () => {
               <div
                 onClick={() => {
                   setShowDropdown((prev) => !prev);
-                  setnotification_popup(false);
                 }}
                 className="flex flex-row items-center justify-center  cursor-pointer group relative px-3 py-2 rounded-lg hover:bg-white/10 transition-all duration-200"
               >

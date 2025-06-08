@@ -5,9 +5,8 @@ import {
   TileLayer,
   Marker,
   useMap,
-  useMapEvents,
 } from "react-leaflet";
-import { useEffect, useState } from "react";
+import { useEffect } from "react";
 import L from "leaflet";
 import "leaflet/dist/leaflet.css";
 
@@ -36,7 +35,7 @@ function FlyToLocation1({ coords }: { coords: { lat: number; lng: number } }) {
 export default function MapView1({
   markerCoords,
 }: {
-  onLocationSelect: any;
+  onLocationSelect: (location: unknown) => void;
   markerCoords: { lat: number; lng: number } | null;
 }) {
   return (

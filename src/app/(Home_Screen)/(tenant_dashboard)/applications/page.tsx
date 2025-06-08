@@ -1,6 +1,7 @@
 "use client";
 
 import React, { useState, useEffect } from "react";
+import Image from "next/image"; 
 import Navbar from "@/app/components/Navbar";
 import Sidebar from "@/app/components/Sidebar";
 import { useRouter } from "next/navigation";
@@ -51,7 +52,7 @@ const Page = () => {
         body: JSON.stringify({ userId }),
       });
       const data = await response.json();
-      console.log(data)
+      console.log(data);
 
       if (data?.applications?.length) {
         data.applications.reverse();
@@ -91,10 +92,10 @@ const Page = () => {
     }, 300);
   };
 
-    return (
+  return (
     <div className="h-screen flex flex-col overflow-hidden">
       <Navbar />
-      <Toaster/>
+      <Toaster />
 
       <div className="md:hidden p-4 bg-white shadow-md flex justify-between items-center">
         <button
@@ -163,44 +164,64 @@ const Page = () => {
                 >
                   <div>
                     <div className="w-full md:w-80 rounded-2xl h-[330px] overflow-hidden shadow-lg border cursor-pointer border-gray-200">
-                      <div className="relative">
-                        <img
-                          src={property.propertyimage || "https://via.placeholder.com/300"}
+                      <div className="relative h-48 w-full">
+                        <Image
+                          src={
+                            property.propertyimage ||
+                            "https://via.placeholder.com/300"
+                          }
                           alt={property.propertyName}
-                          className="h-48 w-full object-cover"
-                          onClick={() => router.push(`/property/${property.addId}`)}
+                          fill
+                          style={{ objectFit: "cover" }}
+                          onClick={() =>
+                            router.push(`/property/${property.addId}`)
+                          }
+                          className="cursor-pointer rounded-t-2xl"
                         />
                       </div>
+
                       <div
-                        onClick={() => router.push(`/property/${property.addId}`)}
-                        className="p-4"
+                        onClick={() =>
+                          router.push(`/property/${property.addId}`)
+                        }
+                        className="p-4 cursor-pointer"
                       >
-                        <h2 className="text-lg font-bold">{property.propertyName}</h2>
+                        <h2 className="text-lg font-bold">
+                          {property.propertyName}
+                        </h2>
                         <p className="text-sm text-gray-600 mb-2">
-                          {property.address || ""} {property.city || ""} {property.country || ""}
+                          {property.address || ""} {property.city || ""}{" "}
+                          {property.country || ""}
                         </p>
                         <div className="flex items-center mb-4">
-                          <span className="text-sm font-semibold ml-auto">${property.pricePerMonth}</span>
+                          <span className="text-sm font-semibold ml-auto">
+                            ${property.pricePerMonth}
+                          </span>
                           <span className="text-sm text-gray-500">/month</span>
                         </div>
                         <div className="flex justify-between text-gray-600 text-sm">
                           <div className="flex items-center gap-1">
-                            <img
-                              className="h-[15px] ml-2 w-[15px]"
+                            <Image
+                              className="ml-2"
                               src="https://img.icons8.com/?size=100&id=561&format=png&color=000000"
-                              alt=""
+                              alt="beds icon"
+                              width={15}
+                              height={15}
                             />
                             {property.beds} Bed
                           </div>
                           <div className="flex items-center gap-1">
-                            <img
-                              className="h-[15px] w-[15px]"
+                            <Image
                               src="https://img.icons8.com/?size=100&id=HiiMjneqmobf&format=png&color=000000"
-                              alt=""
+                              alt="baths icon"
+                              width={15}
+                              height={15}
                             />
                             {property.baths} Bath
                           </div>
-                          <div className="flex items-center gap-1">{property.amenities || ""}</div>
+                          <div className="flex items-center gap-1">
+                            {property.amenities || ""}
+                          </div>
                         </div>
                       </div>
                     </div>
@@ -210,15 +231,24 @@ const Page = () => {
                     <div className="flex-shrink-0 p-4 border border-gray-300 mt-2 mb-2 rounded-lg shadow-lg min-w-[200px] md:w-auto">
                       <h1 className="font-bold">To,</h1>
                       <div className="flex flex-row mt-5 items-center">
-                        <img
-                          className="h-[60px] w-[60px] mr-4 rounded-full"
-                          src={property.pfpUrl}
-                          alt=""
-                        />
-                        <h1 className="break-all">{property.managerUsername || "Manager"}</h1>
+                        <div className="w-[60px] h-[60px] mr-4 rounded-full overflow-hidden">
+                          <Image
+                            className="object-cover w-full h-full"
+                            src={property.pfpUrl}
+                            alt="profile"
+                            width={60}
+                            height={60}
+                          />
+                        </div>
+
+                        <h1 className="break-all">
+                          {property.managerUsername || "Manager"}
+                        </h1>
                       </div>
                       <div>
-                        <h1 className="font-bold mt-10">contact: {property.contact}</h1>
+                        <h1 className="font-bold mt-10">
+                          contact: {property.contact}
+                        </h1>
                       </div>
 
                       <div className="flex flex-col mt-5">
@@ -248,11 +278,13 @@ const Page = () => {
 
                           {property.status?.trim() !== "accepted" && (
                             <div>
-                              <img
+                              <Image
                                 onClick={() => handleDeleteClick(property.id)}
-                                className="h-[25px] mt-3 w-[25px] cursor-pointer"
+                                className="mt-3 cursor-pointer"
                                 src="https://img.icons8.com/?size=100&id=67884&format=png&color=000000"
                                 alt="delete"
+                                width={25}
+                                height={25}
                               />
                             </div>
                           )}

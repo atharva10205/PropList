@@ -1,6 +1,6 @@
 'use client';
 
-import { MapContainer, TileLayer, Marker, Popup, useMap, Tooltip } from 'react-leaflet';
+import { MapContainer, TileLayer, Marker, useMap, Tooltip } from 'react-leaflet';
 import { useEffect, useState } from 'react';
 import L from 'leaflet';
 import 'leaflet/dist/leaflet.css';
@@ -16,8 +16,9 @@ interface MarkerData {
   state?: string;
   country?: string;
   pricePerMonth?: number;
-  [key: string]: any;
+  [key: string]: unknown;
 }
+
 
 delete L.Icon.Default.prototype._getIconUrl;
 

@@ -13,7 +13,7 @@ const PropertyDetails = () => {
   const router = useRouter();
   const params = useParams();
   const id = decodeURIComponent(params.id as string); //addID
-  const [data, setData] = useState<any>(null);
+  const [data, setData] = useState(null);
   const [latitude, setLatitude] = useState<number | null>(null);
   const [longitude, setLongitude] = useState<number | null>(null);
   const [selectedImage, setSelectedImage] = useState<string | null>(null);

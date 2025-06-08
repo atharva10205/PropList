@@ -13,7 +13,7 @@ export async function GET() {
     try {
         const user = jwt.verify(token, process.env.JWT_SECRET);
         return NextResponse.json({ authenticated: true, user });
-    } catch (error) {
+    } catch  {
         return NextResponse.json({ authenticated: false });
     }
 }

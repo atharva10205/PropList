@@ -1,9 +1,9 @@
-export {}; 
+export {};
 
 declare global {
   interface EthereumProvider {
     isMetaMask?: boolean;
-    request: (...args: any[]) => Promise<any>;
+    request: (...args: unknown[]) => Promise<unknown>; // changed from any
   }
 
   interface EthereumMultiProvider extends EthereumProvider {
@@ -12,6 +12,6 @@ declare global {
 
   interface Window {
     ethereum?: EthereumMultiProvider;
-    solana?: any;
+    solana?: Record<string, unknown>; // safer than `any`
   }
 }

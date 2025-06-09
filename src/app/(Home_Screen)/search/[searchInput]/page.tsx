@@ -59,17 +59,17 @@ const SidebarFilters = ({ onFilterChange }) => {
   const conveniences = ["Pets", "Parking", "Hot Tubs", "Wifi"];
 
   return (
-    <div className="w-64 p-4 space-y-6 border border-gray-300 rounded">
+    <div className="w-64 p-4 space-y-16 border border-gray-300 rounded">
       <div>
         <h2 className="text-lg font-semibold mb-2">Property Type</h2>
-        <div className="grid grid-cols-2 gap-2">
+        <div className="grid grid-cols-2 gap-4 p-2">
           {propertyTypes.map((type) => (
             <FilterButton key={type} label={type} />
           ))}
         </div>
       </div>
 
-      <div>
+      {/* <div>
         <h2 className="text-lg font-semibold mb-2">Price Range</h2>
         <div className="flex justify-between text-sm mb-1">
           <span>$200</span>
@@ -81,11 +81,11 @@ const SidebarFilters = ({ onFilterChange }) => {
           max="1200"
           className="w-full accent-black"
         />
-      </div>
+      </div> */}
 
       <div>
         <h2 className="text-lg font-semibold mb-2">Conveniences</h2>
-        <div className="grid grid-cols-2 gap-2">
+        <div className="grid grid-cols-2 gap-4 p-2">
           {conveniences.map((item) => (
             <FilterButton key={item} label={item} />
           ))}
@@ -105,29 +105,63 @@ const SidebarFilters = ({ onFilterChange }) => {
 const NavbarFilters = () => {
   const router = useRouter();
   const [query, setQuery] = useState("");
+  const [suggestions, setSuggestions] = useState([]);
 
   const handleKeyDown = (e) => {
     if (e.key === "Enter") {
-      search_button();
+      router.push(`/search/${query}`);
     }
   };
 
-  const search_button = () => {
-    if (query.trim()) {
-      router.push(`search/${query}`);
-    }
-  };
+  useEffect(() => {
+    const delayDebounce = setTimeout(() => {
+      if (query.length > 2) {
+        axios
+          .get(`/api/location?q=${encodeURIComponent(query)}`)
+          .then((res) => {
+            setSuggestions(res.data);
+          })
+          .catch((err) => {
+            console.error("API error:", err);
+            setSuggestions([]);
+          });
+      } else {
+        setSuggestions([]);
+      }
+    }, 300);
+
+    return () => clearTimeout(delayDebounce);
+  }, [query]);
 
   return (
-    <div className="flex flex-wrap gap-2 items-center p-4 border border-gray-300 rounded">
+    <div className="flex  flex-wrap gap-2 items-center p-4 border border-gray-300 rounded">
       <input
         type="text"
-        placeholder="Search"
-        className="border w-full rounded-full px-4 py-1 text-sm"
+        placeholder="Search by city, neighbourhood, or address"
+        className="border  h-[40px] w-full rounded-lg px-1 py-1 text-sm"
         value={query}
         onChange={(e) => setQuery(e.target.value)}
         onKeyDown={handleKeyDown}
       />
+
+      {suggestions.length > 0 && (
+        <ul className="absolute top-[50px]  sm:top-[65px] w-full z-20 bg-white border opacity-80 border-gray-300 rounded-lg mt-[60px] max-h-60 overflow-y-auto">
+          {suggestions.map((place, index) => (
+            <li
+              key={index}
+              className="px-4 py-2 hover:bg-gray-100 cursor-pointer text-sm"
+              onClick={() => {
+                router.push(
+                  `/search/${encodeURIComponent(place.display_name)}`
+                );
+                setSuggestions([]);
+              }}
+            >
+              {place.display_name}
+            </li>
+          ))}
+        </ul>
+      )}
     </div>
   );
 };
@@ -238,75 +272,77 @@ const Page = () => {
   };
 
   const Property_listings = ({ filteredData }) => {
-  const router = useRouter();
+    const router = useRouter();
 
-  if (!filteredData || filteredData.length === 0) {
+    if (!filteredData || filteredData.length === 0) {
+      return (
+        <div className="flex items-center justify-center border border-gray-300 rounded-lg h-full">
+          <h1 className="text-2xl font-semibold text-gray-500">
+            No Property Found
+          </h1>
+        </div>
+      );
+    }
+
     return (
-      <div className="flex items-center justify-center border border-gray-300 rounded-lg h-full">
-        <h1 className="text-2xl font-semibold text-gray-500">No Property Found</h1>
-      </div>
-    );
-  }
-
-  return (
-    <div className="flex-1 p-2 bg-white cursor-pointer">
-      {filteredData.map((marker, index) => (
-        <div
-          key={marker.id || index}
-          className="border border-gray-300 rounded-lg mb-4"
-        >
-          <div className="flex-1 p-2 bg-white cursor-pointer">
-            <div className="w-full rounded-2xl overflow-hidden shadow-lg border border-gray-200">
-              <div className="relative">
-                <img
-                  src={
-                    marker.imageURLs?.[0] || "https://via.placeholder.com/300"
-                  }
-                  alt={marker.propertyName}
-                  className="h-48 w-full object-cover"
-                  onClick={() => router.push(`/property/${marker.id}`)}
-                />
-              </div>
-              <div
-                onClick={() => router.push(`/property/${marker.id}`)}
-                className="p-4"
-              >
-                <h2 className="text-lg font-bold">{marker.propertyName}</h2>
-                <p className="text-sm text-gray-600 mb-2">
-                  {marker.city}, {marker.state}, {marker.country}
-                </p>
-                <div className="flex items-center mb-3">
-                  <span className="text-sm font-semibold ml-auto">
-                    ${marker.pricePerMonth || "--"}
-                  </span>
-                  <span className="text-sm text-gray-500">/month</span>
+      <div className="flex-1 p-2 bg-white cursor-pointer">
+        {filteredData.map((marker, index) => (
+          <div
+            key={marker.id || index}
+            className="border border-gray-300 rounded-lg mb-4"
+          >
+            <div className="flex-1 p-2 bg-white cursor-pointer">
+              <div className="w-full rounded-2xl overflow-hidden shadow-lg border border-gray-200">
+                <div className="relative">
+                  <img
+                    src={
+                      marker.imageURLs?.[0] || "https://via.placeholder.com/300"
+                    }
+                    alt={marker.propertyName}
+                    className="h-48 w-full object-cover"
+                    onClick={() => router.push(`/property/${marker.id}`)}
+                  />
                 </div>
-                <div className="flex justify-between text-gray-600 text-sm">
-                  <div className="flex items-center gap-1">
-                    <img
-                      className="h-[15px] ml-2 w-[15px]"
-                      src="https://img.icons8.com/?size=100&id=561&format=png&color=000000"
-                      alt=""
-                    />
-                    {marker.beds} Beds
+                <div
+                  onClick={() => router.push(`/property/${marker.id}`)}
+                  className="p-4"
+                >
+                  <h2 className="text-lg font-bold">{marker.propertyName}</h2>
+                  <p className="text-sm text-gray-600 mb-2">
+                    {marker.city}, {marker.state}, {marker.country}
+                  </p>
+                  <div className="flex items-center mb-3">
+                    <span className="text-sm font-semibold ml-auto">
+                      ${marker.pricePerMonth || "--"}
+                    </span>
+                    <span className="text-sm text-gray-500">/month</span>
                   </div>
-                  <div className="flex items-center gap-1">
-                    <img
-                      className="h-[15px] ml-2 w-[15px]"
-                      src="https://img.icons8.com/?size=100&id=HiiMjneqmobf&format=png&color=000000"
-                      alt=""
-                    />
-                    {marker.baths} Baths
+                  <div className="flex justify-between text-gray-600 text-sm">
+                    <div className="flex items-center gap-1">
+                      <img
+                        className="h-[15px] ml-2 w-[15px]"
+                        src="https://img.icons8.com/?size=100&id=561&format=png&color=000000"
+                        alt=""
+                      />
+                      {marker.beds} Beds
+                    </div>
+                    <div className="flex items-center gap-1">
+                      <img
+                        className="h-[15px] ml-2 w-[15px]"
+                        src="https://img.icons8.com/?size=100&id=HiiMjneqmobf&format=png&color=000000"
+                        alt=""
+                      />
+                      {marker.baths} Baths
+                    </div>
                   </div>
                 </div>
               </div>
             </div>
           </div>
-        </div>
-      ))}
-    </div>
-  );
-};
+        ))}
+      </div>
+    );
+  };
 
   const useIsDesktop = () => {
     const [isDesktop, setIsDesktop] = useState(false);

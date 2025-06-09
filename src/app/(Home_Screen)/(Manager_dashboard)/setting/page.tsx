@@ -34,11 +34,9 @@ const Page = () => {
           setUserId(data.userId);
         } else {
           console.error("Error from backend:", data.error);
-          
         }
       } catch (error) {
         console.error("Fetch error:", error);
-        
       }
     };
 
@@ -266,14 +264,10 @@ const Page = () => {
       <div className="flex flex-1 overflow-hidden relative">
         {/* Sidebar - Made responsive */}
         <div
-       className={`
+          className={`
             fixed top-[50px] left-0 z-40 h-full w-64  overflow-y-auto transition-transform duration-300 ease-in-out
             md:static md:translate-x-0
-            ${
-              isSidebarOpen
-                ? "translate-x-0"
-                : "-translate-x-full"
-            }
+            ${isSidebarOpen ? "translate-x-0" : "-translate-x-full"}
           `}
         >
           <Sidebar_manager />
@@ -295,11 +289,11 @@ const Page = () => {
             {Role === "tenant" && (
               <button
                 onClick={tenanat_to_manager}
-                className="relative cursor-pointer group overflow-hidden px-4 py-2 border border-black rounded text-black"
+                className="relative cursor-pointer group md:w-fit w-full overflow-hidden px-4 py-2 border border-black rounded text-black mb-4"
               >
-                <span className="absolute bottom-0 left-0 w-full h-0 bg-black transition-all duration-300 ease-out group-hover:h-full origin-bottom"></span>
-                <span className="relative z-10 transition-colors duration-300 group-hover:text-white">
-                  switch to Manager
+                <span className="absolute bottom-0 left-0 w-full h-0 bg-black transition-all duration-300 group-hover:h-full origin-bottom" />
+                <span className="relative z-10 group-hover:text-white">
+                  Switch to Manager
                 </span>
               </button>
             )}
@@ -307,17 +301,16 @@ const Page = () => {
             {Role === "manager" && (
               <button
                 onClick={managet_to_tenant}
-                className="relative group overflow-hidden px-4 py-2 border border-black rounded text-black"
+                className="relative cursor-pointer group md:w-fit w-full overflow-hidden px-4 py-2 border border-black rounded text-black mb-4"
               >
-                <span className="absolute bottom-0 left-0 w-full h-0 bg-black transition-all duration-300 ease-out group-hover:h-full origin-bottom"></span>
-                <span className="relative z-10 transition-colors duration-300 group-hover:text-white">
-                  switch to Tenant
+                <span className="absolute bottom-0 left-0 w-full h-0 bg-black transition-all duration-300 group-hover:h-full origin-bottom" />
+                <span className="relative z-10 group-hover:text-white">
+                  Switch to Tenant
                 </span>
               </button>
             )}
           </div>
 
-          
           <div className="flex mt-15 flex-col md:flex-row gap-4 mb-8">
             <input
               onChange={(e) => setInput(e.target.value)}
@@ -337,7 +330,6 @@ const Page = () => {
             </button>
           </div>
 
-          {/* Profile Picture Section - Made responsive */}
           <div className="flex flex-col mt-15 md:flex-row gap-4 items-center">
             <div
               className="relative w-20 h-20 md:w-24 md:h-24 rounded-full border-2 border-black overflow-hidden cursor-pointer"
@@ -345,14 +337,14 @@ const Page = () => {
             >
               {previewImage ? (
                 <>
-                <div className="relative w-full h-full">
-  <Image
-    src={previewImage}
-    alt="Profile preview"
-    fill
-    style={{ objectFit: "cover" }}
-  />
-</div>
+                  <div className="relative w-full h-full">
+                    <Image
+                      src={previewImage}
+                      alt="Profile preview"
+                      fill
+                      style={{ objectFit: "cover" }}
+                    />
+                  </div>
                   <button
                     type="button"
                     onClick={handleRemoveImage}

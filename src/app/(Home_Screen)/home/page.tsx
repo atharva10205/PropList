@@ -13,6 +13,13 @@ const Page = () => {
   const [suggestions, setSuggestions] = useState([]);
   const [properties, setProperties] = useState([]);
 
+
+  const handleKeyDown = (e) => {
+    if (e.key === "Enter" && query.trim() !== "") {
+      router.push(`/search/${encodeURIComponent(query.trim())}`);
+    }
+  };
+
   useEffect(() => {
     const get_data = async () => {
       try {
@@ -120,12 +127,12 @@ const Page = () => {
           </motion.div>
         </motion.div>
 
-        {/* Search Input */}
         <div className="relative w-full max-w-lg">
           <input
             className="w-full h-12 sm:h-[60px] px-4 rounded-full bg-white opacity-55 shadow-lg text-sm sm:text-base"
             type="text"
             value={query}
+            onKeyDown={handleKeyDown}
             onChange={(e) => setQuery(e.target.value)}
             placeholder="Search by city, neighbourhood, or address"
           />

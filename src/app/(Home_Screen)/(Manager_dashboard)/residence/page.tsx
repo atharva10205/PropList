@@ -197,7 +197,7 @@ const Page = () => {
         {/* Sidebar */}
         <aside
           className={`
-            fixed top-[50px] left-0 z-40 h-full w-64 bg-gray-100 overflow-y-auto transition-transform duration-300 ease-in-out
+            fixed top-[50px] left-0 z-40 h-full w-64  overflow-y-auto transition-transform duration-300 ease-in-out
             md:static md:translate-x-0
             ${isSidebarOpen ? "translate-x-0" : "-translate-x-full"}
           `}

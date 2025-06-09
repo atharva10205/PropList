@@ -281,7 +281,7 @@ const Page = () => {
           {Role === "tenant" && (
             <button
               onClick={tenanat_to_manager}
-              className="relative cursor-pointer group overflow-hidden px-4 py-2 border border-black rounded text-black mb-4"
+              className="relative cursor-pointer group md:w-fit w-full overflow-hidden px-4 py-2 border border-black rounded text-black mb-4"
             >
               <span className="absolute bottom-0 left-0 w-full h-0 bg-black transition-all duration-300 group-hover:h-full origin-bottom" />
               <span className="relative z-10 group-hover:text-white">
@@ -293,7 +293,7 @@ const Page = () => {
           {Role === "manager" && (
             <button
               onClick={managet_to_tenant}
-              className="relative group overflow-hidden cursor-pointer px-4 py-2 border border-black rounded text-black mb-4"
+              className="relative group w-full md:w-fit  overflow-hidden cursor-pointer px-4 py-2 border border-black rounded text-black mb-4"
             >
               <span className="absolute bottom-0 left-0 w-full h-0 bg-black transition-all duration-300 group-hover:h-full origin-bottom" />
               <span className="relative z-10 group-hover:text-white">

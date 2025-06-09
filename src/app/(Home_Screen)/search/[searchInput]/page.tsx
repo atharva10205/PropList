@@ -6,6 +6,7 @@ import dynamic from "next/dynamic";
 import { useParams } from "next/navigation";
 import axios from "axios";
 import { useRouter } from "next/navigation";
+import toast, { Toaster } from "react-hot-toast";
 
 const MapView = dynamic(() => import("@/app/components/MapView"), {
   ssr: false,
@@ -151,10 +152,26 @@ const Page = () => {
         const { lat, lon } = response.data[0];
         setSelectedLocation([parseFloat(lat), parseFloat(lon)]);
       } else {
-        alert("Place not found");
+        toast.custom((t) => (
+          <div
+            className={`${
+              t.visible ? "animate-enter" : "animate-leave"
+            } fixed top-2 right-2 bg-black border mt-[40px] border-black text-white flex items-center justify-center rounded-lg shadow-md font-bold h-[60px] w-[250px] text-sm`}
+          >
+            Place not found{" "}
+          </div>
+        ));
       }
     } catch {
-      alert("Error fetching location");
+      toast.custom((t) => (
+        <div
+          className={`${
+            t.visible ? "animate-enter" : "animate-leave"
+          } fixed top-2 right-2 bg-black border mt-[40px] border-black text-white flex items-center justify-center rounded-lg shadow-md font-bold h-[60px] w-[250px] text-sm`}
+        >
+          Place not found{" "}
+        </div>
+      ));
     }
   };
 
@@ -218,79 +235,78 @@ const Page = () => {
     });
 
     setFilteredData(filtered);
-
-    // if (Array.isArray(filtered)) {
-    //   const latLngArray = filtered.map((marker) => [
-    //     marker.latitude,
-    //     marker.longitude,
-    //   ]);
-    //   setapprox_coordinates(latLngArray);
-    // }
   };
 
   const Property_listings = ({ filteredData }) => {
-    console.log("filterddata", filteredData);
-    const router = useRouter();
+  const router = useRouter();
 
+  if (!filteredData || filteredData.length === 0) {
     return (
-      <div className="flex-1 p-2 bg-white cursor-pointer">
-        {filteredData?.map((marker, index) => (
-          <div
-            key={marker.id || index}
-            className="border border-gray-300 rounded-lg mb-4"
-          >
-            <div className="flex-1 p-2 bg-white cursor-pointer">
-              <div className="w-full rounded-2xl overflow-hidden shadow-lg border border-gray-200">
-                <div className="relative">
-                  <img
-                    src={
-                      marker.imageURLs?.[0] || "https://via.placeholder.com/300"
-                    }
-                    alt={marker.propertyName}
-                    className="h-48 w-full object-cover"
-                    onClick={() => router.push(`/property/${marker.id}`)}
-                  />
-                </div>
-                <div
+      <div className="flex items-center justify-center border border-gray-300 rounded-lg h-full">
+        <h1 className="text-2xl font-semibold text-gray-500">No Property Found</h1>
+      </div>
+    );
+  }
+
+  return (
+    <div className="flex-1 p-2 bg-white cursor-pointer">
+      {filteredData.map((marker, index) => (
+        <div
+          key={marker.id || index}
+          className="border border-gray-300 rounded-lg mb-4"
+        >
+          <div className="flex-1 p-2 bg-white cursor-pointer">
+            <div className="w-full rounded-2xl overflow-hidden shadow-lg border border-gray-200">
+              <div className="relative">
+                <img
+                  src={
+                    marker.imageURLs?.[0] || "https://via.placeholder.com/300"
+                  }
+                  alt={marker.propertyName}
+                  className="h-48 w-full object-cover"
                   onClick={() => router.push(`/property/${marker.id}`)}
-                  className="p-4"
-                >
-                  <h2 className="text-lg font-bold">{marker.propertyName}</h2>
-                  <p className="text-sm text-gray-600 mb-2">
-                    {marker.city}, {marker.state}, {marker.country}
-                  </p>
-                  <div className="flex items-center mb-3">
-                    <span className="text-sm font-semibold ml-auto">
-                      ${marker.pricePerMonth || "--"}
-                    </span>
-                    <span className="text-sm text-gray-500">/month</span>
+                />
+              </div>
+              <div
+                onClick={() => router.push(`/property/${marker.id}`)}
+                className="p-4"
+              >
+                <h2 className="text-lg font-bold">{marker.propertyName}</h2>
+                <p className="text-sm text-gray-600 mb-2">
+                  {marker.city}, {marker.state}, {marker.country}
+                </p>
+                <div className="flex items-center mb-3">
+                  <span className="text-sm font-semibold ml-auto">
+                    ${marker.pricePerMonth || "--"}
+                  </span>
+                  <span className="text-sm text-gray-500">/month</span>
+                </div>
+                <div className="flex justify-between text-gray-600 text-sm">
+                  <div className="flex items-center gap-1">
+                    <img
+                      className="h-[15px] ml-2 w-[15px]"
+                      src="https://img.icons8.com/?size=100&id=561&format=png&color=000000"
+                      alt=""
+                    />
+                    {marker.beds} Beds
                   </div>
-                  <div className="flex justify-between text-gray-600 text-sm">
-                    <div className="flex items-center gap-1">
-                      <img
-                        className="h-[15px] ml-2 w-[15px]"
-                        src="https://img.icons8.com/?size=100&id=561&format=png&color=000000"
-                        alt=""
-                      />
-                      {marker.beds} Beds
-                    </div>
-                    <div className="flex items-center gap-1">
-                      <img
-                        className="h-[15px] ml-2 w-[15px]"
-                        src="https://img.icons8.com/?size=100&id=HiiMjneqmobf&format=png&color=000000"
-                        alt=""
-                      />
-                      {marker.baths} Baths
-                    </div>
+                  <div className="flex items-center gap-1">
+                    <img
+                      className="h-[15px] ml-2 w-[15px]"
+                      src="https://img.icons8.com/?size=100&id=HiiMjneqmobf&format=png&color=000000"
+                      alt=""
+                    />
+                    {marker.baths} Baths
                   </div>
                 </div>
               </div>
             </div>
           </div>
-        ))}
-      </div>
-    );
-  };
+        </div>
+      ))}
+    </div>
+  );
+};
 
   const useIsDesktop = () => {
     const [isDesktop, setIsDesktop] = useState(false);
@@ -311,13 +327,16 @@ const Page = () => {
     <div className="h-screen overflow-hidden">
       <div className="fixed top-0 left-0 w-full z-50">
         <Navbar />
+        <Toaster />
       </div>
 
       <div className="pt-16 pb-2 px-4 h-full flex flex-col gap-4 overflow-hidden">
         {isDesktop && <NavbarFilters />}
+
         <div className="flex gap-4 h-full overflow-hidden">
           {isDesktop && <SidebarFilters onFilterChange={handleFilterChange} />}
-          <div className="flex flex-col md:flex-row gap-4 flex-1 overflow-y-auto">
+
+          <div className="flex flex-1 gap-4 overflow-hidden">
             {isDesktop && (
               <div className="border border-gray-300 w-[850px] rounded-lg p-4 bg-white flex flex-col">
                 <div className="w-full flex-grow rounded overflow-hidden">
@@ -329,7 +348,9 @@ const Page = () => {
               </div>
             )}
 
-            <Property_listings filteredData={filteredData} />
+            <div className="flex-1 overflow-y-auto">
+              <Property_listings filteredData={filteredData} />
+            </div>
           </div>
         </div>
       </div>

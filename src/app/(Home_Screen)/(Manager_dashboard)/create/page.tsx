@@ -32,6 +32,12 @@ export default function AddPropertyForm() {
   const [Public_Id, setPublic_Id] = useState("");
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
 
+  const handleKeyDown = (e) => {
+    if (e.key === "Enter" && query.trim() !== "") {
+     handleSearch(query)
+    }
+  };
+
   const Connectwallet = async () => {
     if (!window.ethereum) {
       toast.custom((t) => (
@@ -196,7 +202,6 @@ export default function AddPropertyForm() {
     }
   };
 
-  //thing that pulls suggestions
   useEffect(() => {
     const delayDebounce = setTimeout(() => {
       if (query.length > 2) {
@@ -1033,12 +1038,10 @@ export default function AddPropertyForm() {
                               : "bg-white text-black border-gray-200"
                           }`}
                         >
-                          {/* Animated fill from bottom to top (only when not active) */}
                           {!search_location && (
                             <span className="absolute bottom-0 left-0 w-full h-0 bg-black origin-bottom transition-all duration-300 ease-out group-hover:h-full" />
                           )}
 
-                          {/* Text on top with color change */}
                           <span
                             className={`relative z-10 transition-colors duration-300 ${
                               search_location ? "" : "group-hover:text-white"
@@ -1054,6 +1057,7 @@ export default function AddPropertyForm() {
                           <div className="relative">
                             <input
                               value={query}
+                              onKeyDown={handleKeyDown}
                               onChange={(e) => setQuery(e.target.value)}
                               type="text"
                               placeholder="Enter Location"

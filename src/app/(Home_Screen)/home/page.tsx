@@ -213,7 +213,7 @@ const Page = () => {
                   <div className="flex items-center mb-3">
                     <span className="text-sm font-semibold ml-auto">
                       {property.pricePerMonth
-                        ? `₹${property.pricePerMonth}`
+                        ? `$${property.pricePerMonth}`
                         : "Price N/A"}
                     </span>
                     <span className="text-sm text-gray-500">/month</span>

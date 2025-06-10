@@ -5,7 +5,30 @@ export async function POST(req) {
     const body = await req.json();
     const { Contact, reciver_id, Message, id, userId } = body;
 
-    // Check if the application already exists
+    console.log("reciver_id", reciver_id);
+    console.log("userId", userId);
+
+    const sameUser = await prisma.Application.findFirst({
+      where: {
+        reciverId: parseInt(userId, 10),
+        senderId: parseInt(userId, 10),
+      },
+    });
+
+    if (!sameUser) {
+      console.log("samememmem ussseeerrrr")
+      return new Response(
+        JSON.stringify({
+          success: false,
+          message: "You are the owner",
+        }),
+        {
+          status: 409,
+          headers: { "Content-Type": "application/json" },
+        }
+      );
+    }
+
     const existingApplication = await prisma.Application.findFirst({
       where: {
         senderId: parseInt(userId, 10),
@@ -21,13 +44,12 @@ export async function POST(req) {
           message: "Application already exists",
         }),
         {
-          status: 409, // Conflict
+          status: 409,
           headers: { "Content-Type": "application/json" },
         }
       );
     }
 
-    // Create new application
     await prisma.Application.create({
       data: {
         senderId: parseInt(userId, 10),

@@ -18,7 +18,7 @@ const PropertyDetails = () => {
   const [longitude, setLongitude] = useState<number | null>(null);
   const [selectedImage, setSelectedImage] = useState<string | null>(null);
   const [liked, setLiked] = useState<boolean | null>(null);
-  const [userId, setUserId] = useState(""); //SenderID
+  const [userId, setUserId] = useState(""); 
   const [submit_popup, setsubmit_popup] = useState(false);
   const propertyId = id;
   const [user_data, setuser_data] = useState<string | null>(null);
@@ -67,7 +67,7 @@ const PropertyDetails = () => {
               t.visible ? "animate-enter" : "animate-leave"
             } fixed top-2 right-2 bg-black border mt-[40px] border-black text-white flex items-center justify-center rounded-lg shadow-md font-bold h-[60px] w-[250px] text-sm`}
           >
-            Application alredy exist{" "}
+           {data.message}{" "}
           </div>
         ));
         setLoading(false);
@@ -398,13 +398,11 @@ const PropertyDetails = () => {
               </div>
             </div>
 
-            {/* Highlights */}
             <div>
               <h2 className="text-lg font-semibold mb-2">Highlights</h2>
               <p className="text-sm text-gray-700">{info?.highlights}</p>
             </div>
 
-            {/* Submit Application */}
             {role === "tenant" && (
               <motion.div
                 onClick={() => setsubmit_popup(true)}
@@ -419,7 +417,6 @@ const PropertyDetails = () => {
               </motion.div>
             )}
 
-            {/* Popup */}
             {submit_popup && (
               <AnimatePresence>
                 <motion.div
@@ -438,11 +435,10 @@ const PropertyDetails = () => {
                     exit={{ scale: 0.9, opacity: 0 }}
                     transition={{ type: "spring", stiffness: 300, damping: 25 }}
                   >
-                    {/* User Info */}
                     <div className="mt-5 flex items-center gap-4">
                       <motion.img
-                        className="h-[60px] w-[60px] rounded-full"
-                        src="https://imgs.search.brave.com/5UXUrwnw8J0ENnlCfKBvy2iT3ZiU9L2WC2CXtxFJfO0/rs:fit:860:0:0:0/g:ce/aHR0cHM6Ly93YWxs/cGFwZXJzLmNvbS9p/bWFnZXMvaGQvcGZw/LXBpY3R1cmVzLWsz/ZHF4bjNuMG5heGVm/bjIuanBn"
+                        className="h-[60px] w-[60px] rounded-full"  
+                        src= {user_data?.pfpUrl ||  "https://imgs.search.brave.com/5UXUrwnw8J0ENnlCfKBvy2iT3ZiU9L2WC2CXtxFJfO0/rs:fit:860:0:0:0/g:ce/aHR0cHM6Ly93YWxs/cGFwZXJzLmNvbS9p/bWFnZXMvaGQvcGZw/LXBpY3R1cmVzLWsz/ZHF4bjNuMG5heGVm/bjIuanBn"}
                         alt="User Avatar"
                         initial={{ scale: 0.8 }}
                         animate={{ scale: 1 }}
@@ -487,7 +483,7 @@ const PropertyDetails = () => {
 
                     <motion.button
                       onClick={submit}
-                      className="relative group overflow-hidden w-full mt-2 rounded-lg h-[40px] border border-gray-300 shadow-lg"
+                      className="relative group cursor-pointer overflow-hidden w-full mt-2 rounded-lg h-[40px] border border-gray-300 shadow-lg"
                       whileHover={{ scale: 1.01 }}
                       whileTap={{ scale: 0.98 }}
                     >
@@ -501,7 +497,6 @@ const PropertyDetails = () => {
               </AnimatePresence>
             )}
 
-            {/* Map */}
             <div>
               <h2 className="text-lg font-semibold mb-2">Map</h2>
               <div className="h-[410px] w-full border border-gray-300">

@@ -181,7 +181,7 @@ const Page = () => {
                       </p>
                       <div className="flex items-center mb-4">
                         <span className="text-sm font-semibold ml-auto">
-                          ₹{property.pricePerMonth}
+                          ${property.pricePerMonth}
                         </span>
                         <span className="text-sm text-gray-500">/month</span>
                       </div>

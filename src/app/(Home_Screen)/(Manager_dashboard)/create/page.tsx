@@ -34,6 +34,15 @@ export default function AddPropertyForm() {
 
   const Connectwallet = async () => {
     if (!window.ethereum) {
+      toast.custom((t) => (
+        <div
+          className={`${
+            t.visible ? "animate-enter" : "animate-leave"
+          } fixed top-2 right-2 bg-black border mt-[40px] border-black text-white flex items-center justify-center rounded-lg shadow-md font-bold h-[60px] w-[250px] text-sm`}
+        >
+          No metamask detected{" "}
+        </div>
+      ));
       return;
     }
 

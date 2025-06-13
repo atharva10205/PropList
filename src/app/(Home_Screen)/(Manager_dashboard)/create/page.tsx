@@ -446,6 +446,7 @@ export default function AddPropertyForm() {
     lng: number;
   } | null>(null);
 
+
   const memoizedMap = useMemo(() => {
     return (
       <div className="h-[403px] w-[340px] md:w-[973px] bg-gray-300 flex items-center justify-center">
@@ -455,7 +456,7 @@ export default function AddPropertyForm() {
         />
       </div>
     );
-  }, [selectedLocation, MapView3]); 
+  }, [selectedLocation]); 
 
  useEffect(() => {
   if (selectedLocation1) {
@@ -1087,14 +1088,17 @@ export default function AddPropertyForm() {
                     </div>
                   </div>
 
-                  {/* Map */}
+                  {/* current location */}
                   {my_location && coords && (
                     <div className="h-[403px] w-[340px] md:w-[973px] bg-gray-300 flex items-center justify-center">
                       <MapView1 markerCoords={coords} />
                     </div>
                   )}
+                  
                   {search_location && memoizedMap}
+                  
 
+                    {/* default map */}
                   {dog && (
                     <div className="h-[403px]  w-[340px] md:w-[973px] bg-gray-300 flex items-center justify-center">
                       <MapView2 />

@@ -302,7 +302,6 @@ const Page = () => {
             </button>
           )}
 
-          {/* Change name section */}
           <div className="flex flex-col sm:flex-row gap-4 items-start sm:items-center mb-10">
             <button
               onClick={handel_name_change}

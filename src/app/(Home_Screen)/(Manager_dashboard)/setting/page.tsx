@@ -312,13 +312,6 @@ const Page = () => {
           </div>
 
           <div className="flex mt-15 flex-col md:flex-row gap-4 mb-8">
-            <input
-              onChange={(e) => setInput(e.target.value)}
-              className="border border-gray-300 w-full md:w-[300px] rounded h-[42px] px-3"
-              type="text"
-              placeholder="Update name"
-            />
-
             <button
               onClick={handel_name_change}
               className="relative group overflow-hidden px-4 w-full md:w-[158px] cursor-pointer py-2 border border-black rounded text-black"
@@ -328,9 +321,28 @@ const Page = () => {
                 Change name
               </span>
             </button>
+
+            <input
+              onChange={(e) => setInput(e.target.value)}
+              className="border border-gray-300 w-full md:w-[300px] rounded h-[42px] px-3"
+              type="text"
+              placeholder="Update name"
+            />
           </div>
 
           <div className="flex flex-col mt-15 md:flex-row gap-4 items-center">
+            {/* Change pfp button - moved to the left */}
+            <button
+              onClick={handleSubmit}
+              className="relative group overflow-hidden w-full md:w-[160px] px-4 py-2 border border-black rounded text-black"
+            >
+              <span className="absolute bottom-0 left-0 w-full h-0 bg-black transition-all duration-300 ease-out group-hover:h-full origin-bottom"></span>
+              <span className="relative z-10 transition-colors duration-300 group-hover:text-white">
+                Change pfp
+              </span>
+            </button>
+
+            {/* Profile image box */}
             <div
               className="relative w-20 h-20 md:w-24 md:h-24 rounded-full border-2 border-black overflow-hidden cursor-pointer"
               onClick={handleImageClick}
@@ -372,16 +384,6 @@ const Page = () => {
                 </div>
               )}
             </div>
-
-            <button
-              onClick={handleSubmit}
-              className="relative group overflow-hidden w-full md:w-[160px] px-4 py-2 border border-black rounded text-black"
-            >
-              <span className="absolute bottom-0 left-0 w-full h-0 bg-black transition-all duration-300 ease-out group-hover:h-full origin-bottom"></span>
-              <span className="relative z-10 transition-colors duration-300 group-hover:text-white">
-                Change pfp
-              </span>
-            </button>
 
             <input
               type="file"

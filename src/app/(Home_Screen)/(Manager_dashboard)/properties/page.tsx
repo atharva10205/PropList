@@ -204,7 +204,7 @@ const Page = () => {
                           />
                           {property.baths} Bath
                         </div>
-                        <div className="flex items-center gap-1">
+                        {/* <div className="flex max-w-[200px]  items-center gap-1">
                           <Image
                             src="https://img.icons8.com/?size=100&id=912&format=png&color=000000"
                             alt="amenities"
@@ -212,7 +212,7 @@ const Page = () => {
                             height={16}
                           />
                           {property.amenities || "Amenities"}
-                        </div>
+                        </div> */}
                       </div>
                     </div>
                   </div>

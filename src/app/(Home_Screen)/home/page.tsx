@@ -156,9 +156,7 @@ const Page = () => {
       </div>
     </div>
 
-    {/* MAIN SECTION */}
     <div className="min-h-screen">
-      {/* Featured Properties */}
       <div className="relative bg-white py-20">
         <motion.div
           initial={{ opacity: 0 }}
@@ -235,14 +233,14 @@ const Page = () => {
                       />
                       {property.baths || 0} Bath
                     </div>
-                    <div className="flex items-center gap-1">
+                    {/* <div className="flex max-w-[150px] items-center gap-1">
                       <img
                         className="h-4 w-4"
                         src="https://img.icons8.com/?size=100&id=912&format=png&color=000000"
                         alt=""
                       />
                       {property.amenities || "Amenities"}
-                    </div>
+                    </div> */}
                   </div>
                 </div>
               </motion.div>

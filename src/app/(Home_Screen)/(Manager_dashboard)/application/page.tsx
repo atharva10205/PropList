@@ -245,7 +245,6 @@ const Page = () => {
                       </div>
                     </div>
 
-                    {/* Applicant Info & Message */}
                     <div className="flex flex-col md:flex-row gap-4 mr-4 ml-4 flex-grow">
                       <div className="flex-shrink-0 p-4 border border-gray-300 mt-2 mb-2 rounded-lg shadow-lg w-full md:w-auto">
                         <h1 className="font-bold">From,</h1>

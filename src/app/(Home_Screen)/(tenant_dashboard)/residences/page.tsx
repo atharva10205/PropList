@@ -340,9 +340,9 @@ const Page = () => {
                               />
                               {property.baths} Bath
                             </div>
-                            <div className="flex items-center gap-1">
+                            {/* <div className="flex items-center gap-1">
                               {property.amenities || ""}
-                            </div>
+                            </div> */}
                           </div>
                         </div>
                       </div>
